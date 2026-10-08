@@ -272,7 +272,7 @@ private val Muted = Color(0xFF99AFBF)
                     item {
                         SectionTitle(R.string.authorized_assets)
                         Text(stringResource(R.string.baseline_note), color = Muted, fontSize = 13.sp)
-                        Button(onClick = { createAsset = true }, enabled = zone != null && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("create-asset")) { Text(stringResource(R.string.create_asset)) }
+                        Button(onClick = { createAsset = true }, enabled = zone != null && !assetSaving && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("create-asset")) { Text(stringResource(R.string.create_asset)) }
                         Text(stringResource(R.string.asset_help), color = Muted, fontSize = 13.sp)
                     }
                     val currentAssets = assets.filter { it.zoneId == zone?.id }
@@ -289,7 +289,7 @@ private val Muted = Color(0xFF99AFBF)
                             TextButton(onClick = { renameAsset = asset }, enabled = !busy) { Text(stringResource(R.string.rename_asset)) }
                             Row {
                                 TextButton(onClick = { hunt = asset }, enabled = scan.running && bindings.any { it.assetId == asset.id }) { Text(stringResource(R.string.hunt)) }
-                                TextButton(onClick = { bindAsset = asset }, enabled = !scan.saving && !scan.saveFailed) { Text(stringResource(R.string.bind_signal)) }
+                                TextButton(onClick = { bindAsset = asset }, enabled = !assetSaving && !scan.saving && !scan.saveFailed) { Text(stringResource(R.string.bind_signal)) }
                                 Spacer(Modifier.weight(1f)); TextButton(onClick = { delete = asset }, enabled = !busy) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
                             }
                         }

@@ -45,14 +45,15 @@ class FirstRunTest {
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.awaiting_binding)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
         compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
-        compose.onNodeWithTag("radio-address").performTextInput("AA:BB:CC:DD:EE:00")
+        compose.onNodeWithTag("radio-address").performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
         compose.onNodeWithTag("authorization").performScrollTo().performClick()
         compose.onNodeWithText(text(R.string.save)).performClick()
         compose.waitUntil(15000) { runBlocking { app.repository.dao.allBindings().size == 1 } }
+        compose.waitUntil(15000) { compose.onAllNodesWithTag("radio-address").fetchSemanticsNodes().isEmpty() }
         shot("assets-with-binding")
         compose.onNodeWithTag("create-asset").performScrollTo().performClick()
         compose.onNodeWithTag("asset-name").performTextInput("Duplicate")
-        compose.onNodeWithTag("radio-address").performTextInput("AA:BB:CC:DD:EE:00")
+        compose.onNodeWithTag("radio-address").performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
         compose.onNodeWithTag("authorization").performScrollTo().performClick()
         compose.onNodeWithText(text(R.string.save)).performClick()
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.duplicate_asset)).fetchSemanticsNodes().isNotEmpty() }
