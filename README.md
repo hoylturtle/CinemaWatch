@@ -27,3 +27,5 @@ JDK 17、Android SDK 35、Gradle Wrapper 8.11.1：
 ```
 
 APK：`app/build/outputs/apk/debug/app-debug.apk`。预览包使用调试签名；正式发布前需要生产签名、真机 Wi-Fi/BLE 与 Android 12–15 权限/前台服务验证。模拟器演示验证不能代替影院现场校准。
+
+当前预览验证与限制见 [验证记录](docs/evidence/cinemawatch-v0.1.0/VALIDATION.md)。170 项单元测试通过；软件模拟器的完整 UI 流程未通过，需要硬件加速环境或真机复测。

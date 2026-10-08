@@ -1,12 +1,18 @@
+Starting a Gradle Daemon, 2 stopped Daemons could not be reused, use --status for details
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (Read-only file system)
+
 > Task :fieldwatch-core:preBuild UP-TO-DATE
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :fieldwatch-core:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :fieldwatch-core:writeDebugAarMetadata UP-TO-DATE
 > Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :fieldwatch-core:writeDebugAarMetadata UP-TO-DATE
 > Task :fieldwatch-core:generateDebugResValues UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
 > Task :fieldwatch-core:generateDebugResources UP-TO-DATE
 > Task :fieldwatch-core:packageDebugResources UP-TO-DATE
 > Task :fieldwatch-core:extractDeepLinksDebug UP-TO-DATE
@@ -15,6 +21,14 @@
 > Task :fieldwatch-core:parseDebugLocalResources UP-TO-DATE
 > Task :fieldwatch-core:generateDebugRFile UP-TO-DATE
 > Task :fieldwatch-core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :fieldwatch-core:compileDebugKotlin UP-TO-DATE
 > Task :fieldwatch-core:javaPreCompileDebug UP-TO-DATE
 > Task :fieldwatch-core:compileDebugJavaWithJavac NO-SOURCE
@@ -29,32 +43,17 @@
 > Task :fieldwatch-core:mergeDebugJniLibFolders UP-TO-DATE
 > Task :fieldwatch-core:mergeDebugNativeLibs NO-SOURCE
 > Task :fieldwatch-core:copyDebugJniLibsProjectOnly UP-TO-DATE
-> Task :fieldwatch-core:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :fieldwatch-core:generateDebugUnitTestStubRFile UP-TO-DATE
-> Task :app:generateDebugResValues UP-TO-DATE
-> Task :app:mapDebugSourceSetPaths
-> Task :app:generateDebugResources
-> Task :fieldwatch-core:compileDebugUnitTestKotlin UP-TO-DATE
-> Task :fieldwatch-core:javaPreCompileDebugUnitTest UP-TO-DATE
-> Task :fieldwatch-core:compileDebugUnitTestJavaWithJavac NO-SOURCE
-> Task :fieldwatch-core:processDebugUnitTestJavaRes UP-TO-DATE
-> Task :fieldwatch-core:testDebugUnitTest UP-TO-DATE
-> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
 > Task :app:processDebugMainManifest UP-TO-DATE
 > Task :app:processDebugManifest UP-TO-DATE
 > Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
 > Task :app:javaPreCompileDebug UP-TO-DATE
 > Task :app:mergeDebugShaders UP-TO-DATE
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugResources
 > Task :app:mergeDebugAssets UP-TO-DATE
-> Task :app:packageDebugResources
 > Task :app:compressDebugAssets UP-TO-DATE
 > Task :app:desugarDebugFileDependencies UP-TO-DATE
-> Task :app:parseDebugLocalResources
 > Task :app:checkDebugDuplicateClasses UP-TO-DATE
 > Task :app:mergeExtDexDebug UP-TO-DATE
 > Task :app:mergeLibDexDebug UP-TO-DATE
@@ -66,6 +65,8 @@
 > Task :app:writeDebugSigningConfigVersions UP-TO-DATE
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:packageDebugUnitTestForUnitTest UP-TO-DATE
+> Task :app:generateDebugUnitTestConfig UP-TO-DATE
 > Task :app:preDebugAndroidTestBuild SKIPPED
 > Task :app:processDebugAndroidTestManifest UP-TO-DATE
 > Task :app:generateDebugAndroidTestBuildConfig UP-TO-DATE
@@ -73,6 +74,8 @@
 > Task :app:generateDebugAndroidTestResValues UP-TO-DATE
 > Task :app:mapDebugAndroidTestSourceSetPaths UP-TO-DATE
 > Task :app:generateDebugAndroidTestResources UP-TO-DATE
+> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
+> Task :app:processDebugAndroidTestResources UP-TO-DATE
 > Task :app:javaPreCompileDebugAndroidTest UP-TO-DATE
 > Task :app:mergeDebugAndroidTestShaders UP-TO-DATE
 > Task :app:compileDebugAndroidTestShaders NO-SOURCE
@@ -88,43 +91,48 @@
 > Task :app:stripDebugAndroidTestDebugSymbols NO-SOURCE
 > Task :app:validateSigningDebugAndroidTest UP-TO-DATE
 > Task :app:writeDebugAndroidTestSigningConfigVersions UP-TO-DATE
-> Task :app:processDebugResources
-> Task :app:kaptGenerateStubsDebugKotlin UP-TO-DATE
+
+> Task :app:kaptGenerateStubsDebugKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
 > Task :app:kaptDebugKotlin UP-TO-DATE
-> Task :app:compileDebugKotlin UP-TO-DATE
+
+> Task :app:compileDebugKotlin
+w: file:///workspace/CinemaWatch/app/src/main/java/com/cinemawatch/MainActivity.kt:121:100 'val Icons.Outlined.Assignment: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.Assignment.
+w: file:///workspace/CinemaWatch/app/src/main/java/com/cinemawatch/MainActivity.kt:246:98 'val Icons.Outlined.Assignment: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Outlined.Assignment.
+
 > Task :app:compileDebugJavaWithJavac UP-TO-DATE
-> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:dexBuilderDebug
 > Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
 > Task :app:processDebugJavaRes UP-TO-DATE
 > Task :app:mergeDebugJavaResource UP-TO-DATE
-> Task :app:mergeProjectDexDebug UP-TO-DATE
-> Task :app:bundleDebugClassesToRuntimeJar UP-TO-DATE
-> Task :app:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:mergeProjectDexDebug
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:kaptGenerateStubsDebugUnitTestKotlin UP-TO-DATE
-> Task :app:kaptDebugUnitTestKotlin UP-TO-DATE
-> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
-> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
-> Task :app:packageDebugUnitTestForUnitTest
-> Task :app:generateDebugUnitTestConfig
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect UP-TO-DATE
 > Task :app:assembleDebug
+> Task :app:kaptDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :app:kaptGenerateStubsDebugAndroidTestKotlin
+w: Kapt currently doesn't support language version 2.0+. Falling back to 1.9.
+
 > Task :app:testDebugUnitTest
-> Task :app:mergeDebugAndroidTestResources UP-TO-DATE
-> Task :app:processDebugAndroidTestResources UP-TO-DATE
-> Task :app:kaptGenerateStubsDebugAndroidTestKotlin UP-TO-DATE
-> Task :app:kaptDebugAndroidTestKotlin UP-TO-DATE
-> Task :app:compileDebugAndroidTestKotlin UP-TO-DATE
+> Task :app:kaptDebugAndroidTestKotlin
+> Task :app:compileDebugAndroidTestKotlin
 > Task :app:compileDebugAndroidTestJavaWithJavac UP-TO-DATE
-> Task :app:dexBuilderDebugAndroidTest UP-TO-DATE
+> Task :app:dexBuilderDebugAndroidTest
 > Task :app:mergeDebugAndroidTestGlobalSynthetics UP-TO-DATE
 > Task :app:processDebugAndroidTestJavaRes UP-TO-DATE
 > Task :app:mergeDebugAndroidTestJavaResource UP-TO-DATE
 > Task :app:mergeProjectDexDebugAndroidTest
 > Task :app:packageDebugAndroidTest
-> Task :app:createDebugAndroidTestApkListingFileRedirect
+> Task :app:createDebugAndroidTestApkListingFileRedirect UP-TO-DATE
 > Task :app:assembleDebugAndroidTest
 
-BUILD SUCCESSFUL in 14s
-103 actionable tasks: 13 executed, 90 up-to-date
+BUILD SUCCESSFUL in 1m 25s
+98 actionable tasks: 15 executed, 83 up-to-date

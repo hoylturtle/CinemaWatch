@@ -1,0 +1,19 @@
+
+com.cinemawatch.FirstRunTest:
+Error in chineseSetupDemoAndPersistedHistory(com.cinemawatch.FirstRunTest):
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
+	at com.cinemawatch.FirstRunTest.chineseSetupDemoAndPersistedHistory(FirstRunTest.kt:15)
+
+
+Time: 90.84
+There was 1 failure:
+1) chineseSetupDemoAndPersistedHistory(com.cinemawatch.FirstRunTest)
+androidx.compose.ui.test.ComposeTimeoutException: Condition still not satisfied after 30000 ms
+	at androidx.compose.ui.test.AndroidComposeUiTestEnvironment$AndroidComposeUiTestImpl.waitUntil(ComposeUiTest.android.kt:441)
+	at androidx.compose.ui.test.junit4.AndroidComposeTestRule.waitUntil(AndroidComposeTestRule.android.kt:306)
+	at com.cinemawatch.FirstRunTest.chineseSetupDemoAndPersistedHistory(FirstRunTest.kt:15)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1

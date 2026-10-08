@@ -1,0 +1,31 @@
+
+com.cinemawatch.FirstRunTest:
+Error in chineseSetupDemoAndPersistedHistory(com.cinemawatch.FirstRunTest):
+java.lang.AssertionError: Failed to perform text input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + EditableText contains 'Cinema name' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.TextActionsKt.getNodeAndFocus(TextActions.kt:114)
+	at androidx.compose.ui.test.TextActionsKt.getNodeAndFocus$default(TextActions.kt:108)
+	at androidx.compose.ui.test.TextActionsKt.performTextInput(TextActions.kt:44)
+	at com.cinemawatch.FirstRunTest.chineseSetupDemoAndPersistedHistory(FirstRunTest.kt:15)
+
+
+Time: 35.651
+There was 1 failure:
+1) chineseSetupDemoAndPersistedHistory(com.cinemawatch.FirstRunTest)
+java.lang.AssertionError: Failed to perform text input.
+Reason: Expected exactly '1' node but could not find any node that satisfies: (Text + EditableText contains 'Cinema name' (ignoreCase: false))
+
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow(SemanticsNodeInteraction.kt:178)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchOneOrThrow$default(SemanticsNodeInteraction.kt:150)
+	at androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNode(SemanticsNodeInteraction.kt:84)
+	at androidx.compose.ui.test.TextActionsKt.getNodeAndFocus(TextActions.kt:114)
+	at androidx.compose.ui.test.TextActionsKt.getNodeAndFocus$default(TextActions.kt:108)
+	at androidx.compose.ui.test.TextActionsKt.performTextInput(TextActions.kt:44)
+	at com.cinemawatch.FirstRunTest.chineseSetupDemoAndPersistedHistory(FirstRunTest.kt:15)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1

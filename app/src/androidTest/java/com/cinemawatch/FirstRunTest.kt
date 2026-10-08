@@ -30,8 +30,11 @@ class FirstRunTest {
             compose.waitUntil(15000) { compose.onAllNodesWithText(expected).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(expected).assertIsDisplayed()
         }
+        compose.onNodeWithText("简体中文").performClick()
+        compose.waitUntil(15000) { compose.onAllNodesWithText("设置").fetchSemanticsNodes().isNotEmpty() }
         compose.activityRule.scenario.recreate()
-        compose.waitUntil(15000) { compose.onAllNodesWithText("Settings").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Settings").assertIsDisplayed()
+        compose.waitUntil(15000) { compose.onAllNodesWithText("设置").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("设置").assertIsDisplayed()
+        org.junit.Assert.assertEquals("zh-Hans", androidx.appcompat.app.AppCompatDelegate.getApplicationLocales().toLanguageTags())
     }
 }
