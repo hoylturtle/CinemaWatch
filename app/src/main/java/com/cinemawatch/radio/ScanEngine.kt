@@ -20,9 +20,9 @@ import java.util.UUID
 data class SampleRequest(val zoneId: String, val mode: String = "INSPECTION", val seconds: Int = 120, val planned: Int? = null, val actual: Int? = null, val gate: Int? = null, val point: String = "", val demo: Boolean = false)
 data class SignatureHit(val name: String, val category: SignatureClass)
 
-data class LiveRadio(val kind: String, val address: String, val name: String, val rssi: Int, val vendor: String?, val signatureClass: SignatureClass?, val lastAt: Long, val assetId: String?, val history: List<Int>, val guess: SignalGuess = SignalGuess(SignalGroup.UNKNOWN, GuessEvidence.NONE, "UNKNOWN"), val signatureHits: List<SignatureHit> = emptyList()) {
+data class LiveRadio(val kind: String, val address: String, val name: String, val rssi: Int, val vendor: String?, val signatureClass: SignatureClass?, val lastAt: Long, val assetId: String?, val history: List<Int>, val guess: SignalGuess = SignalGuess(SignalGroup.UNKNOWN, GuessEvidence.NONE, "UNKNOWN"), val signatureHits: List<SignatureHit> = emptyList(), val ecosystem: SignalGroup? = null) {
     val key get() = "$kind:$address"
-    val categories = SignalGrouping.memberships(kind, guess, signatureHits.map { it.category }.toSet())
+    val categories = SignalGrouping.memberships(kind, guess, signatureHits.map { it.category }.toSet()) + setOfNotNull(ecosystem)
 }
 data class ScanUi(val running: Boolean = false, val saving: Boolean = false, val saveFailed: Boolean = false,
     val request: SampleRequest? = null, val remaining: Int = 0, val wifiCount: Int = 0, val bleCount: Int = 0,
@@ -180,7 +180,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         window.classify(kind, address, guess.group.name)
         if (old == null && live.size >= 512) return
         live[key] = LiveRadio(kind, address, observation.name.take(48), observation.rssi, vendor ?: company, hits.firstOrNull()?.category,
-            System.currentTimeMillis(), currentAssetId, (old?.history.orEmpty() + observation.rssi).takeLast(20), guess, hits)
+            System.currentTimeMillis(), currentAssetId, (old?.history.orEmpty() + observation.rssi).takeLast(20), guess, hits, SignalGrouping.guess(kind, "", vendor, company, null).group.takeIf { it in SignalGrouping.ecosystems })
     }
 
     /** Registration changes are explicit authorization; apply them immediately to live labels/counts. */
