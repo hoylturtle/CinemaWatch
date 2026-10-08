@@ -53,6 +53,32 @@ class AssetAndImportTest {
         try { repo.createCinemaWithHalls("Invalid", 101, "Hall"); fail() } catch (_: IllegalArgumentException) { }
         assertEquals(1, repo.dao.cinemas().first().size)
     }
+    @Test fun commonAreasAreCreatedAtomicallyAndRepeatedAddAcrossLanguagesIsSafe() = runBlocking {
+        val simplified = listOf("大堂", "通道", "办公区", "放映层")
+        val firstHall = repo.createCinemaWithHalls("Cinema", 2, "Hall", simplified)
+        val cinema = repo.dao.cinemas().first().single()
+        assertEquals("Hall 1", repo.dao.zones().first().single { it.id == firstHall }.name)
+        assertEquals(setOf("Hall 1", "Hall 2") + simplified, repo.dao.zones().first().map { it.name }.toSet())
+        val asset = repo.createAsset(firstHall, "Projector", true)
+        assertTrue(repo.addCommonZones(cinema.id, listOf("Lobby", "Corridor", "Office", "Projection floor")).isEmpty())
+        assertTrue(repo.addCommonZones(cinema.id, listOf("大堂", "通道", "辦公區", "放映層")).isEmpty())
+        assertEquals(6, repo.dao.zones().first().size)
+        assertEquals(asset, repo.dao.asset(asset.id))
+        try { repo.createCinemaWithHalls("Bad", 2, "Hall", listOf("Lobby")); fail() } catch (_: IllegalArgumentException) { }
+        assertEquals(1, repo.dao.cinemas().first().size)
+    }
+    @Test fun existingCinemaGetsOnlyMissingCommonAreasWithoutChangingOtherCinemas() = runBlocking {
+        repo.createCinemaWithHalls("Existing", 1, "Hall")
+        val existing = repo.dao.cinemas().first().single()
+        repo.createZone(existing.id, "大堂")
+        repo.createZone(existing.id, "Warehouse")
+        repo.createCinemaWithHalls("Other", 1, "Hall")
+        val added = repo.addCommonZones(existing.id, listOf("大堂", "通道", "办公区", "放映层"))
+        assertEquals(3, added.size)
+        assertTrue(repo.addCommonZones(existing.id, listOf("大堂", "通道", "办公区", "放映层")).isEmpty())
+        assertEquals(6, repo.dao.zones().first().count { it.cinemaId == existing.id })
+        assertEquals(1, repo.dao.zones().first().count { it.cinemaId != existing.id })
+    }
     @Test fun localizedCsvRoundTripRestoresAggregatesButNotAssetIdentities() = runBlocking {
         val zone = repo.createCinemaWithHalls("Cinema, \"East\"", 1, "Hall")
         val session = Inspection(UUID.randomUUID().toString(), zone, "INSPECTION", 1000, 121000, 120, 2, 1, 1, 3, 30, 0, 0, true, true, false, point = "Door\nA", requestedSeconds = 120)

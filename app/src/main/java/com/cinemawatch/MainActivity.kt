@@ -102,6 +102,7 @@ private val Muted = Color(0xFF99AFBF)
     var importing by remember { mutableStateOf(false) }
     val zone = zones.find { it.id == zoneId } ?: zones.firstOrNull()
     val cinema = cinemas.find { it.id == zone?.cinemaId }
+    val commonZoneNames = listOf(R.string.zone_lobby, R.string.zone_corridor, R.string.zone_office, R.string.zone_projection).map { stringResource(it) }
     var createCinema by remember { mutableStateOf(false) }
     var createZone by remember { mutableStateOf(false) }
     var chooseZone by remember { mutableStateOf(false) }
@@ -373,6 +374,14 @@ private val Muted = Color(0xFF99AFBF)
                             else TextButton(onClick = { createZone = true }, enabled = !busy) { Text(stringResource(R.string.add_zone)) }
                             TextButton(onClick = { createCinema = true }, enabled = !busy) { Text(stringResource(R.string.setup)) }
                             if (cinema != null) TextButton(onClick = { bulkHalls = true }, enabled = !busy && !cinemaSaving) { Text(stringResource(R.string.batch_halls)) }
+                            if (cinema != null) TextButton(onClick = {
+                                val selectedCinema = cinema
+                                if (selectedCinema != null && !cinemaSaving) scope.launch {
+                                    cinemaSaving = true
+                                    runCatching { app.repository.addCommonZones(selectedCinema.id, commonZoneNames) }.onFailure { error = R.string.error_save }
+                                    cinemaSaving = false
+                                }
+                            }, enabled = !busy && !cinemaSaving) { Text(stringResource(R.string.add_common_zones)) }
                             TextButton(onClick = { logic = true }) { Text(stringResource(R.string.signal_logic)) }
                             TextButton(onClick = { importCsv.launch(arrayOf("*/*")) }, enabled = !busy && !importing) { Text(stringResource(R.string.import_history)) }
                             Text(stringResource(R.string.import_note), color = Muted, fontSize = 12.sp)
@@ -389,7 +398,7 @@ private val Muted = Color(0xFF99AFBF)
     if (createCinema) CinemaDialog(saving = cinemaSaving, onDismiss = { createCinema = false }) { name, count, prefix ->
         if (!cinemaSaving) scope.launch {
             cinemaSaving = true
-            runCatching { app.repository.createCinemaWithHalls(name, count, prefix) }.onSuccess { zoneId = it; createCinema = false }.onFailure { error = R.string.error_save }
+            runCatching { app.repository.createCinemaWithHalls(name, count, prefix, commonZoneNames) }.onSuccess { zoneId = it; createCinema = false }.onFailure { error = R.string.error_save }
             cinemaSaving = false
         }
     }
@@ -502,6 +511,7 @@ private val Muted = Color(0xFF99AFBF)
             OutlinedTextField(name, { name = it.take(80) }, modifier = Modifier.testTag("cinema-name"), label = { Text(stringResource(R.string.cinema_name)) }, singleLine = true)
             OutlinedTextField(count, { count = it.filter(Char::isDigit).take(3) }, modifier = Modifier.testTag("hall-count"), label = { Text(stringResource(R.string.hall_count)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
             OutlinedTextField(prefix, { prefix = it.take(60) }, modifier = Modifier.testTag("hall-prefix"), label = { Text(stringResource(R.string.hall_prefix)) }, singleLine = true)
+            Text(stringResource(R.string.common_zones_note))
             if (count.toIntOrNull() in 1..100 && prefix.isNotBlank()) Text(stringResource(R.string.hall_preview, prefix, count.toInt()))
         }
     }, confirmButton = { Button(onClick = { onSave(name, count.toInt(), prefix) }, enabled = !saving && name.isNotBlank() && prefix.isNotBlank() && count.toIntOrNull() in 1..100) { Text(stringResource(if (saving) R.string.saving else R.string.save)) } }, dismissButton = { TextButton(onClick = onDismiss, enabled = !saving) { Text(stringResource(R.string.cancel)) } })

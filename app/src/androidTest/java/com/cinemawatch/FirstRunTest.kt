@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.*
+import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 import java.io.File
 
@@ -47,7 +48,11 @@ class FirstRunTest {
         compose.onNodeWithTag("hall-count").performTextReplacement("2")
         compose.onNodeWithTag("hall-prefix").performTextReplacement("Hall")
         compose.onNodeWithText(text(R.string.save)).performClick()
-        compose.waitUntil(15000) { runBlocking { app.repository.dao.zones().first().size == 2 } }
+        compose.waitUntil(15000) { runBlocking { app.repository.dao.zones().first().size == 6 } }
+        runBlocking {
+            val names = app.repository.dao.zones().first().map { it.name }.toSet()
+            listOf(R.string.zone_lobby, R.string.zone_corridor, R.string.zone_office, R.string.zone_projection).forEach { assertTrue(names.contains(text(it))) }
+        }
         compose.onNodeWithText(text(R.string.assets)).performClick()
         compose.onNodeWithTag("create-asset").performClick()
         compose.onNodeWithTag("asset-name").performTextInput("Projector 1")

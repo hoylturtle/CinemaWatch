@@ -24,11 +24,13 @@ class CinemaRepository(val database: CinemaDatabase) {
         dao.insertCinema(cinema)
         dao.insertZone(Zone(UUID.randomUUID().toString(), cinema.id, zoneName.trim().take(80)))
     }
-    suspend fun createCinemaWithHalls(name: String, count: Int, prefix: String): String = database.withTransaction {
+    suspend fun createCinemaWithHalls(name: String, count: Int, prefix: String, commonZones: List<String> = emptyList()): String = database.withTransaction {
         require(name.isNotBlank() && prefix.isNotBlank() && count in 1..100)
         val cinema = Cinema(UUID.randomUUID().toString(), name.trim().take(80))
         dao.insertCinema(cinema)
-        addHalls(cinema.id, count, prefix).first().id
+        val firstHall = addHalls(cinema.id, count, prefix).first().id
+        if (commonZones.isNotEmpty()) addCommonZones(cinema.id, commonZones)
+        firstHall
     }
     suspend fun addHalls(cinemaId: String, count: Int, prefix: String): List<Zone> = database.withTransaction {
         require(count in 1..100 && prefix.isNotBlank())
@@ -36,6 +38,25 @@ class CinemaRepository(val database: CinemaDatabase) {
         val existing = dao.zones().first().filter { it.cinemaId == cinemaId }
         val last = existing.mapNotNull { it.name.takeIf { name -> name.startsWith("$label ") }?.removePrefix("$label ")?.toIntOrNull() }.maxOrNull() ?: 0
         (1..count).map { Zone(UUID.randomUUID().toString(), cinemaId, "$label ${last + it}").also { z -> dao.insertZone(z) } }
+    }
+    /** Add missing standard areas; translated names share one identity for duplicate checks. */
+    suspend fun addCommonZones(cinemaId: String, names: List<String>) = database.withTransaction {
+        require(names.size == 4 && names.all { it.isNotBlank() && it.length <= 80 })
+        require(dao.cinemas().first().any { it.id == cinemaId })
+        val aliases = listOf(
+            setOf("大堂", "Lobby"), setOf("通道", "Corridor"),
+            setOf("办公区", "辦公區", "Office"), setOf("放映层", "放映層", "Projection floor")
+        )
+        val existing = dao.zones().first().filter { it.cinemaId == cinemaId }.map { it.name.trim().lowercase(java.util.Locale.ROOT) }.toMutableSet()
+        names.mapIndexedNotNull { index, name ->
+            val alternatives = (aliases[index] + name.trim()).map { it.lowercase(java.util.Locale.ROOT) }
+            if (alternatives.any { it in existing }) null else {
+                val zone = Zone(UUID.randomUUID().toString(), cinemaId, name.trim())
+                dao.insertZone(zone)
+                existing.add(name.trim().lowercase(java.util.Locale.ROOT))
+                zone
+            }
+        }
     }
     suspend fun createZone(cinemaId: String, name: String) {
         require(name.isNotBlank())

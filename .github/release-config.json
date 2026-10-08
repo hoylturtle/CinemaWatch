@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 3,
-  "versionName": "0.3.0",
+  "versionCode": 4,
+  "versionName": "0.3.1",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "恢复原包名；新增手动检查更新、下载校验和系统覆盖安装入口。0.1/0.2 临时签名无法覆盖；此次备份后一次性换装，从 0.3 起固定签名，后续保留数据覆盖升级。"
+  "notes": "新增大堂、通道、办公区和放映层；新影城自动创建，已有影城可补充公共区域。保留原数据，同签名覆盖升级。"
 }
