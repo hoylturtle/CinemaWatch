@@ -11,8 +11,8 @@ android {
         applicationId = "com.cinemawatch"
         minSdk = 29
         targetSdk = 35
-        versionCode = providers.gradleProperty("cinemaVersionCode").orNull?.toInt() ?: 3
-        versionName = providers.gradleProperty("cinemaVersionName").orNull ?: "0.3.0"
+        versionCode = providers.gradleProperty("cinemaVersionCode").orNull?.toInt() ?: 4
+        versionName = providers.gradleProperty("cinemaVersionName").orNull ?: "0.3.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {

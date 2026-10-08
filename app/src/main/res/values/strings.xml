@@ -84,7 +84,7 @@
     <string name="healthy_sample">已收到两种无线来源；仍需现场校准</string>
     <string name="privacy_title">数据只留在影院</string>
     <string name="privacy_description">RF 纪录只保存区域、时间与汇总。未授权的 MAC、名称、原始载荷不写入数据库或导出档；不建立跨日顾客识别。</string>
-    <string name="version">CinemaWatch 0.3.0</string>
+    <string name="version">CinemaWatch 0.3.1</string>
     <string name="licenses">授权与署名</string>
     <string name="license_intro">扫描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授权；查表数据另受 IEEE 与 Bluetooth SIG 条款约束。</string>
     <string name="reset">清除本机数据</string>
@@ -202,4 +202,10 @@
     <string name="update_storage_error">空间不足，请释放空间后重新下载。</string>
     <string name="update_install_permission">如需安装，请在系统设置中允许 CinemaWatch 安装应用，再返回重试。</string>
     <string name="update_release_page">打开 GitHub 发布页</string>
+    <string name="zone_lobby">大堂</string>
+    <string name="zone_corridor">通道</string>
+    <string name="zone_office">办公区</string>
+    <string name="zone_projection">放映层</string>
+    <string name="add_common_zones">补充公共区域</string>
+    <string name="common_zones_note">同时创建大堂、通道、办公区、放映层；其他区域可在设置中新增。</string>
 </resources>
