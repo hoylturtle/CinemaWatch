@@ -14,13 +14,36 @@ class SignalGroupingTest {
         assertEquals(SignalGroup.IPHONE, g.group); assertEquals("LOW", g.confidence)
     }
     @Test fun wifiRolesIncludeHotspotsAndUnknownBleStaysUnknown() {
-        assertEquals(SignalGroup.ACCESS_POINT, SignalGrouping.guess("WIFI", "Cinema", "TP-Link", null, null).group)
+        val router = SignalGrouping.guess("WIFI", "Cinema", "TP-Link", null, null)
+        assertEquals(SignalGroup.TP_LINK, router.group)
+        assertTrue(SignalGrouping.memberships("WIFI", router, emptySet()).containsAll(setOf(SignalGroup.TP_LINK, SignalGroup.ACCESS_POINT)))
         assertEquals(SignalGroup.UNKNOWN, SignalGrouping.guess("BLE", "", null, null, null).group)
     }
     @Test fun companyCluesIdentifyEcosystemNotPhoneModel() {
         assertEquals(SignalGroup.XIAOMI, SignalGrouping.guess("BLE", "", null, "Xiaomi Communications", null).group)
         assertEquals(SignalGroup.HUAWEI, SignalGrouping.guess("WIFI", "", "Huawei Technologies", null, null).group)
         assertEquals(SignalGroup.COMPUTER, SignalGrouping.guess("BLE", "MacBook Pro", null, "Apple", null).group)
+    }
+    @Test fun everyUpstreamClassIsMappedAndMultiMatchesArePreserved() {
+        app.fieldwatch.domain.SignatureClass.entries.forEach { assertTrue(SignalGrouping.fromSignature(it) in SignalGrouping.deviceTypes) }
+        val g = SignalGrouping.guess("WIFI", "", "Huawei Technologies", null, null)
+        val memberships = SignalGrouping.memberships("WIFI", g, setOf(app.fieldwatch.domain.SignatureClass.CAMERA, app.fieldwatch.domain.SignatureClass.MESH))
+        assertTrue(memberships.containsAll(setOf(SignalGroup.CAMERA, SignalGroup.MESH, SignalGroup.ACCESS_POINT, SignalGroup.HUAWEI)))
+        assertFalse(SignalGroup.UNKNOWN in memberships)
+        assertTrue(SignalGroup.UNKNOWN in SignalGrouping.memberships("BLE", g, emptySet()))
+    }
+    @Test fun domesticEcosystemsUseEvidenceAndDoNotInferDeviceType() {
+        val brands = mapOf("Honor Device" to SignalGroup.HONOR, "OPPO" to SignalGroup.OPPO, "vivo" to SignalGroup.VIVO,
+            "realme" to SignalGroup.REALME, "OnePlus" to SignalGroup.ONEPLUS, "DJI" to SignalGroup.DJI,
+            "Hikvision" to SignalGroup.HIKVISION, "Dahua" to SignalGroup.DAHUA, "TP-Link" to SignalGroup.TP_LINK, "ZTE" to SignalGroup.ZTE)
+        brands.forEach { (brand, category) ->
+            val g = SignalGrouping.guess("BLE", "", brand, "Unrelated company", null)
+            assertEquals(category, g.group); assertEquals(GuessEvidence.OUI, g.evidence)
+            val fromName = SignalGrouping.guess("BLE", brand, null, null, null)
+            assertEquals(category, fromName.group); assertEquals("LOW", fromName.confidence)
+            assertTrue(SignalGroup.UNKNOWN in SignalGrouping.memberships("BLE", g, emptySet()))
+        }
+        assertEquals(SignalGroup.UNKNOWN, SignalGrouping.guess("BLE", "notoppo randomzte", null, null, null).group)
     }
     @Test fun groupingClearsIdentifiersAndExcludesAuthorizedRadios() {
         val w = PrivacyWindow()
