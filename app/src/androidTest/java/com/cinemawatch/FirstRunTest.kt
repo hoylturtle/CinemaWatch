@@ -88,6 +88,9 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.dashboard)).performClick()
         compose.onNodeWithText(text(R.string.demo)).performScrollTo().performClick()
         compose.waitUntil(10000) { app.scanner.state.value.running }
+        compose.onNodeWithTag("group-ACCESS_POINT").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("group-ACCESS_POINT").performClick()
+        compose.onNodeWithTag("group-ACCESS_POINT").performClick()
         compose.waitUntil(40000) { !app.scanner.state.value.running && !app.scanner.state.value.saving }
         val session = runBlocking { app.repository.dao.sessions().first().single() }
         compose.onNodeWithText(text(R.string.reports)).performClick()

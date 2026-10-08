@@ -23,6 +23,32 @@ internal fun groupLabel(group: SignalGroup) = when (group) {
     SignalGroup.ACCESS_POINT -> R.string.group_access_point; SignalGroup.IPHONE -> R.string.group_iphone
     SignalGroup.APPLE -> R.string.group_apple; SignalGroup.HUAWEI -> R.string.group_huawei; SignalGroup.XIAOMI -> R.string.group_xiaomi
     SignalGroup.COMPUTER -> R.string.group_computer; SignalGroup.PHONE -> R.string.group_phone; SignalGroup.AUDIO -> R.string.group_audio
+    SignalGroup.HONOR -> R.string.group_honor;
+    SignalGroup.OPPO -> R.string.group_oppo;
+    SignalGroup.VIVO -> R.string.group_vivo;
+    SignalGroup.REALME -> R.string.group_realme;
+    SignalGroup.ONEPLUS -> R.string.group_oneplus;
+    SignalGroup.DJI -> R.string.group_dji;
+    SignalGroup.HIKVISION -> R.string.group_hikvision;
+    SignalGroup.DAHUA -> R.string.group_dahua;
+    SignalGroup.TP_LINK -> R.string.group_tp_link;
+    SignalGroup.ZTE -> R.string.group_zte;
+    SignalGroup.ACCESS_CONTROL -> R.string.group_access_control;
+    SignalGroup.CAMERA -> R.string.group_camera;
+    SignalGroup.DRONE -> R.string.group_drone;
+    SignalGroup.FINDER -> R.string.group_finder;
+    SignalGroup.GLASSES -> R.string.group_glasses;
+    SignalGroup.HEALTH -> R.string.group_health;
+    SignalGroup.MESH -> R.string.group_mesh;
+    SignalGroup.BEACON -> R.string.group_beacon;
+    SignalGroup.SIGNAGE -> R.string.group_signage;
+    SignalGroup.SURVEILLANCE -> R.string.group_surveillance;
+    SignalGroup.PENTEST -> R.string.group_pentest;
+    SignalGroup.BODYWORN -> R.string.group_bodyworn;
+    SignalGroup.PUBLIC_SAFETY -> R.string.group_public_safety;
+    SignalGroup.VEHICLE -> R.string.group_vehicle;
+    SignalGroup.THERMOSTAT -> R.string.group_thermostat;
+    SignalGroup.OTHER -> R.string.group_other;
     SignalGroup.WEARABLE -> R.string.group_wearable; SignalGroup.IOT -> R.string.group_iot; SignalGroup.UNKNOWN -> R.string.group_unknown
 }
 internal fun evidenceLabel(e: GuessEvidence) = when (e) {

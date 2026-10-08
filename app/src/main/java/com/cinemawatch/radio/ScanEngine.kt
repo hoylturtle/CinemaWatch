@@ -18,8 +18,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 
 data class SampleRequest(val zoneId: String, val mode: String = "INSPECTION", val seconds: Int = 120, val planned: Int? = null, val actual: Int? = null, val gate: Int? = null, val point: String = "", val demo: Boolean = false)
-data class LiveRadio(val kind: String, val address: String, val name: String, val rssi: Int, val vendor: String?, val signatureClass: SignatureClass?, val lastAt: Long, val assetId: String?, val history: List<Int>, val guess: SignalGuess = SignalGuess(SignalGroup.UNKNOWN, GuessEvidence.NONE, "UNKNOWN")) {
+data class SignatureHit(val name: String, val category: SignatureClass)
+
+data class LiveRadio(val kind: String, val address: String, val name: String, val rssi: Int, val vendor: String?, val signatureClass: SignatureClass?, val lastAt: Long, val assetId: String?, val history: List<Int>, val guess: SignalGuess = SignalGuess(SignalGroup.UNKNOWN, GuessEvidence.NONE, "UNKNOWN"), val signatureHits: List<SignatureHit> = emptyList()) {
     val key get() = "$kind:$address"
+    val categories = SignalGrouping.memberships(kind, guess, signatureHits.map { it.category }.toSet())
 }
 data class ScanUi(val running: Boolean = false, val saving: Boolean = false, val saveFailed: Boolean = false,
     val request: SampleRequest? = null, val remaining: Int = 0, val wifiCount: Int = 0, val bleCount: Int = 0,
@@ -168,16 +171,16 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         val vendor = if (kind == "BLE" && observation.facts.addressType != "Public") null else RadioDb.vendorForMac(address)
         val company = observation.manufacturerId?.let { RadioDb.company(it) }
         // A cached null is still a completed classification. Do not rerun catalog matching on every packet.
-        val sig = if (old != null) old.signatureClass else if (live.size >= 512) null else withContext(Dispatchers.Default) { classify(observation, vendor) }
+        val hits = if (old != null) old.signatureHits else if (live.size >= 512) emptyList() else withContext(Dispatchers.Default) { classify(observation, vendor) }
         if (!state.value.running || SystemClock.elapsedRealtime() - startedElapsed >= request.seconds * 1000L) return
         val currentAssetId = bindings.firstOrNull { it.radio == kind && it.address == address }?.assetId
         if (currentAssetId != null) window.exclude(kind, address)
         if (currentAssetId != null && assetId == null && assets.any { it.id == currentAssetId }) assetSamples.getOrPut(currentAssetId) { mutableListOf() }.add(observation.rssi)
-        val guess = SignalGrouping.guess(kind, observation.name, vendor, company, sig)
+        val guess = SignalGrouping.guess(kind, observation.name, vendor, company, hits.firstOrNull()?.category)
         window.classify(kind, address, guess.group.name)
         if (old == null && live.size >= 512) return
-        live[key] = LiveRadio(kind, address, observation.name.take(48), observation.rssi, vendor ?: company, sig,
-            System.currentTimeMillis(), currentAssetId, (old?.history.orEmpty() + observation.rssi).takeLast(20), guess)
+        live[key] = LiveRadio(kind, address, observation.name.take(48), observation.rssi, vendor ?: company, hits.firstOrNull()?.category,
+            System.currentTimeMillis(), currentAssetId, (old?.history.orEmpty() + observation.rssi).takeLast(20), guess, hits)
     }
 
     /** Registration changes are explicit authorization; apply them immediately to live labels/counts. */
@@ -200,7 +203,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         publish(state.value.remaining)
     }
 
-    private fun classify(o: Observation, vendor: String?): SignatureClass? {
+    private fun classify(o: Observation, vendor: String?): List<SignatureHit> {
         val sighting = Sighting(key = "${o.kind}:${o.mac}", kind = o.kind, mac = o.mac, name = o.name,
             rssi = o.rssi, rssiMin = o.rssi, rssiMax = o.rssi, channel = o.channel, frequencyMhz = o.frequencyMhz,
             vendor = vendor, randomized = if (o.kind.name == "BLE") o.facts.addressType != "Public" else MacUtil.isRandomized(o.mac), hiddenSsid = o.hiddenSsid,
@@ -208,7 +211,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
             rawHex = o.rawHex, extras = "", firstSeen = o.at, lastSeen = o.at, hitCount = 1, fleetIds = emptySet(),
             rssiHistory = emptyList(), presence = emptyList(), vendorIeOuis = o.vendorIeOuis, facts = o.facts)
         val ids = engine.match(listOf(sighting), catalog)[sighting.key].orEmpty()
-        return catalog.firstOrNull { it.id in ids }?.kind
+        return catalog.filter { it.id in ids }.map { SignatureHit(it.name, it.kind) }
     }
 
     private fun generateDemo(tick: Int) {

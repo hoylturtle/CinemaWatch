@@ -90,6 +90,7 @@ private val Muted = Color(0xFF99AFBF)
     LaunchedEffect(zoneId) { preferences.edit().putString("zone", zoneId).apply() }
     var reportId by rememberSaveable { mutableStateOf<String?>(null) }
     var zoneReports by rememberSaveable { mutableStateOf(false) }
+    var collapseEmpty by rememberSaveable { mutableStateOf(true) }
     var groupFilter by rememberSaveable { mutableStateOf<String?>(null) }
     var signalSearch by remember { mutableStateOf("") }
     var createAsset by remember { mutableStateOf(false) }
@@ -234,19 +235,33 @@ private val Muted = Color(0xFF99AFBF)
                     if (scan.live.isEmpty()) item { EmptyCard(R.string.empty_radios, Icons.Outlined.Sensors) }
                     item {
                         Text(stringResource(R.string.signal_group_note), color = Muted, fontSize = 12.sp)
-                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            FilterChip(groupFilter == null, { groupFilter = null }, label = { Text(stringResource(R.string.all_groups)) })
-                            SignalGroup.entries.filter { category -> scan.groups.keys.any { it.second == category.name } }.forEach { category ->
-                                FilterChip(groupFilter == category.name, { groupFilter = category.name }, label = { Text(stringResource(groupLabel(category))) })
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { groupFilter = null }) { Text(stringResource(R.string.all_groups)) }
+                            OutlinedButton(onClick = { collapseEmpty = !collapseEmpty }) { Text(stringResource(if (collapseEmpty) R.string.show_empty else R.string.collapse_empty)) }
+                        }
+                        Text(stringResource(R.string.group_overview, scan.live.size,
+                            scan.live.count { SignalGroup.UNKNOWN in it.categories },
+                            scan.live.count { radio -> radio.categories.count { it in SignalGrouping.deviceTypes && it != SignalGroup.UNKNOWN } > 1 }), color = Muted, fontSize = 12.sp)
+                        Text(stringResource(R.string.group_multi_note), color = Muted, fontSize = 12.sp)
+                        listOf(R.string.device_classes to SignalGrouping.deviceTypes, R.string.ecosystem_classes to SignalGrouping.ecosystems).forEach { (title, categories) ->
+                            SectionTitle(title)
+                            categories.forEach { category ->
+                                val members = scan.live.filter { category in it.categories }
+                                if (!collapseEmpty || members.isNotEmpty()) {
+                                    OutlinedButton(onClick = { groupFilter = if (groupFilter == category.name) null else category.name }, modifier = Modifier.fillMaxWidth().testTag("group-${category.name}")) {
+                                        Column(Modifier.weight(1f)) {
+                                            Text((if (groupFilter == category.name) "▾ " else "▸ ") + stringResource(groupLabel(category)))
+                                            val rules = members.flatMap { it.signatureHits }.filter { SignalGrouping.fromSignature(it.category) == category }.map { it.name }.distinct()
+                                            if (rules.isNotEmpty()) Text(rules.take(3).joinToString(" · "), color = Muted, fontSize = 11.sp)
+                                        }
+                                        Text(members.size.toString())
+                                    }
+                                }
                             }
                         }
                         OutlinedTextField(signalSearch, { signalSearch = it.take(80) }, label = { Text(stringResource(R.string.signal_search)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                        scan.groups.entries.sortedWith(compareBy({ it.key.second }, { it.key.first })).forEach { (key, count) ->
-                            val category = SignalGroup.entries.find { it.name == key.second } ?: SignalGroup.UNKNOWN
-                            Text("${stringResource(groupLabel(category))} · ${key.first}: $count", color = Muted, fontSize = 12.sp)
-                        }
                     }
-                    val visibleRadios = scan.live.filter { (groupFilter == null || it.guess.group.name == groupFilter) && (signalSearch.isBlank() || it.name.contains(signalSearch, true) || it.vendor.orEmpty().contains(signalSearch, true)) }
+                    val visibleRadios = scan.live.filter { (groupFilter == null || it.categories.any { category -> category.name == groupFilter }) && (signalSearch.isBlank() || it.name.contains(signalSearch, true) || it.vendor.orEmpty().contains(signalSearch, true)) }
                     if (scan.live.isNotEmpty() && visibleRadios.isEmpty()) item { Text(stringResource(R.string.no_matching_signals)) }
                     items(visibleRadios, key = { it.key }) { radio ->
                         Panel {
@@ -260,7 +275,8 @@ private val Muted = Color(0xFF99AFBF)
                                 }
                                 Text("${radio.rssi} dBm", color = Mint)
                             }
-                            Text(stringResource(groupLabel(radio.guess.group)), color = Mint)
+                            Text(radio.categories.joinToString(" · ") { context.getString(groupLabel(it)) }, color = Mint)
+                            if (radio.signatureHits.isNotEmpty()) Text(stringResource(R.string.match_rules, radio.signatureHits.map { it.name }.distinct().joinToString(" · ")), color = Muted, fontSize = 12.sp)
                             Text(stringResource(evidenceLabel(radio.guess.evidence)), color = Muted, fontSize = 12.sp)
                             Text(stringResource(when (radio.guess.confidence) { "MEDIUM" -> R.string.confidence_medium; "LOW" -> R.string.confidence_low; else -> R.string.confidence_unknown }), color = Muted, fontSize = 12.sp)
                             Text(stringResource(R.string.signal_age, ((System.currentTimeMillis() - radio.lastAt) / 1000).toInt().coerceAtLeast(0)), color = Muted, fontSize = 12.sp)

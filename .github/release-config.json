@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 4,
-  "versionName": "0.3.1",
+  "versionCode": 5,
+  "versionName": "0.4.0",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "新增大堂、通道、办公区和放映层；新影城自动创建，已有影城可补充公共区域。保留原数据，同签名覆盖升级。"
+  "notes": "Fieldwatch 全类型分组、展开筛选、未匹配和多重匹配提示；增加荣耀、OPPO、vivo、一加、realme、大疆、海康、大华、TP-Link、中兴等生态线索分组。固定签名覆盖更新。"
 }
