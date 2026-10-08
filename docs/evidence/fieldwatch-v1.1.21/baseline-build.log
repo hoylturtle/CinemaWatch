@@ -1,0 +1,112 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :app
+Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+Checking the license for package Android SDK Build-Tools 34 in /workspace/android-sdk/licenses
+License for package Android SDK Build-Tools 34 accepted.
+Preparing "Install Android SDK Build-Tools 34 v.34.0.0".
+"Install Android SDK Build-Tools 34 v.34.0.0" ready.
+Installing Android SDK Build-Tools 34 in /workspace/android-sdk/build-tools/34.0.0
+"Install Android SDK Build-Tools 34 v.34.0.0" complete.
+"Install Android SDK Build-Tools 34 v.34.0.0" finished.
+
+> Task :app:buildKotlinToolingMetadata
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:processDebugMainManifest
+> Task :app:packageDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:javaPreCompileDebug
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:extractProguardFiles
+> Task :app:mergeDebugJniLibFolders
+> Task :app:processDebugResources
+> Task :app:mergeDebugNativeLibs
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
+
+> Task :app:extractDebugNativeSymbolTables
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugArtProfile
+> Task :app:mergeDebugStartupProfile
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets
+> Task :app:extractDebugVersionControlInfo
+> Task :app:convertLinkedResourcesToProtoDebug
+> Task :app:collectDebugDependencies
+> Task :app:sdkDebugDependencyData
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:compileDebugKotlin
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:261:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:261:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:261:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:352:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:352:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:352:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:376:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:376:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:376:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:382:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:382:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:382:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:385:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:385:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:385:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:399:6 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:399:34 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/domain/Models.kt:399:39 This declaration needs opt-in. Its usage should be marked with '@kotlinx.serialization.ExperimentalSerializationApi' or '@OptIn(kotlinx.serialization.ExperimentalSerializationApi::class)'
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/radio/WifiRadio.kt:98:37 'fun startScan(): Boolean' is deprecated. Deprecated in Java.
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/radio/WifiRadio.kt:228:21 Check for instance is always 'false'.
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/radio/WifiRadio.kt:229:21 Check for instance is always 'true'.
+w: file:///workspace/Fieldwatch-original/app/src/main/java/app/fieldwatch/radio/WifiRadio.kt:258:44 'field SSID: String!' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:processDebugJavaRes
+> Task :app:generateDebugLintVitalReportModel
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes
+> Task :app:lintVitalAnalyzeDebug
+> Task :app:testDebugUnitTest
+> Task :app:expandDebugArtProfileWildcards
+> Task :app:mergeDebugGeneratedProguardFiles
+> Task :app:mergeDebugJavaResource
+> Task :app:minifyDebugWithR8
+> Task :app:compileDebugArtProfile
+> Task :app:shrinkDebugRes
+> Task :app:convertShrunkResourcesToBinaryDebug
+> Task :app:optimizeDebugResources
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+
+> Task :app:lintVitalAnalyzeDebug
+Warning: Unable to initialize metrics, ensure /home/agent/.android is writable, details: /home/agent/.android/analytics.settings (No such file or directory)
+
+> Task :app:lintVitalReportDebug
+> Task :app:lintVitalDebug
+> Task :app:assembleDebug
+
+BUILD SUCCESSFUL in 8m
+57 actionable tasks: 57 executed

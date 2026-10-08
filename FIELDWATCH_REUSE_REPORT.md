@@ -1,12 +1,74 @@
 # Fieldwatch 复用审计报告 — Issue #1
 
 审计日期：2026-10-07（UTC）。目标分支：`cinema-watch-mvp`。
-状态：源码审计已完成；原版 Android 构建尝试被环境阻断，**未证明原版构建成功**。
-Issue #1 的“Original upstream builds successfully”验收条件仍未满足；在补齐完整 checkout 和构建证据前，不进入 scanner refactor 或产品层开发，不开始 Issue #3，不合并 main。
+状态：源码审计已完成；完整固定 commit 的原版 Wrapper build/test 已成功，478 个测试通过，工作树无改动。最新证据见下节；历史失败记录保留。未进行产品开发、未开始 Issue #3、未合并 main。
 
-## 2026-10-08 更新：原始 Wrapper JAR 已恢复
+## 2026-10-08 最终更新：完整固定基线 Wrapper 构建与测试成功
 
-此节为最新状态；前文 2026-10-07 的缺失与失败记录保留为历史证据。
+**最新验收结果：PASS。** 下方 2026-10-07 失败记录及早期 JAR 恢复记录是历史；其中“缺 binary / 无 SDK / 网络阻断 / 未满足 build 验收”已由本节新证据取代。源码审计和设计风险仍有效。本阶段只完成基线获取、审计、原版构建与证据，不开始产品改造，不执行 Issue #3，不合并 main。
+
+### 完整获取与环境修复
+
+- 对下载/Git/SDK/构建命令申请执行沙箱额外网络权限后，网络访问成功。无需绕过环境 proxy 或关闭 TLS；Cloud unrestricted HTTP policy 与执行沙箱网络授权属于不同层级。
+- 正常 Git clone 到 `/workspace/Fieldwatch-original`，detach checkout `5379a2049c351c2483f7f106ca68d5d6d5f00e64`；HEAD 与 `v1.1.21^{commit}` 均为该 SHA。
+- 完整 checkout 包含原始 JAR、radiodb.bin、launcher PNG、LICENSE、NOTICE；不再依赖文本快照作构建源。
+- JAR Git blob=`a4b76b9530d66f5e68d973ea569d8e19de379189`；radiodb.bin Git blob=`d7285674dbe23e1d0ce39e434629aba5fb1b8cc2`。
+- 安装 Temurin JDK 17.0.20.1、Android cmdline-tools 19.0、platforms;android-35、build-tools;35.0.0、platform-tools，接受 SDK licenses；AGP 自动补装其默认 build-tools 34.0.0。
+- Gradle 使用上游 Wrapper 下载的 **8.11.1**，不是系统 Gradle fallback。
+- GRADLE_USER_HOME 和 ANDROID_USER_HOME 指向可写 /workspace 目录，SDK path 显式配置。为 JDK 17 的工作区 truststore 添加环境配置的公开代理 CA，保留正常根证书与 TLS 校验；JVM HTTP/HTTPS 显式使用 proxy:8080。
+- 未改上游任何 tracked 源码、Manifest、版本、Gradle 脚本、minify/shrink 配置或许可文件。原版 build/debug 签名不是生产 release 签名。
+
+### 实测结果与持久证据
+
+| 项目 | 结果 |
+| --- | --- |
+| 开始 / 结束 UTC | 2026-10-08 00:21:36 / 00:29:37 |
+| 执行任务 | testDebugUnitTest + assembleDebug |
+| 方式 | 原始 Gradle Wrapper，JDK 17，完整固定 checkout |
+| 退出码 | 0 |
+| 最终输出 | BUILD SUCCESSFUL in 8m；57 actionable tasks: 57 executed |
+| JUnit XML 汇总 | 38 suites、478 tests、0 failures、0 errors、0 skipped |
+| 源码状态 | 构建前后 git status --porcelain 均空，git diff 无修改 |
+| APK | app/build/outputs/apk/debug/app-debug.apk |
+| APK 大小 | 9,151,500 bytes |
+| APK SHA-256 | `7f4aa6a4ded4171693fe04f82cc942ec95c106754e57ee9fdd1f4bfbb0710e66` |
+| APK 签名验证 | apksigner verify --verbose 成功；v2=true、1 signer |
+
+证据已提交：
+- [完整构建日志](docs/evidence/fieldwatch-v1.1.21/baseline-build.log)。
+- [环境、命令、退出码、每套件测试统计、APK 哈希与源码状态](docs/evidence/fieldwatch-v1.1.21/baseline-evidence.json)。
+- 本地完整测试 XML/HTML：`/workspace/Fieldwatch-original/app/build/test-results/testDebugUnitTest/` 与 `app/build/reports/tests/testDebugUnitTest/`；APK 保留在上述本地构建目录，未提交到 CinemaWatch Git 仓库。
+
+存在非阻断 warning：serialization ExperimentalSerializationApi opt-in、WifiManager.startScan/SSID deprecated、Wi-Fi IE 类型检查恒真/恒假、libandroidx.graphics.path.so 无法 strip 而原样打包，以及 /home/agent/.android metrics 不可写。未通过改源码隐藏这些 warning；完整日志保留。
+
+这证明指定源码在本环境的 debug 编译、R8/资源裁剪、单元测试与 APK 打包可通过；不证明 BLE/Wi-Fi 真机权限、OEM 节电、定位精度、扫描覆盖率或人数估计已验证。release 构建、生产签名、真机与 occupancy 校准仍未执行。
+
+### 可复现命令
+
+安装好上述 SDK/JDK 并准备可信代理 CA truststore 后，在有执行网络权限的 shell 使用：
+
+```sh
+cd /workspace/Fieldwatch-original
+JAVA_HOME=/workspace/fieldwatch-jdk17 \
+ANDROID_HOME=/workspace/android-sdk \
+ANDROID_SDK_ROOT=/workspace/android-sdk \
+ANDROID_USER_HOME=/workspace/fieldwatch-android-user \
+GRADLE_USER_HOME=/workspace/.gradle-fieldwatch \
+./gradlew --no-daemon --max-workers=2 \
+  -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 \
+  -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 \
+  -Djavax.net.ssl.trustStore=/workspace/fieldwatch-build-evidence/java-cacerts \
+  -Djavax.net.ssl.trustStorePassword=changeit \
+  testDebugUnitTest assembleDebug --stacktrace --console=plain
+git status --porcelain
+```
+
+本次 CinemaWatch 变更只有报告和两份 docs/evidence 证据文件；无产品或 Adapter 实现。Issue #1 的原版构建前置条件已满足，后续仍须遵守隐私分流和逐步评审要求。
+
+
+## 历史记录 — 2026-10-08：原始 Wrapper JAR 已恢复
+
+此节为早期恢复记录；最新成功构建状态见上节。
 
 - 使用 GitHub Connector 的 fetch_file **encoding=base64** 读取固定 commit 中的原始二进制，Base64 解码为字节；没有把 JAR 作为 UTF-8 解码，也没有重新生成/编译 JAR。
 - 已安装到 `/workspace/Fieldwatch/gradle/wrapper/gradle-wrapper.jar`。
