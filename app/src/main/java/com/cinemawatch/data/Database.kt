@@ -3,6 +3,8 @@ package com.cinemawatch.data
 import android.content.Context
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Entity(tableName = "cinemas")
 data class Cinema(@PrimaryKey val id: String, val name: String)
@@ -25,8 +27,13 @@ data class Inspection(
     val wifiCount: Int, val bleCount: Int, val assetCount: Int,
     val wifiBatches: Int, val bleEvents: Int, val discarded: Int, val dropped: Int,
     val wifiHealthy: Boolean, val bleHealthy: Boolean, val demo: Boolean,
-    val planned: Int? = null, val actual: Int? = null, val gate: Int? = null, val point: String = ""
+    val planned: Int? = null, val actual: Int? = null, val gate: Int? = null, val point: String = "",
+    @ColumnInfo(defaultValue = "0") val imported: Boolean = false, val requestedSeconds: Int? = null
 )
+
+/** Only a category, source and count; no unregistered identifiers or payloads. */
+@Entity(tableName = "signal_groups", foreignKeys = [ForeignKey(entity = Inspection::class, parentColumns = ["id"], childColumns = ["sessionId"], onDelete = ForeignKey.CASCADE)], indices = [Index("sessionId")], primaryKeys = ["sessionId", "groupCode", "radio"])
+data class SignalGroupCount(val sessionId: String, val groupCode: String, val radio: String, val count: Int)
 
 @Entity(tableName = "results", foreignKeys = [
     ForeignKey(entity = Inspection::class, parentColumns = ["id"], childColumns = ["sessionId"], onDelete = ForeignKey.CASCADE),
@@ -42,6 +49,9 @@ interface CinemaDao {
     @Query("SELECT * FROM bindings") fun bindings(): Flow<List<RadioBinding>>
     @Query("SELECT * FROM sessions ORDER BY startMs DESC") fun sessions(): Flow<List<Inspection>>
     @Query("SELECT * FROM results ORDER BY at DESC") fun results(): Flow<List<AssetResult>>
+    @Query("SELECT * FROM signal_groups") fun groups(): Flow<List<SignalGroupCount>>
+    @Query("SELECT * FROM assets WHERE id = :id") suspend fun asset(id: String): CinemaAsset?
+    @Query("SELECT * FROM sessions WHERE id = :id") suspend fun session(id: String): Inspection?
     @Query("SELECT * FROM bindings") suspend fun allBindings(): List<RadioBinding>
     @Query("SELECT * FROM assets WHERE zoneId = :zone") suspend fun assetsIn(zone: String): List<CinemaAsset>
     @Query("SELECT * FROM results WHERE assetId = :asset ORDER BY at DESC LIMIT 12") suspend fun history(asset: String): List<AssetResult>
@@ -51,14 +61,24 @@ interface CinemaDao {
     @Insert suspend fun insertBinding(value: RadioBinding)
     @Insert suspend fun insertSession(value: Inspection)
     @Insert suspend fun insertResults(values: List<AssetResult>)
+    @Insert suspend fun insertGroups(values: List<SignalGroupCount>)
+    @Query("UPDATE assets SET name = :name WHERE id = :id") suspend fun renameAsset(id: String, name: String)
     @Query("DELETE FROM assets WHERE id = :id") suspend fun deleteAsset(id: String)
     @Query("DELETE FROM cinemas") suspend fun clear()
 }
 
-@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class], version = 1, exportSchema = false)
+@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class, SignalGroupCount::class], version = 2, exportSchema = false)
 abstract class CinemaDatabase : RoomDatabase() {
     abstract fun dao(): CinemaDao
     companion object {
-        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").build()
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sessions ADD COLUMN imported INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN requestedSeconds INTEGER")
+                db.execSQL("CREATE TABLE IF NOT EXISTS signal_groups (sessionId TEXT NOT NULL, groupCode TEXT NOT NULL, radio TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(sessionId, groupCode, radio), FOREIGN KEY(sessionId) REFERENCES sessions(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_signal_groups_sessionId ON signal_groups (sessionId)")
+            }
+        }
+        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").addMigrations(MIGRATION_1_2).build()
     }
 }

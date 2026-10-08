@@ -35,6 +35,7 @@ object InspectionPolicy {
 class PrivacyWindow(private val maxKeys: Int = 4096) {
     private val wifi = HashSet<String>()
     private val ble = HashSet<String>()
+    private val groups = HashMap<String, String>()
     var dropped = 0; private set
     var discarded = 0; private set
     fun accept(kind: String, address: String, rssi: Int, fresh: Boolean, registered: Boolean): Boolean {
@@ -45,6 +46,15 @@ class PrivacyWindow(private val maxKeys: Int = 4096) {
         set += address
         return true
     }
+    fun classify(kind: String, address: String, group: String) {
+        if (address in (if (kind == "WIFI") wifi else ble)) groups["$kind:$address"] = group
+    }
+    fun exclude(kind: String, address: String) {
+        (if (kind == "WIFI") wifi else ble).remove(address)
+        groups.remove("$kind:$address")
+    }
+    fun groupCounts(): Map<Pair<String, String>, Int> = groups.entries.groupingBy { (key, group) -> key.substringBefore(":") to group }.eachCount()
+    fun discard() { discarded++ }
     fun counts() = wifi.size to ble.size
-    fun clear() { wifi.clear(); ble.clear(); dropped = 0; discarded = 0 }
+    fun clear() { wifi.clear(); ble.clear(); groups.clear(); dropped = 0; discarded = 0 }
 }

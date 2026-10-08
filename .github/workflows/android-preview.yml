@@ -2,7 +2,9 @@ name: Android preview APK
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/android-preview.yml']
+    paths: ['app/**', 'fieldwatch-core/**', '*.gradle.kts', 'gradle/**', 'gradle.properties', '.github/workflows/android-preview.yml']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: write
@@ -12,7 +14,7 @@ concurrency:
 jobs:
   preview:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -28,37 +30,65 @@ jobs:
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
       - name: Build APK and verify unit tests
         run: ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:testDebugUnitTest :fieldwatch-core:testDebugUnitTest
+      - name: Enable emulator acceleration
+        run: sudo chmod a+rw /dev/kvm
+      - name: Verify Android interface
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest
+            mkdir -p build/ui-screenshots
+            adb pull /sdcard/Android/data/com.cinemawatch.preview/files/screenshots build/ui-screenshots
+      - name: Save verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-${{ github.run_id }}
+          path: |
+            app/build/reports
+            app/build/test-results
+            fieldwatch-core/build/test-results
+            app/build/outputs/androidTest-results
+            build/ui-screenshots
+          if-no-files-found: ignore
       - name: Prepare APK and checksum
         run: |
           mkdir -p artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk artifacts/CinemaWatch-0.1.0-preview.apk
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/CinemaWatch-0.2.0-preview.apk
           cd artifacts
-          sha256sum CinemaWatch-0.1.0-preview.apk > SHA256.txt
+          sha256sum CinemaWatch-0.2.0-preview.apk > SHA256.txt
       - name: Save downloadable build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CinemaWatch-0.1.0-preview
+          name: CinemaWatch-0.2.0-preview
           path: artifacts/*
           if-no-files-found: error
           retention-days: 30
       - name: Publish preview APK
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
           cat > release-notes.md <<'NOTES'
-          CinemaWatch 0.1.0 Android 预览版（Android 10+）
+          CinemaWatch 0.2.0 Android 预览版（Android 10+）
 
           支持简体中文、繁体中文、英文。默认跟随系统，不支持的语言回退简体中文，设置中可手动切换。
 
-          影院／区域设置、Wi-Fi/BLE 巡检、授权资产登记、RSSI 状态、演示、历史记录与 CSV 导出。本地优先，不把无线地址当人数，不保存未授权信号标识。
+          独立创建资产、绑定多个授权信号、按影厅数批量创建区域、原生报告预览、CSV 历史导入、信号预判分组与扫描质量检查。支持三语言，本地优先，不把信号数量当人数。
 
-          APK 使用调试签名。完整 UI 流程尚未通过模拟器验证，现场扫描及 Android 厂商限制仍需真机测试。详见仓库 docs/evidence/cinemawatch-v0.1.0/VALIDATION.md。
+          APK 使用调试签名，新包名与 0.1 版并存以保留旧数据。先在旧版导出 CSV，再在新版设置导入；不会导入授权无线绑定或恢复校准。发布工作流验证单元测试和模拟器界面流程，现场无线扫描仍需真机验证。信号逻辑详见 docs/SIGNAL_DETECTION_LOGIC.md。
 
           Fieldwatch v1.1.21，固定 source commit 5379a2049c351c2483f7f106ca68d5d6d5f00e64；保留 MIT License 与 attribution。
           NOTES
-          if gh release view v0.1.0-preview >/dev/null 2>&1; then
-            gh release upload v0.1.0-preview artifacts/* --clobber
+          if gh release view v0.2.0-preview >/dev/null 2>&1; then
+            gh release upload v0.2.0-preview artifacts/* --clobber
           else
-            gh release create v0.1.0-preview artifacts/* --target "$GITHUB_SHA" --prerelease --title "CinemaWatch 0.1.0 三语言预览版" --notes-file release-notes.md
+            gh release create v0.2.0-preview artifacts/* --target "$GITHUB_SHA" --prerelease --title "CinemaWatch 0.2.0 三语言预览版" --notes-file release-notes.md
           fi
+

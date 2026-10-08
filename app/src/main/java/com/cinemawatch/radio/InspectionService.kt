@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
@@ -26,12 +27,17 @@ object ScanPermissions {
 }
 
 class InspectionService : Service() {
+    private var wakeLock: PowerManager.WakeLock? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     override fun onBind(intent: Intent?): IBinder? = null
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val scanner = (application as CinemaApp).scanner
         if (intent?.action == "STOP") { scanner.stop(); return START_NOT_STICKY }
         if (intent == null || !ScanPermissions.granted(this)) { stopSelf(); return START_NOT_STICKY }
+        val seconds = intent.getIntExtra("seconds", 120)
+        if (seconds !in setOf(120, 180)) { stopSelf(); return START_NOT_STICKY }
+        if (wakeLock?.isHeld != true) wakeLock = getSystemService(PowerManager::class.java)
+            .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$packageName:inspection").apply { acquire((seconds + 30) * 1000L) }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel("inspection", com.cinemawatch.AppLanguage.context(this).getString(R.string.channel_name), NotificationManager.IMPORTANCE_LOW))
         val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
@@ -50,5 +56,5 @@ class InspectionService : Service() {
         return START_NOT_STICKY
     }
     private fun optionalInt(intent: Intent, key: String) = intent.getIntExtra(key, -1).takeIf { it >= 0 }
-    override fun onDestroy() { (application as CinemaApp).scanner.stop(); scope.cancel(); super.onDestroy() }
+    override fun onDestroy() { wakeLock?.let { if (it.isHeld) it.release() }; wakeLock = null; (application as CinemaApp).scanner.stop(); scope.cancel(); super.onDestroy() }
 }

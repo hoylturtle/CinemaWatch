@@ -14,6 +14,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,6 +43,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinemawatch.data.*
 import com.cinemawatch.domain.InspectionPolicy
+import com.cinemawatch.domain.SignalGroup
 import com.cinemawatch.radio.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,9 +81,25 @@ private val Muted = Color(0xFF99AFBF)
     val assets by remember(dao) { dao.assets() }.collectAsStateWithLifecycle(emptyList())
     val sessions by remember(dao) { dao.sessions() }.collectAsStateWithLifecycle(emptyList())
     val results by remember(dao) { dao.results() }.collectAsStateWithLifecycle(emptyList())
+    val bindings by remember(dao) { dao.bindings() }.collectAsStateWithLifecycle(emptyList())
+    val groups by remember(dao) { dao.groups() }.collectAsStateWithLifecycle(emptyList())
     val scan by app.scanner.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var zoneId by rememberSaveable { mutableStateOf("") }
+    val preferences = remember(context) { context.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE) }
+    var zoneId by rememberSaveable { mutableStateOf(preferences.getString("zone", "").orEmpty()) }
+    LaunchedEffect(zoneId) { preferences.edit().putString("zone", zoneId).apply() }
+    var reportId by rememberSaveable { mutableStateOf<String?>(null) }
+    var zoneReports by rememberSaveable { mutableStateOf(false) }
+    var groupFilter by rememberSaveable { mutableStateOf<String?>(null) }
+    var signalSearch by remember { mutableStateOf("") }
+    var createAsset by remember { mutableStateOf(false) }
+    var bindAsset by remember { mutableStateOf<CinemaAsset?>(null) }
+    var renameAsset by remember { mutableStateOf<CinemaAsset?>(null) }
+    var assetSaving by remember { mutableStateOf(false) }
+    var cinemaSaving by remember { mutableStateOf(false) }
+    var bulkHalls by remember { mutableStateOf(false) }
+    var logic by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
     val zone = zones.find { it.id == zoneId } ?: zones.firstOrNull()
     val cinema = cinemas.find { it.id == zone?.cinemaId }
     var createCinema by remember { mutableStateOf(false) }
@@ -94,7 +115,9 @@ private val Muted = Color(0xFF99AFBF)
     var request by remember { mutableStateOf<SampleRequest?>(null) }
     val busy = scan.running || scan.saving || scan.saveFailed
     val snackbar = remember { SnackbarHostState() }
-    val exportCsv = remember(sessions, zones, cinemas, results, assets, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context) }
+    val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups) }
+    LaunchedEffect(scan.running) { if (!scan.running) { register = null; signalSearch = "" } }
+    fun assetError(t: Throwable) { error = when (t) { is InvalidRadioAddressException -> R.string.invalid_address; is DuplicateRadioException -> R.string.duplicate_asset; else -> R.string.error_save } }
 
     fun launchSample(r: SampleRequest) {
         if (r.demo) { scope.launch { app.scanner.start(r) }; return }
@@ -114,6 +137,25 @@ private val Muted = Color(0xFF99AFBF)
                 .onFailure { error = R.string.error_save }
         }
     }
+    val importCsv = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null && !importing && !busy) scope.launch {
+            importing = true
+            runCatching {
+                val text = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { stream ->
+                        HistoryImport.read(stream)
+                    } ?: error("No input")
+                }
+                app.repository.importHistory(text)
+            }.onSuccess { snackbar.showSnackbar(context.getString(R.string.import_done, it)) }.onFailure { error = R.string.import_failed }
+            importing = false
+        }
+    }
+    sessions.find { it.id == reportId }?.let { session ->
+        val reportZone = zones.find { it.id == session.zoneId }
+        ReportPreview(session, cinemas.find { it.id == reportZone?.cinemaId }?.name.orEmpty(), reportZone?.name.orEmpty(), results, assets, groups) { reportId = null }
+        return
+    }
     Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Ink, snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             NavigationBar(containerColor = Surface) {
@@ -132,7 +174,7 @@ private val Muted = Color(0xFF99AFBF)
                     Icon(Icons.Outlined.Theaters, null, tint = Mint, modifier = Modifier.size(28.dp))
                     Spacer(Modifier.width(10.dp))
                     Text("CinemaWatch", fontSize = 26.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f)); Text("0.1", color = Muted, fontSize = 13.sp)
+                    Spacer(Modifier.weight(1f)); Text("0.2", color = Muted, fontSize = 13.sp)
                 }
                 Text(stringResource(R.string.camera_subtitle), color = Muted, modifier = Modifier.padding(top = 6.dp))
             }
@@ -189,7 +231,23 @@ private val Muted = Color(0xFF99AFBF)
                     item { Text(stringResource(R.string.rf_note), color = Muted, fontSize = 13.sp) }
                     item { SectionTitle(R.string.new_radios); Text(stringResource(R.string.transient_note), color = Muted, fontSize = 12.sp) }
                     if (scan.live.isEmpty()) item { EmptyCard(R.string.empty_radios, Icons.Outlined.Sensors) }
-                    items(scan.live.take(80), key = { it.key }) { radio ->
+                    item {
+                        Text(stringResource(R.string.signal_group_note), color = Muted, fontSize = 12.sp)
+                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(groupFilter == null, { groupFilter = null }, label = { Text(stringResource(R.string.all_groups)) })
+                            SignalGroup.entries.filter { category -> scan.groups.keys.any { it.second == category.name } }.forEach { category ->
+                                FilterChip(groupFilter == category.name, { groupFilter = category.name }, label = { Text(stringResource(groupLabel(category))) })
+                            }
+                        }
+                        OutlinedTextField(signalSearch, { signalSearch = it.take(80) }, label = { Text(stringResource(R.string.signal_search)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        scan.groups.entries.sortedWith(compareBy({ it.key.second }, { it.key.first })).forEach { (key, count) ->
+                            val category = SignalGroup.entries.find { it.name == key.second } ?: SignalGroup.UNKNOWN
+                            Text("${stringResource(groupLabel(category))} · ${key.first}: $count", color = Muted, fontSize = 12.sp)
+                        }
+                    }
+                    val visibleRadios = scan.live.filter { (groupFilter == null || it.guess.group.name == groupFilter) && (signalSearch.isBlank() || it.name.contains(signalSearch, true) || it.vendor.orEmpty().contains(signalSearch, true)) }
+                    if (scan.live.isNotEmpty() && visibleRadios.isEmpty()) item { Text(stringResource(R.string.no_matching_signals)) }
+                    items(visibleRadios, key = { it.key }) { radio ->
                         Panel {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(if (radio.kind == "WIFI") Icons.Outlined.Wifi else Icons.Outlined.Bluetooth, null, tint = Mint)
@@ -201,12 +259,22 @@ private val Muted = Color(0xFF99AFBF)
                                 }
                                 Text("${radio.rssi} dBm", color = Mint)
                             }
-                            if (radio.assetId == null && scan.request?.demo != true) TextButton(onClick = { register = radio }) { Text(stringResource(R.string.register)) }
+                            Text(stringResource(groupLabel(radio.guess.group)), color = Mint)
+                            Text(stringResource(evidenceLabel(radio.guess.evidence)), color = Muted, fontSize = 12.sp)
+                            Text(stringResource(when (radio.guess.confidence) { "MEDIUM" -> R.string.confidence_medium; "LOW" -> R.string.confidence_low; else -> R.string.confidence_unknown }), color = Muted, fontSize = 12.sp)
+                            Text(stringResource(R.string.signal_age, ((System.currentTimeMillis() - radio.lastAt) / 1000).toInt().coerceAtLeast(0)), color = Muted, fontSize = 12.sp)
+                            if (radio.assetId == null && scan.running && scan.request?.demo != true) TextButton(onClick = { register = radio }) { Text(stringResource(R.string.register)) }
+                            else if (radio.assetId != null) Text(stringResource(R.string.registered_signal), color = Mint)
                         }
                     }
                 }
                 1 -> {
-                    item { SectionTitle(R.string.authorized_assets); Text(stringResource(R.string.baseline_note), color = Muted, fontSize = 13.sp) }
+                    item {
+                        SectionTitle(R.string.authorized_assets)
+                        Text(stringResource(R.string.baseline_note), color = Muted, fontSize = 13.sp)
+                        Button(onClick = { createAsset = true }, enabled = zone != null && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("create-asset")) { Text(stringResource(R.string.create_asset)) }
+                        Text(stringResource(R.string.asset_help), color = Muted, fontSize = 13.sp)
+                    }
                     val currentAssets = assets.filter { it.zoneId == zone?.id }
                     if (currentAssets.isEmpty()) item { EmptyCard(R.string.no_assets, Icons.Outlined.Inventory2); Text(stringResource(R.string.asset_help), color = Muted, fontSize = 13.sp) }
                     items(currentAssets, key = { it.id }) { asset ->
@@ -214,11 +282,14 @@ private val Muted = Color(0xFF99AFBF)
                         Panel {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(asset.name, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                                StatusChip(last?.status ?: "LEARNING")
+                                StatusChip(if (bindings.none { it.assetId == asset.id }) "UNBOUND" else last?.status ?: "PENDING")
                             }
                             Text(last?.medianRssi?.let { "$it dBm" } ?: stringResource(R.string.no_signal), color = Muted)
+                            bindings.filter { it.assetId == asset.id }.forEach { b -> Text("${b.radio} · …${b.address.takeLast(5)}", color = Muted, fontSize = 12.sp) }
+                            TextButton(onClick = { renameAsset = asset }, enabled = !busy) { Text(stringResource(R.string.rename_asset)) }
                             Row {
-                                TextButton(onClick = { hunt = asset }) { Text(stringResource(R.string.hunt)) }
+                                TextButton(onClick = { hunt = asset }, enabled = scan.running && bindings.any { it.assetId == asset.id }) { Text(stringResource(R.string.hunt)) }
+                                TextButton(onClick = { bindAsset = asset }, enabled = !scan.saving && !scan.saveFailed) { Text(stringResource(R.string.bind_signal)) }
                                 Spacer(Modifier.weight(1f)); TextButton(onClick = { delete = asset }, enabled = !busy) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
                             }
                         }
@@ -227,6 +298,10 @@ private val Muted = Color(0xFF99AFBF)
                 2 -> {
                     item {
                         SectionTitle(R.string.reports)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(!zoneReports, { zoneReports = false }, label = { Text(stringResource(R.string.all_records)) })
+                            FilterChip(zoneReports, { zoneReports = true }, label = { Text(stringResource(R.string.zone_records)) })
+                        }
                         if (sessions.isNotEmpty()) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = { export.launch("CinemaWatch-${System.currentTimeMillis()}.csv") }) { Icon(Icons.Outlined.Download, null); Text(stringResource(R.string.export)) }
                             TextButton(onClick = {
@@ -244,18 +319,21 @@ private val Muted = Color(0xFF99AFBF)
                         }
                     }
                     if (sessions.isEmpty()) item { EmptyCard(R.string.no_reports, Icons.Outlined.Assignment) }
-                    items(sessions, key = { it.id }) { session ->
+                    items(sessions.filter { !zoneReports || it.zoneId == zone?.id }, key = { it.id }) { session ->
                         val z = zones.find { it.id == session.zoneId }
-                        Panel {
+                        Panel(onClick = { reportId = session.id }) {
                             Row {
-                                Text(z?.name.orEmpty(), fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                                Text("${cinemas.find { it.id == z?.cinemaId }?.name.orEmpty()} · ${z?.name.orEmpty()}", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                                 Text(stringResource(if (session.mode == "LAB") R.string.lab_mode else R.string.inspection_mode), color = Mint, fontSize = 12.sp)
                             }
                             Text(SimpleDateFormat("yyyy/MM/dd HH:mm", context.resources.configuration.locales[0]).format(Date(session.startMs)) + " · ${session.durationSeconds}s", color = Muted, fontSize = 12.sp)
+                            OutlinedButton(onClick = { reportId = session.id }, modifier = Modifier.testTag("preview-${session.id}")) { Text(stringResource(R.string.preview_report)) }
+                            if (session.imported) Text(stringResource(R.string.imported_record), color = Muted)
+                            if (session.overran()) Text(stringResource(R.string.late_sample), color = MaterialTheme.colorScheme.error)
                             if (session.demo) Text(stringResource(R.string.demo_note), color = Color(0xFFFFD48D))
                             Text("Wi-Fi AP  ${session.wifiCount}    BLE  ${session.bleCount}", fontSize = 20.sp, fontWeight = FontWeight.Medium)
                             Text(stringResource(R.string.calibration_pending), color = Muted)
-                            Text(stringResource(if (session.wifiHealthy && session.bleHealthy) R.string.healthy_sample else R.string.partial_sample), color = Muted, fontSize = 12.sp)
+                            Text(stringResource(if (session.wifiHealthy && session.bleHealthy && !session.overran()) R.string.healthy_sample else R.string.partial_sample), color = Muted, fontSize = 12.sp)
                             results.filter { it.sessionId == session.id }.forEach { r ->
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(assets.find { it.id == r.assetId }?.name.orEmpty(), modifier = Modifier.weight(1f), fontSize = 14.sp)
@@ -293,6 +371,10 @@ private val Muted = Color(0xFF99AFBF)
                             if (cinemas.isEmpty()) TextButton(onClick = { createCinema = true }) { Text(stringResource(R.string.setup)) }
                             else TextButton(onClick = { createZone = true }, enabled = !busy) { Text(stringResource(R.string.add_zone)) }
                             TextButton(onClick = { createCinema = true }, enabled = !busy) { Text(stringResource(R.string.setup)) }
+                            if (cinema != null) TextButton(onClick = { bulkHalls = true }, enabled = !busy && !cinemaSaving) { Text(stringResource(R.string.batch_halls)) }
+                            TextButton(onClick = { logic = true }) { Text(stringResource(R.string.signal_logic)) }
+                            TextButton(onClick = { importCsv.launch(arrayOf("*/*")) }, enabled = !busy && !importing) { Text(stringResource(R.string.import_history)) }
+                            Text(stringResource(R.string.import_note), color = Muted, fontSize = 12.sp)
                             TextButton(onClick = { license = true }) { Text(stringResource(R.string.licenses)) }
                             Text(stringResource(R.string.version), color = Muted, fontSize = 12.sp)
                             TextButton(onClick = { reset = true }, enabled = !busy) { Text(stringResource(R.string.reset), color = MaterialTheme.colorScheme.error) }
@@ -303,14 +385,25 @@ private val Muted = Color(0xFF99AFBF)
             item { Spacer(Modifier.height(8.dp)) }
         }
     }
-    if (createCinema) CinemaDialog(onDismiss = { createCinema = false }) { c, z ->
-        scope.launch { runCatching { app.repository.createCinema(c, z) }.onSuccess { createCinema = false }.onFailure { error = R.string.error_save } }
+    if (createCinema) CinemaDialog(saving = cinemaSaving, onDismiss = { createCinema = false }) { name, count, prefix ->
+        if (!cinemaSaving) scope.launch {
+            cinemaSaving = true
+            runCatching { app.repository.createCinemaWithHalls(name, count, prefix) }.onSuccess { zoneId = it; createCinema = false }.onFailure { error = R.string.error_save }
+            cinemaSaving = false
+        }
+    }
+    if (bulkHalls) HallsDialog(cinemaSaving, { bulkHalls = false }) { count, prefix ->
+        cinema?.let { selectedCinema -> if (!cinemaSaving) scope.launch {
+            cinemaSaving = true
+            runCatching { app.repository.addHalls(selectedCinema.id, count, prefix) }.onSuccess { bulkHalls = false }.onFailure { error = R.string.error_save }
+            cinemaSaving = false
+        } }
     }
     if (createZone) NameDialog(R.string.add_zone, R.string.zone_name, { createZone = false }) { name ->
         cinema?.let { scope.launch { runCatching { app.repository.createZone(it.id, name) }.onSuccess { createZone = false }.onFailure { error = R.string.error_save } } }
     }
     if (chooseZone) AlertDialog(onDismissRequest = { chooseZone = false }, title = { Text(stringResource(R.string.choose_zone)) }, text = {
-        Column { zones.forEach { z -> TextButton(onClick = { zoneId = z.id; chooseZone = false }) { Text("${cinemas.find { it.id == z.cinemaId }?.name.orEmpty()} · ${z.name}") } } }
+        Column(Modifier.verticalScroll(rememberScrollState())) { zones.forEach { z -> TextButton(onClick = { zoneId = z.id; chooseZone = false }) { Text("${cinemas.find { it.id == z.cinemaId }?.name.orEmpty()} · ${z.name}") } } }
     }, confirmButton = { TextButton(onClick = { chooseZone = false }) { Text(stringResource(R.string.close)) } })
     setupMode?.let { mode -> SampleDialog(mode, { setupMode = null }) { seconds, planned, actual, gate, point ->
         zone?.let { z ->
@@ -323,17 +416,38 @@ private val Muted = Color(0xFF99AFBF)
             }
         }
     } }
-    register?.let { radio -> RegisterDialog(radio, { register = null }) { name ->
-        zone?.let { z -> scope.launch {
-            runCatching { app.repository.register(z.id, name, radio.kind, radio.address, true) }.onSuccess { register = null }
-                .onFailure { error = R.string.duplicate_asset }
+    fun savedAsset() { createAsset = false; bindAsset = null; register = null }
+    if (createAsset || bindAsset != null) ManualAssetDialog(bindAsset, assetSaving, { createAsset = false; bindAsset = null }) { name, kind, address ->
+        zone?.let { z -> if (!assetSaving) scope.launch {
+            assetSaving = true
+            runCatching {
+                val existing = bindAsset
+                if (existing == null) app.repository.createAsset(z.id, name, true, kind, address)
+                else app.repository.addBinding(existing.id, kind, address, true)
+                app.scanner.refreshAssets()
+            }.onSuccess { savedAsset(); assetSaving = false; scope.launch { snackbar.showSnackbar(context.getString(if (address.isBlank()) R.string.asset_created else R.string.binding_saved)) } }.onFailure(::assetError)
+            assetSaving = false
         } }
+    }
+    register?.let { radio -> SignalBindingDialog(radio, assets.filter { it.zoneId == zone?.id }, assetSaving, { register = null }) { name, existing ->
+        zone?.let { z -> if (!assetSaving) scope.launch {
+            assetSaving = true
+            runCatching {
+                if (existing == null) app.repository.register(z.id, name, radio.kind, radio.address, true)
+                else app.repository.addBinding(existing, radio.kind, radio.address, true)
+                app.scanner.refreshAssets()
+            }.onSuccess { savedAsset(); assetSaving = false; scope.launch { snackbar.showSnackbar(context.getString(R.string.binding_saved)) } }.onFailure(::assetError)
+            assetSaving = false
+        } }
+    } }
+    renameAsset?.let { asset -> NameDialog(R.string.rename_asset, R.string.asset_name, { renameAsset = null }, initial = asset.name) { name ->
+        scope.launch { runCatching { app.repository.renameAsset(asset.id, name) }.onSuccess { renameAsset = null }.onFailure(::assetError) }
     } }
     delete?.let { asset -> ConfirmDialog(R.string.delete_asset_title, R.string.delete_asset_note, { delete = null }) {
         scope.launch { runCatching { dao.deleteAsset(asset.id) }.onSuccess { delete = null }.onFailure { error = R.string.error_save } }
     } }
     hunt?.let { asset ->
-        val radio = scan.live.find { it.assetId == asset.id }
+        val radio = scan.live.find { it.assetId == asset.id }?.takeIf { System.currentTimeMillis() - it.lastAt <= 15_000 }
         AlertDialog(onDismissRequest = { hunt = null }, title = { Text(asset.name) }, text = {
             Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 Text(stringResource(R.string.hunt_note))
@@ -349,6 +463,9 @@ private val Muted = Color(0xFF99AFBF)
     if (reset) ConfirmDialog(R.string.reset_title, R.string.reset_note, { reset = false }) {
         scope.launch { runCatching { dao.clear() }.onSuccess { reset = false; zoneId = "" }.onFailure { error = R.string.error_save } }
     }
+    if (logic) AlertDialog(onDismissRequest = { logic = false }, title = { Text(stringResource(R.string.signal_logic)) }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState())) { Text(stringResource(R.string.signal_logic_summary)) }
+    }, confirmButton = { TextButton(onClick = { logic = false }) { Text(stringResource(R.string.close)) } })
     if (license) {
         val text = remember { context.assets.open("attribution/LICENSE").bufferedReader().use { it.readText() } + "\n" + context.assets.open("attribution/NOTICE").bufferedReader().use { it.readText() } }
         AlertDialog(onDismissRequest = { license = false }, title = { Text(stringResource(R.string.licenses)) }, text = {
@@ -358,49 +475,51 @@ private val Muted = Color(0xFF99AFBF)
     error?.let { id -> AlertDialog(onDismissRequest = { error = null }, text = { Text(stringResource(id)) }, confirmButton = { TextButton(onClick = { error = null }) { Text(stringResource(R.string.close)) } }) }
 }
 
-@Composable private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Surface)) {
+@Composable internal fun Panel(onClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Surface)) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
     }
 }
 @Composable private fun Stat(count: Int, label: Int, modifier: Modifier) {
     Column(modifier) { Text(count.toString(), fontSize = 42.sp, fontWeight = FontWeight.Bold); Text(stringResource(label), color = Muted, fontSize = 12.sp) }
 }
-@Composable private fun SectionTitle(label: Int) { Text(stringResource(label), fontWeight = FontWeight.Bold, fontSize = 19.sp) }
+@Composable internal fun SectionTitle(label: Int) { Text(stringResource(label), fontWeight = FontWeight.Bold, fontSize = 19.sp) }
 @Composable private fun EmptyCard(label: Int, icon: androidx.compose.ui.graphics.vector.ImageVector) {
     Panel { Icon(icon, null, tint = Muted, modifier = Modifier.size(30.dp)); Text(stringResource(label), color = Muted) }
 }
-@Composable private fun StatusChip(status: String) {
-    val id = when (status) { "NORMAL" -> R.string.normal; "WEAK" -> R.string.weak; "UNSTABLE" -> R.string.unstable
-        "MISSING" -> R.string.missing; "REVIEW" -> R.string.review; "UNAVAILABLE" -> R.string.unavailable; else -> R.string.baseline_learning }
+@Composable internal fun StatusChip(status: String) {
+    val id = statusLabel(status)
     val color = if (status == "NORMAL") Mint else if (status in setOf("MISSING", "WEAK")) Color(0xFFFFB69E) else Muted
     Text(stringResource(id), color = color, fontSize = 12.sp, modifier = Modifier.background(color.copy(alpha = .1f), RoundedCornerShape(8.dp)).padding(8.dp))
 }
-@Composable private fun CinemaDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
-    var name by remember { mutableStateOf("") }; var zone by remember { mutableStateOf("") }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.setup)) }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+@Composable private fun CinemaDialog(saving: Boolean, onDismiss: () -> Unit, onSave: (String, Int, String) -> Unit) {
+    var name by remember { mutableStateOf("") }; var count by remember { mutableStateOf("1") }
+    val defaultPrefix = stringResource(R.string.hall_prefix_default)
+    var prefix by remember { mutableStateOf(defaultPrefix) }
+    AlertDialog(onDismissRequest = { if (!saving) onDismiss() }, title = { Text(stringResource(R.string.setup)) }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(name, { name = it.take(80) }, modifier = Modifier.testTag("cinema-name"), label = { Text(stringResource(R.string.cinema_name)) }, singleLine = true)
-            OutlinedTextField(zone, { zone = it.take(80) }, modifier = Modifier.testTag("zone-name"), label = { Text(stringResource(R.string.zone_name)) }, singleLine = true)
+            OutlinedTextField(count, { count = it.filter(Char::isDigit).take(3) }, modifier = Modifier.testTag("hall-count"), label = { Text(stringResource(R.string.hall_count)) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
+            OutlinedTextField(prefix, { prefix = it.take(60) }, modifier = Modifier.testTag("hall-prefix"), label = { Text(stringResource(R.string.hall_prefix)) }, singleLine = true)
+            if (count.toIntOrNull() in 1..100 && prefix.isNotBlank()) Text(stringResource(R.string.hall_preview, prefix, count.toInt()))
         }
-    }, confirmButton = { Button(onClick = { onSave(name, zone) }, enabled = name.isNotBlank() && zone.isNotBlank()) { Text(stringResource(R.string.save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+    }, confirmButton = { Button(onClick = { onSave(name, count.toInt(), prefix) }, enabled = !saving && name.isNotBlank() && prefix.isNotBlank() && count.toIntOrNull() in 1..100) { Text(stringResource(if (saving) R.string.saving else R.string.save)) } }, dismissButton = { TextButton(onClick = onDismiss, enabled = !saving) { Text(stringResource(R.string.cancel)) } })
 }
-@Composable private fun NameDialog(title: Int, label: Int, onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var name by remember { mutableStateOf("") }
+@Composable private fun HallsDialog(saving: Boolean, onDismiss: () -> Unit, onSave: (Int, String) -> Unit) {
+    var count by remember { mutableStateOf("1") }
+    val defaultPrefix = stringResource(R.string.hall_prefix_default); var prefix by remember { mutableStateOf(defaultPrefix) }
+    AlertDialog(onDismissRequest = { if (!saving) onDismiss() }, title = { Text(stringResource(R.string.batch_halls)) }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(stringResource(R.string.batch_halls_note))
+            OutlinedTextField(count, { count = it.filter(Char::isDigit).take(3) }, label = { Text(stringResource(R.string.hall_count)) }, modifier = Modifier.testTag("hall-count"), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+            OutlinedTextField(prefix, { prefix = it.take(60) }, label = { Text(stringResource(R.string.hall_prefix)) }, modifier = Modifier.testTag("hall-prefix"))
+        }
+    }, confirmButton = { Button(onClick = { onSave(count.toInt(), prefix) }, enabled = !saving && prefix.isNotBlank() && count.toIntOrNull() in 1..100) { Text(stringResource(R.string.save)) } }, dismissButton = { TextButton(onClick = onDismiss, enabled = !saving) { Text(stringResource(R.string.cancel)) } })
+}
+@Composable private fun NameDialog(title: Int, label: Int, onDismiss: () -> Unit, initial: String = "", onSave: (String) -> Unit) {
+    var name by remember { mutableStateOf(initial) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(title)) }, text = { OutlinedTextField(name, { name = it.take(80) }, label = { Text(stringResource(label)) }) },
         confirmButton = { Button(onClick = { onSave(name) }, enabled = name.isNotBlank()) { Text(stringResource(R.string.save)) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
-}
-@Composable private fun RegisterDialog(radio: LiveRadio, onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var name by remember { mutableStateOf(radio.name) }; var authorized by remember { mutableStateOf(false) }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.register)) }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedTextField(name, { name = it.take(80) }, label = { Text(stringResource(R.string.asset_name)) }, singleLine = true)
-            Text("${radio.kind} · ${radio.address}", color = Muted)
-            Text(stringResource(R.string.binding_notice), fontSize = 12.sp)
-            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(authorized, { authorized = it }); Text(stringResource(R.string.authorized_confirm), fontSize = 13.sp) }
-        }
-    }, confirmButton = { Button(onClick = { onSave(name) }, enabled = authorized && name.isNotBlank()) { Text(stringResource(R.string.save)) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
 }
 @Composable private fun ConfirmDialog(title: Int, body: Int, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(title)) }, text = { Text(stringResource(body)) },
