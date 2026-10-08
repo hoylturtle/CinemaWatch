@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 6,
-  "versionName": "0.5.0",
+  "versionCode": 7,
+  "versionName": "0.6.0",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "完善资产名称、具体位置、备注和编辑；新增本地影城平面图、PDF/JPG/PNG导入、CDR内嵌PNG预览读取及简易区域绘图、资产标点。保留数据覆盖更新。"
+  "notes": "改为全屏户型图编辑器：墙线、房间/通道轮廓、门扇、设备标点、移动、缩放、网格吸附、撤销重做。保留旧底图与资产资料，固定签名覆盖升级。"
 }

@@ -84,7 +84,7 @@
     <string name="healthy_sample">已收到两种无线来源；仍需现场校准</string>
     <string name="privacy_title">数据只留在影院</string>
     <string name="privacy_description">RF 纪录只保存区域、时间与汇总。未授权的 MAC、名称、原始载荷不写入数据库或导出档；不建立跨日顾客识别。</string>
-    <string name="version">CinemaWatch 0.5.0</string>
+    <string name="version">CinemaWatch 0.6.0</string>
     <string name="licenses">授权与署名</string>
     <string name="license_intro">扫描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授权；查表数据另受 IEEE 与 Bluetooth SIG 条款约束。</string>
     <string name="reset">清除本机数据</string>
@@ -256,4 +256,26 @@
     <string name="plan_draw_area">绘制区域矩形：点击两个对角</string>
     <string name="plan_second_corner">请点击矩形的另一个对角。</string>
     <string name="plan_import_error">无法处理或保存。请使用不超过 32 MB 的有效 PDF/JPG/PNG，检查 PDF 页码；CDR 仅支持内嵌 PNG 预览，没有预览请先导出 PDF/JPG。</string>
+    <string name="plan_import_short">导入底图</string>
+    <string name="plan_blank">新建空白图</string>
+    <string name="plan_undo">撤销</string>
+    <string name="plan_redo">重做</string>
+    <string name="plan_snap">网格 / 直角吸附</string>
+    <string name="plan_fit">适应画布</string>
+    <string name="plan_tool_select">选取 / 移动</string>
+    <string name="plan_tool_pan">浏览</string>
+    <string name="plan_tool_wall">墙线</string>
+    <string name="plan_tool_room">房间 / 通道</string>
+    <string name="plan_tool_door">门</string>
+    <string name="plan_tool_asset">设备</string>
+    <string name="plan_wall_hint">沿墙连续点选拐点，然后点完成。</string>
+    <string name="plan_room_hint">依次点选房间或通道的轮廓拐点，点起点闭合或点完成，再关联区域。</string>
+    <string name="plan_door_hint">点选门的铰链与门扇端点，生成门扇和开启弧线。</string>
+    <string name="plan_asset_hint">点图面放置当前设备；位置由你确认。</string>
+    <string name="plan_pan_hint">拖动画布浏览，双指缩放；可点适应画布复位。</string>
+    <string name="plan_select_hint">点选房间或设备，拖动调整位置；图面自动保存在本机。</string>
+    <string name="plan_finish">完成轮廓</string>
+    <string name="plan_wall_object">墙线 / 门</string>
+    <string name="plan_autosave">本机自动保存 · 示意图，无建筑测量比例</string>
+    <string name="plan_name_room">关联区域或新建房间</string>
 </resources>

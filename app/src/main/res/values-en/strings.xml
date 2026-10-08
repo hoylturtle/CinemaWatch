@@ -84,7 +84,7 @@
     <string name="healthy_sample">Both radio sources received; field calibration still required</string>
     <string name="privacy_title">Data stays in the cinema</string>
     <string name="privacy_description">RF records save zone, time and aggregates only. Unauthorized MACs, names and raw payloads are excluded from the database and exports. No cross-day customer identification.</string>
-    <string name="version">CinemaWatch 0.5.0</string>
+    <string name="version">CinemaWatch 0.6.0</string>
     <string name="licenses">Licenses and attribution</string>
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>
@@ -256,4 +256,26 @@
     <string name="plan_draw_area">Draw area: tap two opposite corners</string>
     <string name="plan_second_corner">Tap the opposite corner.</string>
     <string name="plan_import_error">Could not process or save. Use a valid PDF/JPG/PNG up to 32 MB and check the page number. CDR requires an embedded PNG preview; otherwise export PDF/JPG first.</string>
+    <string name="plan_import_short">Import background</string>
+    <string name="plan_blank">New blank plan</string>
+    <string name="plan_undo">Undo</string>
+    <string name="plan_redo">Redo</string>
+    <string name="plan_snap">Grid / right angles</string>
+    <string name="plan_fit">Fit</string>
+    <string name="plan_tool_select">Select / move</string>
+    <string name="plan_tool_pan">Pan</string>
+    <string name="plan_tool_wall">Walls</string>
+    <string name="plan_tool_room">Room / corridor</string>
+    <string name="plan_tool_door">Door</string>
+    <string name="plan_tool_asset">Devices</string>
+    <string name="plan_wall_hint">Tap wall corners in sequence, then finish.</string>
+    <string name="plan_room_hint">Tap room or corridor corners. Tap the first corner or Finish, then link an area.</string>
+    <string name="plan_door_hint">Tap the hinge and leaf endpoint to draw a door and swing arc.</string>
+    <string name="plan_asset_hint">Tap to place the selected device. You confirm its position.</string>
+    <string name="plan_pan_hint">Drag to pan, pinch to zoom. Fit resets the view.</string>
+    <string name="plan_select_hint">Select a room or device and drag to move. Changes save locally.</string>
+    <string name="plan_finish">Finish outline</string>
+    <string name="plan_wall_object">Wall / door</string>
+    <string name="plan_autosave">Autosaves locally · schematic, not measured to scale</string>
+    <string name="plan_name_room">Link an area or create a room</string>
 </resources>
