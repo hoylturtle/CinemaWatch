@@ -1,0 +1,65 @@
+[
+  {
+    "name": "com.cinemawatch.InspectionPolicyTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.cinemawatch.LanguageTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "com.cinemawatch.PersistenceTest",
+    "tests": "4",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.domain.AdvPayloadDecoderTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.domain.SignatureCandidatesTest",
+    "tests": "18",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.domain.SignatureExchangeTest",
+    "tests": "58",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.domain.SignatureFieldDecoderTest",
+    "tests": "50",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.radio.BleAdParserTest",
+    "tests": "11",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  {
+    "name": "app.fieldwatch.radio.WifiIeParserTest",
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  }
+]
