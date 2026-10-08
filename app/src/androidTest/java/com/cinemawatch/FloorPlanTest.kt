@@ -16,6 +16,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -23,17 +25,22 @@ import java.util.zip.ZipOutputStream
 class FloorPlanTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
     @Test fun marksAnAssetOnThePlanAndReopensStoredCoordinates() {
-        val cinema = Cinema(UUID.randomUUID().toString(), "Plan test")
-        val zone = Zone("zone-test", cinema.id, "Hall 1")
-        val asset = CinemaAsset("asset-test", zone.id, "Plan projector", location = "Rack A")
+        val app = compose.activity.application as CinemaApp
+        val zoneId = runBlocking { app.repository.dao.clear(); app.repository.createCinemaWithHalls("Plan test", 1, "Hall") }
+        val cinema = runBlocking { app.repository.dao.cinemas().first().single() }
+        val zones = runBlocking { app.repository.dao.zones().first() }
+        val asset = runBlocking { app.repository.createAsset(zoneId, "Plan projector", true, location = "Rack A") }
         val store = FloorPlanStore(compose.activity, cinema.id)
-        store.sketch(listOf(zone))
-        compose.activity.setContent { MaterialTheme { FloorPlanDialog(cinema, listOf(zone), listOf(asset), {}, { name -> Zone(UUID.randomUUID().toString(), cinema.id, name) }) } }
-        compose.waitUntil(10000) { compose.onAllNodesWithTag("floor-plan-image").fetchSemanticsNodes().isNotEmpty() }
+        store.sketch(zones)
+        compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
+        compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.floor_plan)))
+        compose.onNodeWithText(compose.activity.getString(R.string.floor_plan)).performClick()
+        compose.waitUntil(10000) { compose.onAllNodesWithTag("plan-scroll").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("plan-scroll").performTouchInput { swipeUp() }
         compose.onNodeWithText("Plan projector").performScrollTo().performClick()
         compose.onNodeWithTag("floor-plan-image").performScrollTo().performTouchInput { click(center) }
-        compose.waitUntil(10000) { store.pins().any { it.target == "asset:asset-test" } }
-        val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:asset-test" }
+        compose.waitUntil(10000) { store.pins().any { it.target == "asset:${asset.id}" } }
+        val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:${asset.id}" }
         assertEquals(.5f, marker.x, .02f); assertEquals(.5f, marker.y, .02f)
         store.image.parentFile?.deleteRecursively()
     }

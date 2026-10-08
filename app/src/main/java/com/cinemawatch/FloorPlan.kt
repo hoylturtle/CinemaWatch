@@ -136,7 +136,7 @@ class FloorPlanStore(private val context: Context, cinemaId: String) {
     }
     Dialog(onDismissRequest = { if (!busy) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.padding(20.dp).verticalScroll(rememberScrollState()).testTag("plan-scroll"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("${cinema.name} · ${stringResource(R.string.floor_plan)}", style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.plan_note))
                 Button(onClick = { if (bitmap == null) picker.launch(arrayOf("*/*")) else replacing = true }, enabled = !busy) { Text(stringResource(R.string.plan_import)) }
