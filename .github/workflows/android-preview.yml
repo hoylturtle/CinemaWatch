@@ -10,7 +10,7 @@ permissions:
   contents: write
 concurrency:
   group: android-preview-release
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   preview:
     runs-on: ubuntu-latest
