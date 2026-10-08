@@ -41,9 +41,11 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: |
-            ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest
+            ui_result=0
+            ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest || ui_result=$?
             mkdir -p build/ui-screenshots
-            adb pull /sdcard/Android/data/com.cinemawatch.preview/files/screenshots build/ui-screenshots
+            adb pull /sdcard/Android/data/com.cinemawatch.preview/files/screenshots build/ui-screenshots || true
+            exit "$ui_result"
       - name: Save verification reports
         if: always()
         uses: actions/upload-artifact@v4

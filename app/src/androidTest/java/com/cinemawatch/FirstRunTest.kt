@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -24,6 +25,7 @@ class FirstRunTest {
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
     }
+    @After fun captureFinalScreen() { shot("final-screen") }
     @Before fun cleanDatabase() {
         runBlocking { app.repository.dao.clear() }
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.setup)).fetchSemanticsNodes().isNotEmpty() }
@@ -45,7 +47,7 @@ class FirstRunTest {
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.awaiting_binding)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
         compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
-        compose.onNodeWithTag("radio-address").performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
+        compose.onNodeWithTag("radio-address", useUnmergedTree = true).performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
         compose.onNodeWithTag("authorization").performScrollTo().performClick()
         compose.onNodeWithText(text(R.string.save)).performClick()
         compose.waitUntil(15000) { runBlocking { app.repository.dao.allBindings().size == 1 } }
@@ -53,7 +55,9 @@ class FirstRunTest {
         shot("assets-with-binding")
         compose.onNodeWithTag("create-asset").performScrollTo().performClick()
         compose.onNodeWithTag("asset-name").performTextInput("Duplicate")
-        compose.onNodeWithTag("radio-address").performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
+        closeSoftKeyboard()
+        shot("manual-form")
+        compose.onNodeWithTag("radio-address", useUnmergedTree = true).performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
         compose.onNodeWithTag("authorization").performScrollTo().performClick()
         compose.onNodeWithText(text(R.string.save)).performClick()
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.duplicate_asset)).fetchSemanticsNodes().isNotEmpty() }
