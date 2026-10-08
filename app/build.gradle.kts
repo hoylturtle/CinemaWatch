@@ -8,15 +8,26 @@ android {
     namespace = "com.cinemawatch"
     compileSdk = 35
     defaultConfig {
-        applicationId = "com.cinemawatch.preview"
+        applicationId = "com.cinemawatch"
         minSdk = 29
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = providers.gradleProperty("cinemaVersionCode").orNull?.toInt() ?: 3
+        versionName = providers.gradleProperty("cinemaVersionName").orNull ?: "0.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        create("persistent") {
+            System.getenv("CW_KEYSTORE_FILE")?.let { path ->
+                storeFile = file(path)
+                storePassword = System.getenv("CW_STORE_PASSWORD")
+                keyAlias = System.getenv("CW_KEY_ALIAS")
+                keyPassword = System.getenv("CW_KEY_PASSWORD")
+            }
+        }
     }
     buildTypes {
         release {
+            if (System.getenv("CW_KEYSTORE_FILE") != null) signingConfig = signingConfigs.getByName("persistent")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

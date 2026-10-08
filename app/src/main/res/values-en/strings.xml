@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">CinemaWatch New Preview</string>
+    <string name="app_name">CinemaWatch</string>
     <string name="channel_name">Cinema radio inspection</string>
     <string name="scanning_notification">Sampling; saving authorized assets and aggregates only</string>
     <string name="stop_notification">Stop and save</string>
@@ -84,7 +84,7 @@
     <string name="healthy_sample">Both radio sources received; field calibration still required</string>
     <string name="privacy_title">Data stays in the cinema</string>
     <string name="privacy_description">RF records save zone, time and aggregates only. Unauthorized MACs, names and raw payloads are excluded from the database and exports. No cross-day customer identification.</string>
-    <string name="version">Version 0.2.0 · Android 10 or later</string>
+    <string name="version">CinemaWatch 0.3.0</string>
     <string name="licenses">Licenses and attribution</string>
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>
@@ -183,4 +183,23 @@
     <string name="seconds_format">%1$d seconds</string>
     <string name="signal_logic">How signal detection works</string>
     <string name="signal_logic_summary">Wi-Fi receives AP / hotspot broadcasts; BLE receives nearby advertisements. Valid RSSI and fresh scans are accepted and radio addresses are deduplicated within a session. Names, vendors and signature clues support tentative groups, not verified models or ownership. Authorized assets have independent IDs. Unregistered identifiers are cleared at the end; only category counts and sampling quality persist. At least 3 healthy inspections establish an RSSI baseline; 2 consecutive healthy inspections without a sighting flag absence. No people estimates before calibration.</string>
+    <string name="update_title">Software updates</string>
+    <string name="update_current_version">Current version: %1$s</string>
+    <string name="check_update">Check for updates</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_latest">You have the latest version</string>
+    <string name="update_available">New version %1$s available</string>
+    <string name="update_download">Download update</string>
+    <string name="update_progress">Downloading: %1$d%%</string>
+    <string name="update_verified">Integrity, package, version and signing certificate verified</string>
+    <string name="update_install">Install update (keep data)</string>
+    <string name="update_network_note">GitHub is contacted only when you check or download. Cinema, asset and inspection data are never uploaded.</string>
+    <string name="update_keeps_data">Android confirms updates with the same package and signature. Existing data stays in place; no uninstall is needed.</string>
+    <string name="update_wait_scan">Finish the inspection before checking or installing updates.</string>
+    <string name="update_network_error">Cannot reach the update server. Check your connection and retry. Inspections remain available offline.</string>
+    <string name="update_invalid_error">Package or update metadata verification failed. Installation stopped; check again.</string>
+    <string name="update_signature_error">The update signature differs from this app. Contact the publisher. Do not uninstall or clear data.</string>
+    <string name="update_storage_error">Not enough storage. Free some space and download again.</string>
+    <string name="update_install_permission">To install, allow CinemaWatch to install apps in system settings, then return and retry.</string>
+    <string name="update_release_page">Open GitHub releases</string>
 </resources>

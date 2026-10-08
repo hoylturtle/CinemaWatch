@@ -26,8 +26,10 @@ class FirstRunTest {
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
         // Connected-test cleanup uninstalls the app, so copy synthetic evidence before cleanup.
-        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("mkdir -p /sdcard/cinemawatch-ui; cp ${dir.absolutePath}/$name.png /sdcard/cinemawatch-ui/$name.png").use { descriptor ->
-            android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
+        listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.absolutePath}/$name.png /sdcard/cinemawatch-ui/$name.png").forEach { command ->
+            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command).use { descriptor ->
+                android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
+            }
         }
     }
     @After fun captureFinalScreen() { shot("final-screen") }
