@@ -29,6 +29,13 @@ class AssetAndImportTest {
         assertEquals(setOf(asset.id), repo.dao.allBindings().map { it.assetId }.toSet())
         assertEquals(2, repo.dao.allBindings().size)
     }
+    @Test fun bleAddressesDoNotUseWifiMulticastBitRules() = runBlocking {
+        val zone = repo.createCinemaWithHalls("Cinema", 1, "Hall")
+        val asset = repo.createAsset(zone, "BLE sensor", true, "BLE", "D7:12:34:56:78:90")
+        assertEquals("D7:12:34:56:78:90", repo.dao.allBindings().single().address)
+        try { repo.addBinding(asset.id, "WIFI", "D7:12:34:56:78:90", true); fail() } catch (_: InvalidRadioAddressException) { }
+        assertEquals(1, repo.dao.allBindings().size)
+    }
     @Test fun invalidAddressAndDuplicateCannotLeaveGhostAssets() = runBlocking {
         val zone = repo.createCinemaWithHalls("Cinema", 1, "Hall")
         try { repo.createAsset(zone, "Bad", true, "WIFI", "not a mac"); fail() } catch (_: InvalidRadioAddressException) { }

@@ -146,7 +146,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         val request = state.value.request ?: return
         if (!state.value.running || SystemClock.elapsedRealtime() - startedElapsed >= request.seconds * 1000L) return
         val kind = observation.kind.name
-        val address = runCatching { RadioAddress.normalize(observation.mac) }.getOrNull() ?: run { window.discard(); return }
+        val address = runCatching { RadioAddress.normalize(observation.mac, kind) }.getOrNull() ?: run { window.discard(); return }
         if (kind == "WIFI" && observation.fresh && (wifiCacheAt == Long.MIN_VALUE || SystemClock.elapsedRealtime() - wifiCacheAt > 1000)) refreshWifiTimes()
         val binding = bindings.firstOrNull { it.radio == kind && it.address == address }
         val fresh = if (kind == "WIFI") freshWifi(observation) else true
@@ -165,7 +165,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         }
         val key = "$kind:$address"
         val old = live[key]
-        val vendor = if (kind == "BLE" && MacUtil.isLocallyAdministered(address)) null else RadioDb.vendorForMac(address)
+        val vendor = if (kind == "BLE" && observation.facts.addressType != "Public") null else RadioDb.vendorForMac(address)
         val company = observation.manufacturerId?.let { RadioDb.company(it) }
         // A cached null is still a completed classification. Do not rerun catalog matching on every packet.
         val sig = if (old != null) old.signatureClass else if (live.size >= 512) null else withContext(Dispatchers.Default) { classify(observation, vendor) }
@@ -203,7 +203,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
     private fun classify(o: Observation, vendor: String?): SignatureClass? {
         val sighting = Sighting(key = "${o.kind}:${o.mac}", kind = o.kind, mac = o.mac, name = o.name,
             rssi = o.rssi, rssiMin = o.rssi, rssiMax = o.rssi, channel = o.channel, frequencyMhz = o.frequencyMhz,
-            vendor = vendor, randomized = MacUtil.isRandomized(o.mac), hiddenSsid = o.hiddenSsid,
+            vendor = vendor, randomized = if (o.kind.name == "BLE") o.facts.addressType != "Public" else MacUtil.isRandomized(o.mac), hiddenSsid = o.hiddenSsid,
             serviceUuids = o.serviceUuids, manufacturerId = o.manufacturerId, manufacturerDataHex = o.manufacturerDataHex,
             rawHex = o.rawHex, extras = "", firstSeen = o.at, lastSeen = o.at, hitCount = 1, fleetIds = emptySet(),
             rssiHistory = emptyList(), presence = emptyList(), vendorIeOuis = o.vendorIeOuis, facts = o.facts)

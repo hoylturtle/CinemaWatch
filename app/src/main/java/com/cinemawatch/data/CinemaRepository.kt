@@ -5,12 +5,13 @@ import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 class DuplicateRadioException : IllegalArgumentException("Radio already registered")
-class InvalidRadioAddressException : IllegalArgumentException("Invalid unicast radio address")
+class InvalidRadioAddressException : IllegalArgumentException("Invalid radio address")
 
 object RadioAddress {
-    fun normalize(raw: String): String {
+    fun normalize(raw: String, radio: String = "WIFI"): String {
+        require(radio in setOf("WIFI", "BLE"))
         val hex = raw.trim().replace(":", "").replace("-", "").uppercase(java.util.Locale.ROOT)
-        if (!Regex("[0-9A-F]{12}").matches(hex) || hex in setOf("000000000000", "FFFFFFFFFFFF", "020000000000") || hex.take(2).toInt(16) and 1 != 0) throw InvalidRadioAddressException()
+        if (!Regex("[0-9A-F]{12}").matches(hex) || hex in setOf("000000000000", "FFFFFFFFFFFF", "020000000000") || (radio == "WIFI" && hex.take(2).toInt(16) and 1 != 0)) throw InvalidRadioAddressException()
         return hex.chunked(2).joinToString(":")
     }
 }
@@ -49,7 +50,7 @@ class CinemaRepository(val database: CinemaDatabase) {
     }
     suspend fun addBinding(assetId: String, radio: String, address: String, authorized: Boolean) = database.withTransaction {
         require(authorized && dao.asset(assetId)?.authorized == true && radio in setOf("WIFI", "BLE"))
-        val normalized = RadioAddress.normalize(address)
+        val normalized = RadioAddress.normalize(address, radio)
         if (dao.allBindings().any { it.radio == radio && it.address == normalized }) throw DuplicateRadioException()
         dao.insertBinding(RadioBinding(UUID.randomUUID().toString(), assetId, radio, normalized))
     }
