@@ -25,8 +25,16 @@ class FirstRunTest {
         val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bitmap.recycle()
+        // Connected-test cleanup uninstalls the app, so copy synthetic evidence before cleanup.
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("mkdir -p /sdcard/cinemawatch-ui; cp ${dir.absolutePath}/$name.png /sdcard/cinemawatch-ui/$name.png").use { descriptor ->
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
+        }
     }
     @After fun captureFinalScreen() { shot("final-screen") }
+    private fun waitForToast(id: Int) {
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(id)).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(id)).fetchSemanticsNodes().isEmpty() }
+    }
     @Before fun cleanDatabase() {
         runBlocking { app.repository.dao.clear() }
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.setup)).fetchSemanticsNodes().isNotEmpty() }
@@ -48,6 +56,8 @@ class FirstRunTest {
         compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.awaiting_binding)).fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
         compose.waitUntil(15000) { compose.onAllNodesWithTag("asset-name").fetchSemanticsNodes().isEmpty() }
+        waitForToast(R.string.asset_created)
+        shot("asset-before-binding")
         compose.onNodeWithText(text(R.string.bind_signal)).assertIsEnabled()
         compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
         compose.onNodeWithTag("radio-address", useUnmergedTree = true).performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
@@ -55,6 +65,7 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.save)).performClick()
         compose.waitUntil(15000) { runBlocking { app.repository.dao.allBindings().size == 1 } }
         compose.waitUntil(15000) { compose.onAllNodesWithTag("radio-address").fetchSemanticsNodes().isEmpty() }
+        waitForToast(R.string.binding_saved)
         shot("assets-with-binding")
         compose.onNodeWithTag("create-asset").performScrollTo().performClick()
         compose.onNodeWithTag("asset-name").performTextInput("Duplicate")
