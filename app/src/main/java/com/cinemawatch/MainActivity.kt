@@ -498,7 +498,7 @@ private val Muted = Color(0xFF99AFBF)
         }, confirmButton = { TextButton(onClick = { hunt = null }) { Text(stringResource(R.string.close)) } })
     }
     if (reset) ConfirmDialog(R.string.reset_title, R.string.reset_note, { reset = false }) {
-        scope.launch { runCatching { dao.clear() }.onSuccess { reset = false; zoneId = "" }.onFailure { error = R.string.error_save } }
+        scope.launch { runCatching { dao.clear(); withContext(Dispatchers.IO) { val plans = File(context.filesDir, "plans"); if (plans.exists()) check(plans.deleteRecursively()) } }.onSuccess { reset = false; floorPlan = false; zoneId = "" }.onFailure { error = R.string.error_save } }
     }
     if (logic) AlertDialog(onDismissRequest = { logic = false }, title = { Text(stringResource(R.string.signal_logic)) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) { Text(stringResource(R.string.signal_logic_summary)) }
