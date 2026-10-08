@@ -66,6 +66,8 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
         compose.waitUntil(15000) { compose.onAllNodesWithTag("asset-name").fetchSemanticsNodes().isEmpty() }
         waitForToast(R.string.asset_created)
+        compose.onNodeWithTag("main-list").performScrollToNode(hasText("Rear wall / rack A"))
+        compose.onNodeWithText("Rear wall / rack A").assertIsDisplayed()
         shot("asset-before-binding")
         compose.onNodeWithText(text(R.string.bind_signal)).assertIsEnabled()
         compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
@@ -102,8 +104,6 @@ class FirstRunTest {
         compose.onNodeWithTag("preview-${session.id}").performScrollTo().performClick()
         compose.onNodeWithTag("report-preview").assertExists()
         compose.onNodeWithText(text(R.string.report_title)).assertIsDisplayed()
-        compose.onNodeWithTag("report-list").performScrollToNode(hasText("Rear wall / rack A"))
-        compose.onNodeWithText("Rear wall / rack A").assertIsDisplayed()
         shot("report-preview")
         compose.onNodeWithTag("report-list").performScrollToNode(hasText(text(R.string.report_groups)))
         compose.onNodeWithText(text(R.string.group_access_point), substring = true).assertExists()
