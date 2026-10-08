@@ -1,0 +1,260 @@
+{
+  "commit": "5379a2049c351c2483f7f106ca68d5d6d5f00e64",
+  "files": [
+    {
+      "path": "fieldwatch-core/src/main/assets/lookups/radiodb.bin",
+      "upstream_path": "app/src/main/assets/lookups/radiodb.bin",
+      "git_blob_sha": "d7285674dbe23e1d0ce39e434629aba5fb1b8cc2"
+    },
+    {
+      "path": "fieldwatch-core/src/main/assets/lookups/radiodb.txt",
+      "upstream_path": "app/src/main/assets/lookups/radiodb.txt",
+      "git_blob_sha": "9797ea633788582c7cd59a1389c085045cbd3d60"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/AdvPayloadDecoder.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/AdvPayloadDecoder.kt",
+      "git_blob_sha": "afe79391d1bfc4463a8149a7668f972ae736080c"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/AircraftTrail.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/AircraftTrail.kt",
+      "git_blob_sha": "afcd26a8ac452281ad26248324ef010267a6ea03"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ApVendorOuis.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/ApVendorOuis.kt",
+      "git_blob_sha": "c362dbedf10ceb7068d28e4d50c45346d7a2a59c"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CatalogDecodes.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/CatalogDecodes.kt",
+      "git_blob_sha": "2209c70d9be111f8e66ea565d70826cdfd63388b"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ClassOutline.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/ClassOutline.kt",
+      "git_blob_sha": "d1b90f85266623ab765902c6d1022ad1d611dfc3"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CodDecoder.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/CodDecoder.kt",
+      "git_blob_sha": "42c57207bbbad23d546168b2e2426e2aa82d7bdd"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CsvCells.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/CsvCells.kt",
+      "git_blob_sha": "9a21377afec07bd409bf96b978ecf9b40df8dee7"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Cta2063.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Cta2063.kt",
+      "git_blob_sha": "d7b326af192ed84849cdfcb989c4259331bfd6ef"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DebriefPrompt.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DebriefPrompt.kt",
+      "git_blob_sha": "a77aec0719a850dd5da8558e5ca0d3370748e602"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DebriefReport.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DebriefReport.kt",
+      "git_blob_sha": "8597a3ecd485bd476874cfe6ab375bf27695460d"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DefaultCatalog.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DefaultCatalog.kt",
+      "git_blob_sha": "2dfe0ed856e8572bbc26090e434c54b9b567d169"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceDetailPrompt.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DeviceDetailPrompt.kt",
+      "git_blob_sha": "6a9738729f763bb7fe1e41282c535eb082758ed6"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceDetailText.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DeviceDetailText.kt",
+      "git_blob_sha": "13e55ef91a33bbb049d5264af41105dd7c6e70c8"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceExplain.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/DeviceExplain.kt",
+      "git_blob_sha": "65c92990fd6f24b9803f429c84d1720878d6f7a7"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FastPair.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/FastPair.kt",
+      "git_blob_sha": "e8ea9a7295096c8eb31f5b3e0f06d4f279a3ed09"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FastPairModels.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/FastPairModels.kt",
+      "git_blob_sha": "18ef41ff249229aeecbc1a404266ad426aa4d56e"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FieldwatchDisclaimer.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/FieldwatchDisclaimer.kt",
+      "git_blob_sha": "a66666875dd83b2420bb0a4539aaace406352dff"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FilterEngine.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/FilterEngine.kt",
+      "git_blob_sha": "36101309dc98dd6d7c002e85598b9c5610190539"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Geo.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Geo.kt",
+      "git_blob_sha": "140a59b89891de6401b67d2185f2379736692b38"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/GeoExport.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/GeoExport.kt",
+      "git_blob_sha": "52a2b6cba7ef9b749e4dc4854fa3a87f761351e9"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Hunt.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Hunt.kt",
+      "git_blob_sha": "c5bbda7e5a29ea9e9077bdb79d016c78d7625d7f"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/LogReplay.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/LogReplay.kt",
+      "git_blob_sha": "052152bbe2982a0ea0d9c718a525bec5adb7cf8e"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Models.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Models.kt",
+      "git_blob_sha": "e918af7bf3b03269609bf792cbbed98fd88bc61f"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/OpenDroneId.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/OpenDroneId.kt",
+      "git_blob_sha": "bf2cd1c314a4f7c2d40e8f02ef8665392a7ae181"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/OuiLookup.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/OuiLookup.kt",
+      "git_blob_sha": "7243fc18e2f3d4dc97c62332495d1a00849aa00b"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/PairingFlood.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/PairingFlood.kt",
+      "git_blob_sha": "b385572b74d0974c149c372693f05dfa892776a4"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/PayloadLocation.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/PayloadLocation.kt",
+      "git_blob_sha": "bcbe54468ee9eb58e1aa1a82b6ae0bd1fb3fff73"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadarPlot.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/RadarPlot.kt",
+      "git_blob_sha": "44a8a0e27c7e4c0dfec6ad1c5899f3228b59ec0e"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioBookmarks.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/RadioBookmarks.kt",
+      "git_blob_sha": "6f91e550f41c1198d116fa50fa7a53f839a5c3f0"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioDb.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/RadioDb.kt",
+      "git_blob_sha": "bbbaad29b1e0f7f436a03ad474573a5d9ab36f21"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioFacts.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/RadioFacts.kt",
+      "git_blob_sha": "f9476d74f7f7b116ede48c9cf725858df9382b84"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Rssi.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Rssi.kt",
+      "git_blob_sha": "f5170a6350d353bd3a3eece945c685fcb582116c"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ScanStatus.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/ScanStatus.kt",
+      "git_blob_sha": "a8d870f7113a5bd959674ae78178d30755a65510"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SettingsExchange.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SettingsExchange.kt",
+      "git_blob_sha": "d3e7b5ae997c404705d5ce50974d994a27aa2c06"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureCandidates.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SignatureCandidates.kt",
+      "git_blob_sha": "89fc80cae3fc930ffe77918316ba1f386e91245f"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureEngine.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SignatureEngine.kt",
+      "git_blob_sha": "ed299b39e9cb68647aa6cc57854d2cfdfbf86e7a"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureExchange.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SignatureExchange.kt",
+      "git_blob_sha": "50fd38c3edfa41b29028388940dd411fe65f1d61"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureFieldDecoder.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SignatureFieldDecoder.kt",
+      "git_blob_sha": "68e2f1d75bcc21d541281dec802d6aeb4c9f177b"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Sit.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/Sit.kt",
+      "git_blob_sha": "39881b50ad6f09a1bc8956707a094478e293c72a"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitDiff.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SitDiff.kt",
+      "git_blob_sha": "a85840754c465ff346d6e7b83ae8911dd7e26554"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitDiffPrompt.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SitDiffPrompt.kt",
+      "git_blob_sha": "674587d4ec1afbee99891436ed1a30d0b48f77eb"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitExport.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SitExport.kt",
+      "git_blob_sha": "86d956a831236393e690e16b39d494910c161921"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitPathPlot.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/SitPathPlot.kt",
+      "git_blob_sha": "53a215bb7a0cb65392ff9a822ffe500d657e4e17"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/TakPublish.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/TakPublish.kt",
+      "git_blob_sha": "5fb80b43e003224ca00c994249cac88b612d422b"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/WifiBeaconFlood.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/domain/WifiBeaconFlood.kt",
+      "git_blob_sha": "078992fa96572b06669b20d4ec62bffd18a6ae0e"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/BleAdParser.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/radio/BleAdParser.kt",
+      "git_blob_sha": "a51e02a2c8deb85302cd5a285fa4775fdafae406"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/BleRadio.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/radio/BleRadio.kt",
+      "git_blob_sha": "06331ce40ae9035593bfe28f3cdd55b8efea2647"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/WifiIeParser.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/radio/WifiIeParser.kt",
+      "git_blob_sha": "428735f59e64e19f045ea58b6eaa28a59bc0a119"
+    },
+    {
+      "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/WifiRadio.kt",
+      "upstream_path": "app/src/main/java/app/fieldwatch/radio/WifiRadio.kt",
+      "git_blob_sha": "290c27eba7b1d0c41fb654f07116406aa16a443c"
+    }
+  ]
+}
