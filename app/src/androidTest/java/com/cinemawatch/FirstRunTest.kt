@@ -88,7 +88,10 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.dashboard)).performClick()
         compose.onNodeWithText(text(R.string.demo)).performScrollTo().performClick()
         compose.waitUntil(10000) { app.scanner.state.value.running }
-        compose.onNodeWithTag("group-ACCESS_POINT").performScrollTo().assertIsDisplayed()
+        compose.waitUntil(10000) { app.scanner.state.value.live.isNotEmpty() }
+        compose.onNodeWithTag("main-list").performScrollToNode(hasTestTag("group-ACCESS_POINT"))
+        compose.onNodeWithTag("group-ACCESS_POINT").assertIsDisplayed()
+        shot("fieldwatch-groups")
         compose.onNodeWithTag("group-ACCESS_POINT").performClick()
         compose.onNodeWithTag("group-ACCESS_POINT").performClick()
         compose.waitUntil(40000) { !app.scanner.state.value.running && !app.scanner.state.value.saving }

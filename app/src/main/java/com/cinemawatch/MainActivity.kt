@@ -171,7 +171,7 @@ private val Muted = Color(0xFF99AFBF)
             }
         }
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).testTag("main-list"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.Theaters, null, tint = Mint, modifier = Modifier.size(28.dp))
