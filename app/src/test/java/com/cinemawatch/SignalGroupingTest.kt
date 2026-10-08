@@ -14,7 +14,9 @@ class SignalGroupingTest {
         assertEquals(SignalGroup.IPHONE, g.group); assertEquals("LOW", g.confidence)
     }
     @Test fun wifiRolesIncludeHotspotsAndUnknownBleStaysUnknown() {
-        assertEquals(SignalGroup.ACCESS_POINT, SignalGrouping.guess("WIFI", "Cinema", "TP-Link", null, null).group)
+        val router = SignalGrouping.guess("WIFI", "Cinema", "TP-Link", null, null)
+        assertEquals(SignalGroup.TP_LINK, router.group)
+        assertTrue(SignalGrouping.memberships("WIFI", router, emptySet()).containsAll(setOf(SignalGroup.TP_LINK, SignalGroup.ACCESS_POINT)))
         assertEquals(SignalGroup.UNKNOWN, SignalGrouping.guess("BLE", "", null, null, null).group)
     }
     @Test fun companyCluesIdentifyEcosystemNotPhoneModel() {
