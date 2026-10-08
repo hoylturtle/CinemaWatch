@@ -11,6 +11,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import org.junit.Rule
+import org.junit.After
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +27,14 @@ import java.util.zip.ZipOutputStream
 @RunWith(AndroidJUnit4::class)
 class FloorPlanTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @After fun capturePlanScreen() { runCatching {
+        val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
+        val bitmap = compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
+        File(dir, "plan-screen.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.path}/plan-screen.png /sdcard/cinemawatch-ui/plan-screen.png").forEach { command ->
+            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command).use { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
+        }
+    } }
     @Test fun marksAnAssetOnThePlanAndReopensStoredCoordinates() {
         val app = compose.activity.application as CinemaApp
         val zoneId = runBlocking { app.repository.dao.clear(); app.repository.createCinemaWithHalls("Plan test", 1, "Hall") }
@@ -32,6 +43,7 @@ class FloorPlanTest {
         val asset = runBlocking { app.repository.createAsset(zoneId, "Plan projector", true, location = "Rack A") }
         val store = FloorPlanStore(compose.activity, cinema.id)
         store.sketch(zones)
+        compose.waitUntil(10000) { compose.onAllNodesWithText("Plan test · Hall 1").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
         compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.floor_plan)))
         compose.onNodeWithText(compose.activity.getString(R.string.floor_plan)).performClick()
