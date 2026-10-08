@@ -20,6 +20,12 @@ class PlanGeometryTest {
         assertTrue(moved.vertices.all { it.x in 0f..1f && it.y in 0f..1f })
         assertEquals(PlanGeometry.area(points), PlanGeometry.area(moved.vertices), .0001f)
     }
+    @Test fun wallsCanBeSelectedAlongAnySegment() {
+        val points = listOf(PlanPoint(.1f,.1f), PlanPoint(.8f,.1f), PlanPoint(.8f,.8f))
+        assertTrue(PlanGeometry.near(points, PlanPoint(.2f,.11f), .025f))
+        assertTrue(PlanGeometry.near(points, PlanPoint(.79f,.7f), .025f))
+        assertFalse(PlanGeometry.near(points, PlanPoint(.4f,.6f), .025f))
+    }
     @Test fun gridAndRightAngleSnapCanBeDisabled() {
         assertEquals(PlanPoint(.4f,.2f), PlanGeometry.snap(PlanPoint(.409f,.29f), PlanPoint(.2f,.2f), true))
         assertEquals(PlanPoint(.409f,.29f), PlanGeometry.snap(PlanPoint(.409f,.29f), PlanPoint(.2f,.2f), false))

@@ -187,7 +187,7 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                     return PlanPoint(((point.x - size.width / 2 - pan.x) / zoom / w + .5f).coerceIn(0f, 1f), ((point.y - size.height / 2 - pan.y) / zoom / h + .5f).coerceIn(0f, 1f))
                 }
                 fun hit(p: PlanPoint): PlanPin? = pins.asReversed().firstOrNull { pin ->
-                    if (pin.target.startsWith("zone:")) PlanGeometry.contains(PlanGeometry.outline(pin), p) else kotlin.math.hypot((pin.x - p.x).toDouble(), (pin.y - p.y).toDouble()) < .035 / zoom
+                    if (pin.target.startsWith("zone:")) PlanGeometry.contains(PlanGeometry.outline(pin), p) else if (pin.target.startsWith("wall:") || pin.target.startsWith("door:")) PlanGeometry.near(PlanGeometry.outline(pin), p, .025f / zoom) else kotlin.math.hypot((pin.x - p.x).toDouble(), (pin.y - p.y).toDouble()) < .035 / zoom
                 }
                 Canvas(Modifier.fillMaxWidth().weight(1f).testTag("floor-plan-image")
                     .pointerInput(tool, busy, ratio) {
@@ -217,7 +217,7 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                     }
                     .pointerInput(tool, busy, ratio) {
                         if (tool != PlanTool.SELECT || busy) return@pointerInput
-                        detectDragGestures(onDragStart = { at -> selected = hit(local(at, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat())))?.target; dragging = pins }, onDragCancel = { dragging?.let { pins = it }; dragging = null }, onDragEnd = { dragging?.let { if (pins != it) commit(pins, it) }; dragging = null }) { change, amount ->
+                        detectDragGestures(onDragStart = { at -> selected = hit(local(at, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat())))?.target ?: selected; dragging = pins }, onDragCancel = { dragging?.let { pins = it }; dragging = null }, onDragEnd = { dragging?.let { if (pins != it) commit(pins, it) }; dragging = null }) { change, amount ->
                             change.consume(); val (w, h) = metrics(androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()))
                             pins = pins.map { if (it.target == selected) PlanGeometry.move(it, amount.x / zoom / w, amount.y / zoom / h) else it }
                         }

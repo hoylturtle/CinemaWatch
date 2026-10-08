@@ -20,6 +20,11 @@ object PlanGeometry {
         val y = dy.coerceIn(-points.minOf { it.y }, 1 - points.maxOf { it.y })
         return pin.copy(x = pin.x + x, y = pin.y + y, vertices = pin.vertices.map { PlanPoint(it.x + x, it.y + y) })
     }
+    fun near(points: List<PlanPoint>, point: PlanPoint, tolerance: Float): Boolean = points.zipWithNext().any { (a, b) ->
+        val dx = b.x - a.x; val dy = b.y - a.y; val length = dx * dx + dy * dy
+        val t = if (length == 0f) 0f else (((point.x - a.x) * dx + (point.y - a.y) * dy) / length).coerceIn(0f, 1f)
+        hypot((point.x - a.x - t * dx).toDouble(), (point.y - a.y - t * dy).toDouble()) <= tolerance
+    }
     fun contains(points: List<PlanPoint>, p: PlanPoint): Boolean {
         if (points.size < 3) return false
         var inside = false; var j = points.lastIndex
