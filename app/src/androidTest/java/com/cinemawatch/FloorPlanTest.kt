@@ -5,7 +5,12 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.cinemawatch.data.Zone
+import com.cinemawatch.data.*
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import org.junit.Rule
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +21,23 @@ import java.util.zip.ZipOutputStream
 
 @RunWith(AndroidJUnit4::class)
 class FloorPlanTest {
+    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @Test fun marksAnAssetOnThePlanAndReopensStoredCoordinates() {
+        val cinema = Cinema(UUID.randomUUID().toString(), "Plan test")
+        val zone = Zone("zone-test", cinema.id, "Hall 1")
+        val asset = CinemaAsset("asset-test", zone.id, "Plan projector", location = "Rack A")
+        val store = FloorPlanStore(compose.activity, cinema.id)
+        store.sketch(listOf(zone))
+        compose.activity.setContent { MaterialTheme { FloorPlanDialog(cinema, listOf(zone), listOf(asset), {}, { name -> Zone(UUID.randomUUID().toString(), cinema.id, name) }) } }
+        compose.waitUntil(10000) { compose.onAllNodesWithTag("floor-plan-image").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText("Plan projector").performScrollTo().performClick()
+        compose.onNodeWithTag("floor-plan-image").performScrollTo().performTouchInput { click(center) }
+        compose.waitUntil(10000) { store.pins().any { it.target == "asset:asset-test" } }
+        val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:asset-test" }
+        assertEquals(.5f, marker.x, .02f); assertEquals(.5f, marker.y, .02f)
+        store.image.parentFile?.deleteRecursively()
+    }
+
     @Test fun importsPdfJpgAndCdrPreviewAndPersistsManualGeometry() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val cinema = UUID.randomUUID().toString()
@@ -30,10 +52,11 @@ class FloorPlanTest {
         try { store.save(listOf(PlanPin("asset:a", Float.NaN, .5f))); fail() } catch (_: IllegalArgumentException) { }
         assertEquals(pins, store.pins())
         val pdf = File(context.cacheDir, "plan-test.pdf")
-        PdfDocument().use { doc ->
+        val doc = PdfDocument()
+        try {
             doc.startPage(PdfDocument.PageInfo.Builder(300, 200, 1).create()).also { page -> page.canvas.drawColor(android.graphics.Color.WHITE); doc.finishPage(page) }
             pdf.outputStream().use { doc.writeTo(it) }
-        }
+        } finally { doc.close() }
         store.import(Uri.fromFile(pdf), 1); assertTrue(store.image.length() > 0); assertTrue(store.pins().isEmpty())
         val before = store.image.readBytes()
         try { store.import(Uri.fromFile(pdf), 2); fail() } catch (_: IllegalArgumentException) { }
