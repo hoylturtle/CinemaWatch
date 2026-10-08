@@ -4,6 +4,32 @@
 状态：源码审计已完成；原版 Android 构建尝试被环境阻断，**未证明原版构建成功**。
 Issue #1 的“Original upstream builds successfully”验收条件仍未满足；在补齐完整 checkout 和构建证据前，不进入 scanner refactor 或产品层开发，不开始 Issue #3，不合并 main。
 
+## 2026-10-08 更新：原始 Wrapper JAR 已恢复
+
+此节为最新状态；前文 2026-10-07 的缺失与失败记录保留为历史证据。
+
+- 使用 GitHub Connector 的 fetch_file **encoding=base64** 读取固定 commit 中的原始二进制，Base64 解码为字节；没有把 JAR 作为 UTF-8 解码，也没有重新生成/编译 JAR。
+- 已安装到 `/workspace/Fieldwatch/gradle/wrapper/gradle-wrapper.jar`。
+- 大小：43583 bytes。
+- Git blob SHA-1：`a4b76b9530d66f5e68d973ea569d8e19de379189`，与固定 commit 完全一致。
+- SHA-256：`2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046`。
+- file/stat/unzip -l 检查正常；Python ZipFile.testzip() 返回 None，存在 org/gradle/wrapper/GradleWrapperMain.class，共 33 个 ZIP entries。
+- 首次恢复后 Wrapper 能启动，但默认 /home/agent/.gradle 不在可写路径，无法创建 distribution lock。
+- 将 GRADLE_USER_HOME 指向 /workspace/.gradle-fieldwatch 后重试 assembleDebug，已进入 Gradle 8.11.1 distribution 下载阶段。显式设置 JVM 使用环境 proxy:8080 后重试仍失败：
+  `java.net.SocketException: Operation not permitted`，exit 1。
+- proxy 可解析为 172.31.9.61；Python socket 检查也返回 Operation not permitted。因此无法仅凭 curl 的“Could not connect to server”认定代理服务未启动，当前已实证执行沙箱阻止网络 socket。
+- 当前复现命令：
+
+```sh
+cd /workspace/Fieldwatch
+GRADLE_USER_HOME=/workspace/.gradle-fieldwatch bash ./gradlew \
+  -Dhttps.proxyHost=proxy -Dhttps.proxyPort=8080 \
+  -Dhttp.proxyHost=proxy -Dhttp.proxyPort=8080 \
+  assembleDebug --stacktrace
+```
+
+JAR 缺失问题已解决；当前构建阻断转为执行网络权限、未下载 Gradle distribution、未配置 SDK，且 radiodb.bin / launcher PNG 尚未恢复。仍无源码编译或测试成功证据，不开始产品改造。JAR 只恢复在独立上游本地审计目录；CinemaWatch 本次仅更新本报告。
+
 ## 1. 唯一上游基线与审计范围
 
 - 上游：https://github.com/OffGridPete/Fieldwatch
