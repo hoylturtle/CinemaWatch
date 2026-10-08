@@ -1,40 +1,108 @@
 package com.cinemawatch
 
+import android.graphics.Bitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Rule
-import org.junit.Test
+import androidx.test.espresso.Espresso.closeSoftKeyboard
+import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import org.junit.*
 import org.junit.runner.RunWith
+import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class FirstRunTest {
-    @get:Rule val compose=createAndroidComposeRule<MainActivity>()
-    @Test fun chineseSetupDemoAndPersistedHistory() {
-        compose.onNodeWithText(compose.activity.getString(R.string.setup)).performClick()
-        compose.waitUntil(30000) { compose.onAllNodesWithTag("cinema-name").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("cinema-name").performTextInput("星光影城")
-        compose.onNodeWithTag("zone-name").performTextInput("一號廳")
-        compose.onNodeWithText(compose.activity.getString(R.string.save)).performClick()
-        compose.waitUntil(10000) { compose.onAllNodesWithText("星光影城 · 一號廳").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText(compose.activity.getString(R.string.demo)).performClick()
-        compose.waitUntil(10000) { compose.onAllNodesWithText(compose.activity.getString(R.string.demo_note)).fetchSemanticsNodes().isNotEmpty() }
-        compose.waitUntil(40000) { !(compose.activity.application as CinemaApp).scanner.state.value.running && !(compose.activity.application as CinemaApp).scanner.state.value.saving }
-        compose.onNodeWithText(compose.activity.getString(R.string.reports)).performClick()
-        compose.onNodeWithText("一號廳").assertIsDisplayed()
-        compose.onNodeWithText(compose.activity.getString(R.string.calibration_pending)).assertIsDisplayed()
-        compose.onNodeWithText(compose.activity.getString(R.string.demo_note)).assertIsDisplayed()
-        compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
+    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    private val app get() = compose.activity.application as CinemaApp
+    private fun text(id: Int) = compose.activity.getString(id)
+    private fun shot(name: String) {
+        compose.waitForIdle()
+        val bitmap = compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
+        val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
+        File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        bitmap.recycle()
+        // Connected-test cleanup uninstalls the app, so copy synthetic evidence before cleanup.
+        InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand("mkdir -p /sdcard/cinemawatch-ui; cp ${dir.absolutePath}/$name.png /sdcard/cinemawatch-ui/$name.png").use { descriptor ->
+            android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() }
+        }
+    }
+    @After fun captureFinalScreen() { shot("final-screen") }
+    private fun waitForToast(id: Int) {
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(id)).fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(id)).fetchSemanticsNodes().isEmpty() }
+    }
+    @Before fun cleanDatabase() {
+        runBlocking { app.repository.dao.clear() }
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.setup)).fetchSemanticsNodes().isNotEmpty() }
+    }
+    @Test fun bulkSetupManualAssetBindingDemoPreviewAndLanguagePersistence() {
+        compose.onNodeWithText(text(R.string.setup)).performClick()
+        compose.onNodeWithTag("cinema-name").performTextInput("Cinema Test")
+        compose.onNodeWithTag("hall-count").performTextReplacement("2")
+        compose.onNodeWithTag("hall-prefix").performTextReplacement("Hall")
+        compose.onNodeWithText(text(R.string.save)).performClick()
+        compose.waitUntil(15000) { runBlocking { app.repository.dao.zones().first().size == 2 } }
+        compose.onNodeWithText(text(R.string.assets)).performClick()
+        compose.onNodeWithTag("create-asset").performClick()
+        compose.onNodeWithTag("asset-name").performTextInput("Projector 1")
+        compose.onNodeWithText(text(R.string.save)).assertIsNotEnabled()
+        compose.onNodeWithTag("authorization").performScrollTo().performClick()
+        compose.onNodeWithText(text(R.string.save)).performClick()
+        compose.waitUntil(15000) { runBlocking { app.repository.dao.assets().first().size == 1 } }
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.awaiting_binding)).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
+        compose.waitUntil(15000) { compose.onAllNodesWithTag("asset-name").fetchSemanticsNodes().isEmpty() }
+        waitForToast(R.string.asset_created)
+        shot("asset-before-binding")
+        compose.onNodeWithText(text(R.string.bind_signal)).assertIsEnabled()
+        compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
+        compose.onNodeWithTag("radio-address", useUnmergedTree = true).performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
+        compose.onNodeWithTag("authorization").performScrollTo().performClick()
+        compose.onNodeWithText(text(R.string.save)).performClick()
+        compose.waitUntil(15000) { runBlocking { app.repository.dao.allBindings().size == 1 } }
+        compose.waitUntil(15000) { compose.onAllNodesWithTag("radio-address").fetchSemanticsNodes().isEmpty() }
+        waitForToast(R.string.binding_saved)
+        shot("assets-with-binding")
+        compose.onNodeWithTag("create-asset").performScrollTo().performClick()
+        compose.onNodeWithTag("asset-name").performTextInput("Duplicate")
+        closeSoftKeyboard()
+        shot("manual-form")
+        compose.onNodeWithTag("radio-address", useUnmergedTree = true).performScrollTo().performTextInput("AA:BB:CC:DD:EE:00")
+        compose.onNodeWithTag("authorization").performScrollTo().performClick()
+        compose.onNodeWithText(text(R.string.save)).performClick()
+        compose.waitUntil(15000) { compose.onAllNodesWithText(text(R.string.duplicate_asset)).fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText(text(R.string.close)).performClick()
+        compose.onNodeWithText(text(R.string.cancel)).performClick()
+        Assert.assertEquals(1, runBlocking { app.repository.dao.assets().first().size })
+        compose.onNodeWithText(text(R.string.dashboard)).performClick()
+        compose.onNodeWithText(text(R.string.demo)).performScrollTo().performClick()
+        compose.waitUntil(10000) { app.scanner.state.value.running }
+        compose.waitUntil(40000) { !app.scanner.state.value.running && !app.scanner.state.value.saving }
+        val session = runBlocking { app.repository.dao.sessions().first().single() }
+        compose.onNodeWithText(text(R.string.reports)).performClick()
+        compose.onNodeWithTag("preview-${session.id}").performScrollTo().performClick()
+        compose.onNodeWithTag("report-preview").assertExists()
+        compose.onNodeWithText(text(R.string.report_title)).assertIsDisplayed()
+        shot("report-preview")
+        compose.onNodeWithTag("report-list").performScrollToNode(hasText(text(R.string.report_groups)))
+        compose.onNodeWithText(text(R.string.group_access_point), substring = true).assertExists()
+        shot("report-groups")
+        compose.onNodeWithText(text(R.string.close)).performClick()
+        compose.onNodeWithText(text(R.string.settings)).performClick()
         listOf("简体中文" to "设置", "繁體中文" to "設定", "English" to "Settings").forEach { (choice, expected) ->
-            compose.onNodeWithText(choice).performClick()
+            compose.onNodeWithText(choice).performScrollTo().performClick()
             compose.waitUntil(15000) { compose.onAllNodesWithText(expected).fetchSemanticsNodes().isNotEmpty() }
             compose.onNodeWithText(expected).assertIsDisplayed()
         }
-        compose.onNodeWithText("简体中文").performClick()
+        compose.onNodeWithText("简体中文").performScrollTo().performClick()
         compose.waitUntil(15000) { compose.onAllNodesWithText("设置").fetchSemanticsNodes().isNotEmpty() }
         compose.activityRule.scenario.recreate()
         compose.waitUntil(15000) { compose.onAllNodesWithText("设置").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("设置").assertIsDisplayed()
-        org.junit.Assert.assertEquals("zh-Hans", androidx.appcompat.app.AppCompatDelegate.getApplicationLocales().toLanguageTags())
+        Assert.assertEquals("zh-Hans", AppCompatDelegate.getApplicationLocales().toLanguageTags())
+        shot("settings-simplified")
     }
 }

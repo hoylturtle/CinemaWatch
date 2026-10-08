@@ -31,7 +31,7 @@ class PersistenceTest {
         repo.register(zone.id,"影院感測器","BLE","AA:BB:CC:DD:EE:FF",true)
         val asset=repo.dao.assets().first().single()
         assertNotEquals("AA:BB:CC:DD:EE:FF",asset.id)
-        try { repo.register(zone.id,"重複綁定","BLE","AA:BB:CC:DD:EE:FF",true);fail() } catch (_:android.database.sqlite.SQLiteConstraintException) { }
+        try { repo.register(zone.id,"重複綁定","BLE","AA:BB:CC:DD:EE:FF",true);fail() } catch (_:DuplicateRadioException) { }
         assertEquals(1,repo.dao.assets().first().size)
     }
     @Test fun aggregateSchemaHasNoRawRadioColumnsAndSurvivesReopen() = runBlocking<Unit> {
