@@ -47,11 +47,25 @@ class FloorPlanTest {
         compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
         compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.floor_plan)))
         compose.onNodeWithText(compose.activity.getString(R.string.floor_plan)).performClick()
-        compose.waitUntil(10000) { compose.onAllNodesWithTag("plan-scroll").fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithTag("plan-scroll").performTouchInput { swipeUp() }
+        compose.waitUntil(10000) { compose.onAllNodesWithTag("floor-plan-image").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("plan-tool-ASSET").performScrollTo().performClick()
         compose.onNodeWithText("Plan projector").performScrollTo().performClick()
-        compose.onNodeWithTag("floor-plan-image").performScrollTo().performTouchInput { click(center) }
+        compose.onNodeWithTag("floor-plan-image").performTouchInput { click(center) }
         compose.waitUntil(10000) { store.pins().any { it.target == "asset:${asset.id}" } }
+        compose.onNodeWithTag("plan-tool-ROOM").performScrollTo().performClick()
+        compose.onNodeWithTag("floor-plan-image").performTouchInput {
+            click(androidx.compose.ui.geometry.Offset(width * .3f, height * .35f))
+            click(androidx.compose.ui.geometry.Offset(width * .65f, height * .35f))
+            click(androidx.compose.ui.geometry.Offset(width * .65f, height * .65f))
+            click(androidx.compose.ui.geometry.Offset(width * .3f, height * .65f))
+        }
+        compose.onNodeWithTag("plan-finish").performClick()
+        compose.onNodeWithText("Hall 1").performClick()
+        compose.waitUntil(10000) { store.pins().any { it.target == "zone:$zoneId" && it.vertices.size == 4 } }
+        compose.onNodeWithTag("plan-undo").performClick()
+        compose.waitUntil(10000) { store.pins().single { it.target == "zone:$zoneId" }.vertices.isEmpty() }
+        compose.onNodeWithTag("plan-redo").performClick()
+        compose.waitUntil(10000) { store.pins().single { it.target == "zone:$zoneId" }.vertices.size == 4 }
         val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:${asset.id}" }
         assertEquals(.5f, marker.x, .02f); assertEquals(.5f, marker.y, .02f)
         store.image.parentFile?.deleteRecursively()
