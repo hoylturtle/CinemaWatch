@@ -18,3 +18,5 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 run_test UpgradeVerifyTest
 run_test FirstRunTest
 run_test UpdatesUiTest
+
+run_test FloorPlanTest

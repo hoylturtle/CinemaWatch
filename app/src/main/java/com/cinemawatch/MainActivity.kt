@@ -105,6 +105,7 @@ private val Muted = Color(0xFF99AFBF)
     val zone = zones.find { it.id == zoneId } ?: zones.firstOrNull()
     val cinema = cinemas.find { it.id == zone?.cinemaId }
     val commonZoneNames = listOf(R.string.zone_lobby, R.string.zone_corridor, R.string.zone_office, R.string.zone_projection).map { stringResource(it) }
+    var floorPlan by remember { mutableStateOf(false) }
     var createCinema by remember { mutableStateOf(false) }
     var createZone by remember { mutableStateOf(false) }
     var chooseZone by remember { mutableStateOf(false) }
@@ -302,9 +303,12 @@ private val Muted = Color(0xFF99AFBF)
                                 Text(asset.name, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                                 StatusChip(if (bindings.none { it.assetId == asset.id }) "UNBOUND" else last?.status ?: "PENDING")
                             }
+                            Text(zones.find { it.id == asset.zoneId }?.name.orEmpty(), color = Muted)
+                            if (asset.location.isNotBlank()) Text(asset.location, color = Muted)
+                            if (asset.notes.isNotBlank()) Text(asset.notes, color = Muted, fontSize = 12.sp)
                             Text(last?.medianRssi?.let { "$it dBm" } ?: stringResource(R.string.no_signal), color = Muted)
                             bindings.filter { it.assetId == asset.id }.forEach { b -> Text("${b.radio} · …${b.address.takeLast(5)}", color = Muted, fontSize = 12.sp) }
-                            TextButton(onClick = { renameAsset = asset }, enabled = !busy) { Text(stringResource(R.string.rename_asset)) }
+                            TextButton(onClick = { renameAsset = asset }, enabled = !busy) { Text(stringResource(R.string.edit_asset_details)) }
                             Row {
                                 TextButton(onClick = { hunt = asset }, enabled = scan.running && bindings.any { it.assetId == asset.id }) { Text(stringResource(R.string.hunt)) }
                                 TextButton(onClick = { bindAsset = asset }, enabled = !assetSaving && !scan.saving && !scan.saveFailed) { Text(stringResource(R.string.bind_signal)) }
@@ -390,6 +394,7 @@ private val Muted = Color(0xFF99AFBF)
                             if (cinemas.isEmpty()) TextButton(onClick = { createCinema = true }) { Text(stringResource(R.string.setup)) }
                             else TextButton(onClick = { createZone = true }, enabled = !busy) { Text(stringResource(R.string.add_zone)) }
                             TextButton(onClick = { createCinema = true }, enabled = !busy) { Text(stringResource(R.string.setup)) }
+                            if (cinema != null) TextButton(onClick = { floorPlan = true }, enabled = !busy) { Text(stringResource(R.string.floor_plan)) }
                             if (cinema != null) TextButton(onClick = { bulkHalls = true }, enabled = !busy && !cinemaSaving) { Text(stringResource(R.string.batch_halls)) }
                             if (cinema != null) TextButton(onClick = {
                                 val selectedCinema = cinema
@@ -412,6 +417,7 @@ private val Muted = Color(0xFF99AFBF)
             item { Spacer(Modifier.height(8.dp)) }
         }
     }
+    if (floorPlan && cinema != null) FloorPlanDialog(cinema, zones.filter { it.cinemaId == cinema.id }, assets.filter { asset -> zones.any { it.id == asset.zoneId && it.cinemaId == cinema.id } }, { floorPlan = false }, { name -> app.repository.createZone(cinema.id, name) })
     if (createCinema) CinemaDialog(saving = cinemaSaving, onDismiss = { createCinema = false }) { name, count, prefix ->
         if (!cinemaSaving) scope.launch {
             cinemaSaving = true
@@ -444,31 +450,35 @@ private val Muted = Color(0xFF99AFBF)
         }
     } }
     fun savedAsset() { createAsset = false; bindAsset = null; register = null }
-    if (createAsset || bindAsset != null) ManualAssetDialog(bindAsset, assetSaving, { createAsset = false; bindAsset = null }) { name, kind, address ->
+    if (createAsset || bindAsset != null) ManualAssetDialog(bindAsset, assetSaving, { createAsset = false; bindAsset = null }, zoneName = zone?.name.orEmpty()) { name, kind, address, location, notes ->
         zone?.let { z -> if (!assetSaving) scope.launch {
             assetSaving = true
             runCatching {
                 val existing = bindAsset
-                if (existing == null) app.repository.createAsset(z.id, name, true, kind, address)
+                if (existing == null) app.repository.createAsset(z.id, name, true, kind, address, location, notes)
                 else app.repository.addBinding(existing.id, kind, address, true)
                 app.scanner.refreshAssets()
             }.onSuccess { savedAsset(); assetSaving = false; scope.launch { snackbar.showSnackbar(context.getString(if (address.isBlank()) R.string.asset_created else R.string.binding_saved)) } }.onFailure(::assetError)
             assetSaving = false
         } }
     }
-    register?.let { radio -> SignalBindingDialog(radio, assets.filter { it.zoneId == zone?.id }, assetSaving, { register = null }) { name, existing ->
+    register?.let { radio -> SignalBindingDialog(radio, assets.filter { it.zoneId == zone?.id }, assetSaving, { register = null }, zoneName = zone?.name.orEmpty()) { name, existing, location, notes ->
         zone?.let { z -> if (!assetSaving) scope.launch {
             assetSaving = true
             runCatching {
-                if (existing == null) app.repository.register(z.id, name, radio.kind, radio.address, true)
+                if (existing == null) app.repository.createAsset(z.id, name, true, radio.kind, radio.address, location, notes)
                 else app.repository.addBinding(existing, radio.kind, radio.address, true)
                 app.scanner.refreshAssets()
             }.onSuccess { savedAsset(); assetSaving = false; scope.launch { snackbar.showSnackbar(context.getString(R.string.binding_saved)) } }.onFailure(::assetError)
             assetSaving = false
         } }
     } }
-    renameAsset?.let { asset -> NameDialog(R.string.rename_asset, R.string.asset_name, { renameAsset = null }, initial = asset.name) { name ->
-        scope.launch { runCatching { app.repository.renameAsset(asset.id, name) }.onSuccess { renameAsset = null }.onFailure(::assetError) }
+    renameAsset?.let { asset -> AssetDetailsDialog(asset, assetSaving, { renameAsset = null }) { name, location, notes ->
+        if (!assetSaving) scope.launch {
+            assetSaving = true
+            runCatching { app.repository.updateAssetDetails(asset.id, name, location, notes) }.onSuccess { renameAsset = null }.onFailure(::assetError)
+            assetSaving = false
+        }
     } }
     delete?.let { asset -> ConfirmDialog(R.string.delete_asset_title, R.string.delete_asset_note, { delete = null }) {
         scope.launch { runCatching { dao.deleteAsset(asset.id) }.onSuccess { delete = null }.onFailure { error = R.string.error_save } }

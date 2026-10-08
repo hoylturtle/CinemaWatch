@@ -84,7 +84,7 @@
     <string name="healthy_sample">已收到两种无线来源；仍需现场校准</string>
     <string name="privacy_title">数据只留在影院</string>
     <string name="privacy_description">RF 纪录只保存区域、时间与汇总。未授权的 MAC、名称、原始载荷不写入数据库或导出档；不建立跨日顾客识别。</string>
-    <string name="version">CinemaWatch 0.4.0</string>
+    <string name="version">CinemaWatch 0.5.0</string>
     <string name="licenses">授权与署名</string>
     <string name="license_intro">扫描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授权；查表数据另受 IEEE 与 Bluetooth SIG 条款约束。</string>
     <string name="reset">清除本机数据</string>
@@ -241,4 +241,19 @@
     <string name="group_overview">%1$d 条无线信号 · %2$d 条类型未匹配 · %3$d 条多类型匹配</string>
     <string name="match_rules">匹配规则：%1$s</string>
     <string name="group_multi_note">一条信号可属于多个类型和生态；分类数量不能相加作为设备或人数。未匹配表示缺乏类型依据，不表示安全或危险。</string>
+    <string name="asset_location">具体位置（可选）</string>
+    <string name="asset_location_hint">例如：影厅 1 后墙左侧、机柜 A 第 2 层</string>
+    <string name="asset_notes">备注（可选）</string>
+    <string name="edit_asset_details">编辑资产信息</string>
+    <string name="floor_plan">影城平面图</string>
+    <string name="plan_note">本机保存。区域和资产位置由你标注，不会根据无线信号自动定位。每个影城保存一张图。</string>
+    <string name="plan_import">导入 PDF / JPG / PNG / CDR 预览</string>
+    <string name="plan_select">先选区域或资产，再点击图上位置；区域也可用两个角绘制矩形。</string>
+    <string name="plan_remove_pin">移除标注</string>
+    <string name="plan_replace_note">创建或替换平面图会清除这张图的标注，资产、区域和巡检记录仍保留。是否继续？</string>
+    <string name="plan_pdf_page">PDF 页码（导入前选择）</string>
+    <string name="plan_sketch">绘制简易平面图</string>
+    <string name="plan_draw_area">绘制区域矩形：点击两个对角</string>
+    <string name="plan_second_corner">请点击矩形的另一个对角。</string>
+    <string name="plan_import_error">无法处理或保存。请使用不超过 32 MB 的有效 PDF/JPG/PNG，检查 PDF 页码；CDR 仅支持内嵌 PNG 预览，没有预览请先导出 PDF/JPG。</string>
 </resources>
