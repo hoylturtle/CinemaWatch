@@ -1,0 +1,91 @@
+package com.cinemawatch
+
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfDocument
+import android.net.Uri
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.cinemawatch.data.*
+import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import org.junit.Rule
+import org.junit.After
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.*
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.File
+import java.util.UUID
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+
+@RunWith(AndroidJUnit4::class)
+class FloorPlanTest {
+    @get:Rule val compose = createAndroidComposeRule<MainActivity>()
+    @After fun capturePlanScreen() { runCatching {
+        val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
+        val bitmap = compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
+        File(dir, "plan-screen.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.path}/plan-screen.png /sdcard/cinemawatch-ui/plan-screen.png").forEach { command ->
+            InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command).use { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
+        }
+    } }
+    @Test fun marksAnAssetOnThePlanAndReopensStoredCoordinates() {
+        val app = compose.activity.application as CinemaApp
+        val zoneId = runBlocking { app.repository.dao.clear(); app.repository.createCinemaWithHalls("Plan test", 1, "Hall") }
+        val cinema = runBlocking { app.repository.dao.cinemas().first().single() }
+        val zones = runBlocking { app.repository.dao.zones().first() }
+        val asset = runBlocking { app.repository.createAsset(zoneId, "Plan projector", true, location = "Rack A") }
+        val store = FloorPlanStore(compose.activity, cinema.id)
+        store.sketch(zones)
+        compose.waitUntil(10000) { compose.onAllNodesWithText("Plan test · Hall 1").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
+        compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.floor_plan)))
+        compose.onNodeWithText(compose.activity.getString(R.string.floor_plan)).performClick()
+        compose.waitUntil(10000) { compose.onAllNodesWithTag("plan-scroll").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("plan-scroll").performTouchInput { swipeUp() }
+        compose.onNodeWithText("Plan projector").performScrollTo().performClick()
+        compose.onNodeWithTag("floor-plan-image").performScrollTo().performTouchInput { click(center) }
+        compose.waitUntil(10000) { store.pins().any { it.target == "asset:${asset.id}" } }
+        val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:${asset.id}" }
+        assertEquals(.5f, marker.x, .02f); assertEquals(.5f, marker.y, .02f)
+        store.image.parentFile?.deleteRecursively()
+    }
+
+    @Test fun importsPdfJpgAndCdrPreviewAndPersistsManualGeometry() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val cinema = UUID.randomUUID().toString()
+        val store = FloorPlanStore(context, cinema)
+        val jpg = File(context.cacheDir, "plan-test.jpg")
+        val bitmap = Bitmap.createBitmap(200, 100, Bitmap.Config.ARGB_8888)
+        jpg.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+        store.import(Uri.fromFile(jpg))
+        assertEquals(200, android.graphics.BitmapFactory.decodeFile(store.image.path).width)
+        val pins = listOf(PlanPin("asset:a", .2f, .4f), PlanPin("zone:z", .5f, .5f, .3f, .4f))
+        store.save(pins); assertEquals(pins, FloorPlanStore(context, cinema).pins())
+        try { store.save(listOf(PlanPin("asset:a", Float.NaN, .5f))); fail() } catch (_: IllegalArgumentException) { }
+        assertEquals(pins, store.pins())
+        val pdf = File(context.cacheDir, "plan-test.pdf")
+        val doc = PdfDocument()
+        try {
+            doc.startPage(PdfDocument.PageInfo.Builder(300, 200, 1).create()).also { page -> page.canvas.drawColor(android.graphics.Color.WHITE); doc.finishPage(page) }
+            pdf.outputStream().use { doc.writeTo(it) }
+        } finally { doc.close() }
+        store.import(Uri.fromFile(pdf), 1); assertTrue(store.image.length() > 0); assertTrue(store.pins().isEmpty())
+        val before = store.image.readBytes()
+        try { store.import(Uri.fromFile(pdf), 2); fail() } catch (_: IllegalArgumentException) { }
+        assertArrayEquals(before, store.image.readBytes())
+        val cdr = File(context.cacheDir, "plan-test.cdr")
+        ZipOutputStream(cdr.outputStream()).use { zip -> zip.putNextEntry(ZipEntry("metadata/thumbnails/thumbnail.png")); bitmap.compress(Bitmap.CompressFormat.PNG, 100, zip); zip.closeEntry() }
+        store.import(Uri.fromFile(cdr)); assertEquals(200, android.graphics.BitmapFactory.decodeFile(store.image.path).width)
+        store.sketch(listOf(Zone("z", cinema, "Lobby"), Zone("z2", cinema, "Hall 1")))
+        assertEquals(2, store.pins().size); assertTrue(store.pins().all { it.width > 0 && it.height > 0 })
+        bitmap.recycle(); jpg.delete(); pdf.delete(); cdr.delete()
+        store.image.parentFile?.deleteRecursively()
+    }
+}

@@ -29,6 +29,18 @@ class AssetAndImportTest {
         assertEquals(setOf(asset.id), repo.dao.allBindings().map { it.assetId }.toSet())
         assertEquals(2, repo.dao.allBindings().size)
     }
+    @Test fun assetDetailsEditPreservesIdentityAndBindingsAndEscapesCsv() = runBlocking {
+        val zone = repo.createCinemaWithHalls("Cinema", 1, "Hall")
+        val asset = repo.createAsset(zone, "Projector", true, "WIFI", "AA:BB:CC:DD:EE:00", "Rear wall", "Maintenance")
+        repo.updateAssetDetails(asset.id, "Projector A", "Rack, A", "Check \"power\"\nFriday")
+        val edited = repo.dao.asset(asset.id)!!
+        assertEquals("Rack, A", edited.location); assertEquals("Check \"power\"\nFriday", edited.notes)
+        assertEquals(asset.id, repo.dao.allBindings().single().assetId)
+        val session = Inspection(UUID.randomUUID().toString(), zone, "INSPECTION", 1000, 121000, 120, 0, 0, 1, 3, 30, 0, 0, true, true, false)
+        repo.save(session, listOf(AssetResult(session.id, asset.id, 121000, "NORMAL", -50, 2, 0, -50)))
+        val csv = ReportExport.csv(listOf(session), repo.dao.zones().first(), repo.dao.cinemas().first(), repo.dao.results().first(), listOf(edited))
+        assertTrue(csv.contains("Rack, A")); assertTrue(csv.contains("Friday")); assertEquals(1, HistoryImport.parse(csv).size)
+    }
     @Test fun bleAddressesDoNotUseWifiMulticastBitRules() = runBlocking {
         val zone = repo.createCinemaWithHalls("Cinema", 1, "Hall")
         val asset = repo.createAsset(zone, "BLE sensor", true, "BLE", "D7:12:34:56:78:90")
@@ -106,6 +118,28 @@ class AssetAndImportTest {
         try { repo.importHistory(old + "\nbroken,record"); fail() } catch (_: IllegalArgumentException) { }
         assertEquals(before, repo.dao.sessions().first().size)
     }
+    @Test fun versionTwoMigrationAddsEmptyDetailsWithoutChangingBindingsOrHistory() = runBlocking<Unit> {
+        val c = ApplicationProvider.getApplicationContext<Context>(); val name = "migration-v2.db"; c.deleteDatabase(name)
+        c.openOrCreateDatabase(name, 0, null).use { sqlite ->
+            javaClass.classLoader!!.getResourceAsStream("v1-schema.sql")!!.bufferedReader().useLines { lines -> lines.filter(String::isNotBlank).forEach { sqlite.execSQL(it) } }
+            sqlite.execSQL("ALTER TABLE sessions ADD COLUMN imported INTEGER NOT NULL DEFAULT 0")
+            sqlite.execSQL("ALTER TABLE sessions ADD COLUMN requestedSeconds INTEGER")
+            sqlite.execSQL("CREATE TABLE signal_groups (sessionId TEXT NOT NULL, groupCode TEXT NOT NULL, radio TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(sessionId, groupCode, radio), FOREIGN KEY(sessionId) REFERENCES sessions(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+            sqlite.execSQL("CREATE INDEX index_signal_groups_sessionId ON signal_groups (sessionId)")
+            sqlite.execSQL("INSERT INTO cinemas VALUES ('c','Old cinema')")
+            sqlite.execSQL("INSERT INTO zones VALUES ('z','c','Old hall')")
+            sqlite.execSQL("INSERT INTO assets VALUES ('a','z','Old projector',1)")
+            sqlite.execSQL("INSERT INTO bindings VALUES ('b','a','WIFI','AA:BB:CC:DD:EE:00')")
+            sqlite.execSQL("INSERT INTO sessions VALUES ('s','z','INSPECTION',1000,121000,120,2,4,1,3,30,0,0,1,1,0,NULL,NULL,NULL,'',0,120)")
+            sqlite.version = 2
+        }
+        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_2_3).build()
+        val old = upgraded.dao().asset("a")!!
+        assertEquals("", old.location); assertEquals("", old.notes); assertEquals("Old projector", old.name)
+        assertEquals("a", upgraded.dao().allBindings().single().assetId)
+        assertEquals(120, upgraded.dao().sessions().first().single().durationSeconds)
+        upgraded.close(); c.deleteDatabase(name)
+    }
     @Test fun versionOneMigrationPreservesCinemaAssetBindingAndHistory() = runBlocking<Unit> {
         val c = ApplicationProvider.getApplicationContext<Context>(); val name = "migration-v1.db"; c.deleteDatabase(name)
         c.openOrCreateDatabase(name, 0, null).use { sqlite ->
@@ -117,7 +151,7 @@ class AssetAndImportTest {
             sqlite.execSQL("INSERT INTO sessions VALUES ('s','z','INSPECTION',1000,121000,120,2,4,1,3,30,0,0,1,1,0,NULL,NULL,NULL,'')")
             sqlite.version = 1
         }
-        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_1_2).build()
+        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_1_2, CinemaDatabase.MIGRATION_2_3).build()
         assertEquals("Old projector", upgraded.dao().assets().first().single().name)
         assertEquals("AA:BB:CC:DD:EE:00", upgraded.dao().allBindings().single().address)
         assertEquals(120, upgraded.dao().sessions().first().single().durationSeconds)

@@ -84,7 +84,7 @@
     <string name="healthy_sample">Both radio sources received; field calibration still required</string>
     <string name="privacy_title">Data stays in the cinema</string>
     <string name="privacy_description">RF records save zone, time and aggregates only. Unauthorized MACs, names and raw payloads are excluded from the database and exports. No cross-day customer identification.</string>
-    <string name="version">CinemaWatch 0.4.0</string>
+    <string name="version">CinemaWatch 0.5.0</string>
     <string name="licenses">Licenses and attribution</string>
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>
@@ -241,4 +241,19 @@
     <string name="group_overview">%1$d radios · %2$d unmatched types · %3$d in multiple types</string>
     <string name="match_rules">Matched signatures: %1$s</string>
     <string name="group_multi_note">A radio may match multiple classes and ecosystems. Do not sum classes as devices or people. Unmatched means insufficient type evidence, not a safety verdict.</string>
+    <string name="asset_location">Exact location (optional)</string>
+    <string name="asset_location_hint">Example: Hall 1 rear wall, left; rack A, shelf 2</string>
+    <string name="asset_notes">Notes (optional)</string>
+    <string name="edit_asset_details">Edit asset details</string>
+    <string name="floor_plan">Cinema floor plan</string>
+    <string name="plan_note">Stored locally. You mark areas and assets; radio signals do not locate them. One plan per cinema.</string>
+    <string name="plan_import">Import PDF / JPG / PNG / CDR preview</string>
+    <string name="plan_select">Select an area or asset, then tap its position. Areas can also be drawn using two corners.</string>
+    <string name="plan_remove_pin">Remove marker</string>
+    <string name="plan_replace_note">Creating or replacing a plan clears its markers. Assets, areas and inspection records stay. Continue?</string>
+    <string name="plan_pdf_page">PDF page (choose before import)</string>
+    <string name="plan_sketch">Create a simple plan</string>
+    <string name="plan_draw_area">Draw area: tap two opposite corners</string>
+    <string name="plan_second_corner">Tap the opposite corner.</string>
+    <string name="plan_import_error">Could not process or save. Use a valid PDF/JPG/PNG up to 32 MB and check the page number. CDR requires an embedded PNG preview; otherwise export PDF/JPG first.</string>
 </resources>

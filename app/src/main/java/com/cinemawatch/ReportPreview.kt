@@ -80,7 +80,12 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
     appendLine("${c.getString(R.string.discarded_count)}: ${s.discarded}"); appendLine("${c.getString(R.string.dropped_count)}: ${s.dropped}")
     if (s.overran()) appendLine(c.getString(R.string.late_sample))
     appendLine(c.getString(if (s.wifiHealthy && s.bleHealthy && !s.overran()) R.string.healthy_sample else R.string.partial_sample))
-    results.filter { it.sessionId == s.id }.forEach { r -> appendLine("${assets.find { it.id == r.assetId }?.name.orEmpty()}: ${c.getString(statusLabel(r.status))}, RSSI ${r.medianRssi ?: "—"} dBm") }
+    results.filter { it.sessionId == s.id }.forEach { r ->
+        assets.find { it.id == r.assetId }?.let { asset ->
+            if (asset.location.isNotBlank()) appendLine("${c.getString(R.string.asset_location)}: ${asset.location}")
+            if (asset.notes.isNotBlank()) appendLine("${c.getString(R.string.asset_notes)}: ${asset.notes}")
+        }
+        appendLine("${assets.find { it.id == r.assetId }?.name.orEmpty()}: ${c.getString(statusLabel(r.status))}, RSSI ${r.medianRssi ?: "—"} dBm") }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -127,6 +132,10 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
             if (rows.isEmpty()) item { Text(stringResource(R.string.report_no_assets)) }
             items(rows, key = { it.assetId }) { r -> Panel {
                 Text(assets.find { it.id == r.assetId }?.name.orEmpty(), fontWeight = FontWeight.Bold); StatusChip(r.status)
+                assets.find { it.id == r.assetId }?.let { asset ->
+                    if (asset.location.isNotBlank()) Metric(R.string.asset_location, asset.location)
+                    if (asset.notes.isNotBlank()) Metric(R.string.asset_notes, asset.notes)
+                }
                 Metric(R.string.baseline_rssi, r.baselineRssi?.let { "$it dBm" } ?: stringResource(R.string.no_baseline))
                 Text("RSSI: ${r.medianRssi ?: "—"} dBm")
                 Metric(R.string.rssi_spread, "${r.spread} dBm"); Metric(R.string.miss_count, r.consecutiveMisses.toString())

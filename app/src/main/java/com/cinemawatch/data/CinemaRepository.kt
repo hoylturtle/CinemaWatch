@@ -58,13 +58,15 @@ class CinemaRepository(val database: CinemaDatabase) {
             }
         }
     }
-    suspend fun createZone(cinemaId: String, name: String) {
+    suspend fun createZone(cinemaId: String, name: String): Zone {
         require(name.isNotBlank())
-        dao.insertZone(Zone(UUID.randomUUID().toString(), cinemaId, name.trim().take(80)))
+        val zone = Zone(UUID.randomUUID().toString(), cinemaId, name.trim().take(80))
+        dao.insertZone(zone)
+        return zone
     }
-    suspend fun createAsset(zoneId: String, name: String, authorized: Boolean, radio: String = "WIFI", address: String = ""): CinemaAsset = database.withTransaction {
+    suspend fun createAsset(zoneId: String, name: String, authorized: Boolean, radio: String = "WIFI", address: String = "", location: String = "", notes: String = ""): CinemaAsset = database.withTransaction {
         require(authorized && name.isNotBlank()) { "Explicit asset authorization required" }
-        val asset = CinemaAsset(UUID.randomUUID().toString(), zoneId, name.trim().take(80), true)
+        val asset = CinemaAsset(UUID.randomUUID().toString(), zoneId, name.trim().take(80), true, location.trim().take(160), notes.trim().take(1000))
         dao.insertAsset(asset)
         if (address.isNotBlank()) addBinding(asset.id, radio, address, authorized)
         asset
@@ -78,6 +80,10 @@ class CinemaRepository(val database: CinemaDatabase) {
     suspend fun register(zoneId: String, name: String, radio: String, address: String, authorized: Boolean) = createAsset(zoneId, name, authorized, radio, address)
     suspend fun renameAsset(id: String, name: String) {
         require(name.isNotBlank()); dao.renameAsset(id, name.trim().take(80))
+    }
+    suspend fun updateAssetDetails(id: String, name: String, location: String, notes: String) {
+        require(name.isNotBlank() && dao.asset(id) != null)
+        dao.updateAssetDetails(id, name.trim().take(80), location.trim().take(160), notes.trim().take(1000))
     }
     suspend fun save(session: Inspection, results: List<AssetResult>, groups: List<SignalGroupCount> = emptyList()) = database.withTransaction {
         dao.insertSession(session); dao.insertResults(results); dao.insertGroups(groups)

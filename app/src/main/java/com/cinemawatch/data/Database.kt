@@ -13,7 +13,7 @@ data class Cinema(@PrimaryKey val id: String, val name: String)
 data class Zone(@PrimaryKey val id: String, val cinemaId: String, val name: String)
 
 @Entity(tableName = "assets", foreignKeys = [ForeignKey(entity = Zone::class, parentColumns = ["id"], childColumns = ["zoneId"], onDelete = ForeignKey.CASCADE)], indices = [Index("zoneId")])
-data class CinemaAsset(@PrimaryKey val id: String, val zoneId: String, val name: String, val authorized: Boolean = true)
+data class CinemaAsset(@PrimaryKey val id: String, val zoneId: String, val name: String, val authorized: Boolean = true, @ColumnInfo(defaultValue = "''") val location: String = "", @ColumnInfo(defaultValue = "''") val notes: String = "")
 
 /** One asset may have multiple registered radios. Address is evidence, never the asset ID. */
 @Entity(tableName = "bindings", foreignKeys = [ForeignKey(entity = CinemaAsset::class, parentColumns = ["id"], childColumns = ["assetId"], onDelete = ForeignKey.CASCADE)], indices = [Index("assetId"), Index(value = ["radio", "address"], unique = true)])
@@ -63,11 +63,12 @@ interface CinemaDao {
     @Insert suspend fun insertResults(values: List<AssetResult>)
     @Insert suspend fun insertGroups(values: List<SignalGroupCount>)
     @Query("UPDATE assets SET name = :name WHERE id = :id") suspend fun renameAsset(id: String, name: String)
+    @Query("UPDATE assets SET name = :name, location = :location, notes = :notes WHERE id = :id") suspend fun updateAssetDetails(id: String, name: String, location: String, notes: String)
     @Query("DELETE FROM assets WHERE id = :id") suspend fun deleteAsset(id: String)
     @Query("DELETE FROM cinemas") suspend fun clear()
 }
 
-@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class, SignalGroupCount::class], version = 2, exportSchema = false)
+@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class, SignalGroupCount::class], version = 3, exportSchema = false)
 abstract class CinemaDatabase : RoomDatabase() {
     abstract fun dao(): CinemaDao
     companion object {
@@ -79,6 +80,12 @@ abstract class CinemaDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_signal_groups_sessionId ON signal_groups (sessionId)")
             }
         }
-        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").addMigrations(MIGRATION_1_2).build()
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE assets ADD COLUMN location TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE assets ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
+            }
+        }
+        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
     }
 }

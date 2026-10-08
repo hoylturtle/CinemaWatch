@@ -56,6 +56,8 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.assets)).performClick()
         compose.onNodeWithTag("create-asset").performClick()
         compose.onNodeWithTag("asset-name").performTextInput("Projector 1")
+        compose.onNodeWithTag("asset-location").performScrollTo().performTextInput("Rear wall / rack A")
+        compose.onNodeWithTag("asset-notes").performScrollTo().performTextInput("Maintenance due Friday")
         compose.onNodeWithText(text(R.string.save)).assertIsNotEnabled()
         compose.onNodeWithTag("authorization").performScrollTo().performClick()
         compose.onNodeWithText(text(R.string.save)).performClick()
@@ -64,6 +66,8 @@ class FirstRunTest {
         compose.onNodeWithText(text(R.string.awaiting_binding)).assertIsDisplayed()
         compose.waitUntil(15000) { compose.onAllNodesWithTag("asset-name").fetchSemanticsNodes().isEmpty() }
         waitForToast(R.string.asset_created)
+        compose.onNodeWithTag("main-list").performScrollToNode(hasText("Rear wall / rack A"))
+        compose.onNodeWithText("Rear wall / rack A").assertIsDisplayed()
         shot("asset-before-binding")
         compose.onNodeWithText(text(R.string.bind_signal)).assertIsEnabled()
         compose.onNodeWithText(text(R.string.bind_signal)).performScrollTo().performClick()
