@@ -1,18 +1,18 @@
-name: Android preview APK
+name: Android build and signed updates
 on:
   push:
     branches: [main]
-    paths: ['app/**', 'fieldwatch-core/**', '*.gradle.kts', 'gradle/**', 'gradle.properties', '.github/workflows/android-preview.yml']
+    paths: ['app/**', 'fieldwatch-core/**', '*.gradle.kts', 'gradle/**', 'gradle.properties', '.github/**']
   pull_request:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: android-preview-release
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
-  preview:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -28,11 +28,16 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Install Android SDK
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-      - name: Build APK and verify unit tests
-        run: ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:testDebugUnitTest :fieldwatch-core:testDebugUnitTest
+      - name: Build older-version fixture
+        run: |
+          ./gradlew --no-daemon --max-workers=2 -PcinemaVersionCode=2 -PcinemaVersionName=upgrade-fixture :app:assembleDebug
+          mkdir -p build
+          cp app/build/outputs/apk/debug/app-debug.apk build/upgrade-fixture.apk
+      - name: Build current APK and verify unit tests
+        run: ./gradlew --no-daemon --max-workers=2 :app:assembleDebug :app:assembleDebugAndroidTest :app:testDebugUnitTest :fieldwatch-core:testDebugUnitTest
       - name: Enable emulator acceleration
         run: sudo chmod a+rw /dev/kvm
-      - name: Verify Android interface
+      - name: Verify replacement install and Android interface
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -40,7 +45,7 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: 'ui_result=0; ./gradlew --no-daemon --max-workers=2 :app:connectedDebugAndroidTest || ui_result=$?; mkdir -p build/ui-screenshots; adb pull /sdcard/cinemawatch-ui build/ui-screenshots || true; exit "$ui_result"'
+          script: bash .github/scripts/verify-android.sh
       - name: Save verification reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -50,42 +55,68 @@ jobs:
             app/build/reports
             app/build/test-results
             fieldwatch-core/build/test-results
-            app/build/outputs/androidTest-results
+            build/upgrade-check
             build/ui-screenshots
           if-no-files-found: ignore
-      - name: Prepare APK and checksum
-        run: |
-          mkdir -p artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk artifacts/CinemaWatch-0.2.0-preview.apk
-          cd artifacts
-          sha256sum CinemaWatch-0.2.0-preview.apk > SHA256.txt
-      - name: Save downloadable build artifact
+      - name: Save candidate for the signing job
         uses: actions/upload-artifact@v4
         with:
-          name: CinemaWatch-0.2.0-preview
-          path: artifacts/*
-          if-no-files-found: error
-          retention-days: 30
-      - name: Publish preview APK
-        if: github.event_name != 'pull_request'
+          name: verified-candidate-not-for-installation
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+  publish:
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      HAS_SIGNING: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require persistent signing material
+        if: env.HAS_SIGNING != 'true'
+        run: |
+          echo 'Persistent signing is not configured; no APK or update feed will be published.' >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+      - uses: actions/download-artifact@v4
+        with:
+          name: verified-candidate-not-for-installation
+          path: candidate
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
+      - run: sdkmanager "build-tools;35.0.0"
+      - name: Sign and verify fixed certificate
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: python3 .github/scripts/sign-release.py
+      - name: Publish signed APK and update feed
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          version=$(python3 -c 'import json; print(json.load(open(".github/release-config.json"))["versionName"])')
+          tag="v${version}-preview"
           cat > release-notes.md <<'NOTES'
-          CinemaWatch 0.2.0 Android 预览版（Android 10+）
+          CinemaWatch 固定签名预览版，Android 10+。
 
-          支持简体中文、繁体中文、英文。默认跟随系统，不支持的语言回退简体中文，设置中可手动切换。
+          原包名 com.cinemawatch；简体中文、繁体中文、英文。设置中点击检查更新，下载后验证包名、版本、SHA-256 与签名，再由系统确认覆盖安装。影院、资产、绑定与历史留在本地。
 
-          独立创建资产、绑定多个授权信号、按影厅数批量创建区域、原生报告预览、CSV 历史导入、信号预判分组与扫描质量检查。支持三语言，本地优先，不把信号数量当人数。
+          0.1 / 0.2 使用过不同的临时签名，无法覆盖升级。本次先在旧版导出需要的历史再一次性换装；从 0.3 起保留同一签名，后续原位升级。不要安装 Actions 的临时测试候选包。
 
-          APK 使用调试签名，新包名与 0.1 版并存以保留旧数据。先在旧版导出 CSV，再在新版设置导入；不会导入授权无线绑定或恢复校准。发布工作流验证单元测试和模拟器界面流程，现场无线扫描仍需真机验证。信号逻辑详见 docs/SIGNAL_DETECTION_LOGIC.md。
+          CI 验证同签名的旧版本测试安装 → 覆盖安装 → 数据与语言保留，并验证资产、报告、语言和更新界面。现场 RF 扫描仍需真机验证。
 
-          Fieldwatch v1.1.21，固定 source commit 5379a2049c351c2483f7f106ca68d5d6d5f00e64；保留 MIT License 与 attribution。
+          Fieldwatch v1.1.21，固定 5379a2049c351c2483f7f106ca68d5d6d5f00e64，保留 MIT License 与 attribution。
           NOTES
-          if gh release view v0.2.0-preview >/dev/null 2>&1; then
-            gh release upload v0.2.0-preview artifacts/* --clobber
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" artifacts/* --clobber
           else
-            gh release create v0.2.0-preview artifacts/* --target "$GITHUB_SHA" --prerelease --title "CinemaWatch 0.2.0 三语言预览版" --notes-file release-notes.md
+            gh release create "$tag" artifacts/* --target "$GITHUB_SHA" --prerelease --title "CinemaWatch ${version} 固定签名更新版" --notes-file release-notes.md
           fi
-

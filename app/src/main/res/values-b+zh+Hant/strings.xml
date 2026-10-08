@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">CinemaWatch 新預覽版</string>
+    <string name="app_name">CinemaWatch</string>
     <string name="channel_name">影院無線巡檢</string>
     <string name="scanning_notification">正在採樣；只保存授權資產與彙總資料</string>
     <string name="stop_notification">停止並儲存</string>
@@ -84,7 +84,7 @@
     <string name="healthy_sample">已收到兩種無線來源；仍需現場校準</string>
     <string name="privacy_title">資料只留在影院</string>
     <string name="privacy_description">RF 紀錄只保存區域、時間與彙總。未授權的 MAC、名稱、原始載荷不寫入資料庫或匯出檔；不建立跨日顧客識別。</string>
-    <string name="version">版本 0.2.0 · Android 10 以上</string>
+    <string name="version">CinemaWatch 0.3.0</string>
     <string name="licenses">授權與署名</string>
     <string name="license_intro">掃描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授權；查表資料另受 IEEE 與 Bluetooth SIG 條款約束。</string>
     <string name="reset">清除本機資料</string>
@@ -183,4 +183,23 @@
     <string name="seconds_format">%1$d 秒</string>
     <string name="signal_logic">瞭解信號檢測邏輯</string>
     <string name="signal_logic_summary">Wi-Fi 接收 AP／熱點廣播，BLE 接收附近廣播；只接受有效 RSSI 與新鮮掃描，會話內按無線地址去重。分組用名稱、廠商與 Signature 線索，不能證明型號或歸屬。授權資產使用獨立 ID；未授權標識結束即清除，只保存分組數量與採樣質量。至少 3 次有效巡檢建立 RSSI 基準；連續 2 次健康巡檢未見才提示缺失。未校準前不估算人數。</string>
+    <string name="update_title">軟體更新</string>
+    <string name="update_current_version">目前版本：%1$s</string>
+    <string name="check_update">檢查更新</string>
+    <string name="update_checking">正在檢查…</string>
+    <string name="update_latest">目前已是最新版本</string>
+    <string name="update_available">發現新版本 %1$s</string>
+    <string name="update_download">下載更新</string>
+    <string name="update_progress">下載中：%1$d%%</string>
+    <string name="update_verified">安裝包已通過完整性、套件名稱、版本與簽章檢查</string>
+    <string name="update_install">覆蓋安裝（保留資料）</string>
+    <string name="update_network_note">只有你點擊檢查或下載時才連接 GitHub；影院、資產與巡檢資料不會上傳。</string>
+    <string name="update_keeps_data">同套件名稱、同簽章的更新由 Android 確認覆蓋安裝，保留原資料；不需解除安裝。</string>
+    <string name="update_wait_scan">巡檢結束後再檢查或安裝更新。</string>
+    <string name="update_network_error">無法連接更新伺服器，請檢查網路後重試；原有巡檢功能可離線使用。</string>
+    <string name="update_invalid_error">安裝包或更新資訊驗證失敗，已停止安裝，請重新檢查更新。</string>
+    <string name="update_signature_error">新版簽章與目前應用程式不同，不能覆蓋安裝。請聯絡發布者；不要解除安裝或清除資料。</string>
+    <string name="update_storage_error">空間不足，請釋放空間後重新下載。</string>
+    <string name="update_install_permission">如需安裝，請在系統設定中允許 CinemaWatch 安裝應用程式，再返回重試。</string>
+    <string name="update_release_page">開啟 GitHub 發布頁</string>
 </resources>

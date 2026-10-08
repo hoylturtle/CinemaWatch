@@ -344,6 +344,7 @@ private val Muted = Color(0xFF99AFBF)
                     }
                 }
                 3 -> {
+                    item { UpdateCard(app, busy) }
                     item {
                         Panel {
                             SectionTitle(R.string.language)
