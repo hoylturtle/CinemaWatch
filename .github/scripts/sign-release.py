@@ -12,7 +12,7 @@ key_dir = Path(os.environ['RUNNER_TEMP']) / 'cinemawatch-signing'
 key_dir.mkdir(mode=0o700, exist_ok=True)
 key = key_dir / 'release.p12'
 password = key_dir / 'password.txt'
-key.write_bytes(base64.b64decode(os.environ['ANDROID_KEYSTORE_BASE64'], validate=True))
+key.write_bytes(base64.b64decode(''.join(os.environ['ANDROID_KEYSTORE_BASE64'].split()), validate=True))
 password.write_text(os.environ['ANDROID_KEYSTORE_PASSWORD'])
 key.chmod(0o600); password.chmod(0o600)
 artifacts = Path('artifacts'); artifacts.mkdir(exist_ok=True)
