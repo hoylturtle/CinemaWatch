@@ -38,9 +38,10 @@ import kotlinx.coroutines.CancellationException
             try {
                 GithubUpdates.validateDownloaded(context, file, release)
                 val uri = FileProvider.getUriForFile(context, context.packageName + ".files", file)
-                context.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
-                    .setClipData(ClipData.newRawUri("CinemaWatch update", uri))
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                context.startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive").apply {
+                    clipData = ClipData.newRawUri("CinemaWatch update", uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                })
             } catch (e: CancellationException) { throw e }
             catch (e: Exception) { controller.reject((e as? UpdateException)?.reason ?: UpdateError.INVALID) }
             finally { installing = false }
