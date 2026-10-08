@@ -174,7 +174,7 @@ private val Muted = Color(0xFF99AFBF)
                     Icon(Icons.Outlined.Theaters, null, tint = Mint, modifier = Modifier.size(28.dp))
                     Spacer(Modifier.width(10.dp))
                     Text("CinemaWatch", fontSize = 26.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.weight(1f)); Text("0.2", color = Muted, fontSize = 13.sp)
+                    Spacer(Modifier.weight(1f)); Text(BuildConfig.VERSION_NAME, color = Muted, fontSize = 13.sp)
                 }
                 Text(stringResource(R.string.camera_subtitle), color = Muted, modifier = Modifier.padding(top = 6.dp))
             }

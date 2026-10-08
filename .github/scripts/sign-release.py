@@ -20,7 +20,7 @@ apk = artifacts / ('CinemaWatch-' + config['versionName'] + '.apk')
 tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/35.0.0'
 try:
     subprocess.run([str(tools/'apksigner'), 'sign', '--ks', str(key), '--ks-key-alias', 'cinemawatch',
-        '--ks-pass', 'file:' + str(password), '--key-pass', 'file:' + str(password), '--out', str(apk), 'candidate/app-debug.apk'], check=True)
+        '--ks-pass', 'file:' + str(password), '--out', str(apk), 'candidate/app-debug.apk'], check=True)
     verified = subprocess.check_output([str(tools/'apksigner'), 'verify', '--print-certs', str(apk)], text=True)
     certificate = re.search(r'certificate SHA-256 digest: ([0-9a-f]+)', verified).group(1)
     if certificate != config['signerSha256']:
