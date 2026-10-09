@@ -130,7 +130,7 @@ private fun groupGlyph(group: SignalGroup): ImageVector = when (group) {
                 RadioBadge(groupGlyph(group), accent)
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(assetName ?: radio.name.ifBlank { radio.address }, fontSize = 16.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold, color = RadioText, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(assetName ?: radio.address, fontSize = 16.sp, lineHeight = 18.sp, fontWeight = FontWeight.SemiBold, color = RadioText, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     val label = radio.signatureHits.firstOrNull { SignalGrouping.fromSignature(it.category) == group }?.name ?: stringResource(groupLabel(group))
                     Surface(color = accent.copy(alpha = .16f), shape = RoundedCornerShape(5.dp)) {
                         Text(label, color = accent, fontSize = 10.sp, lineHeight = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp))
@@ -138,7 +138,7 @@ private fun groupGlyph(group: SignalGroup): ImageVector = when (group) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(if (radio.kind == "WIFI") Icons.Outlined.Wifi else Icons.Outlined.Bluetooth, null, tint = RadioMuted, modifier = Modifier.size(12.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text(listOfNotNull(radio.vendor, radio.address).joinToString(" · "), fontFamily = FontFamily.Monospace, color = RadioMuted, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(listOfNotNull(radio.vendor, radio.name.takeIf { it.isNotBlank() }).distinct().joinToString(" · "), fontFamily = FontFamily.Monospace, color = RadioMuted, fontSize = 10.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 Spacer(Modifier.width(6.dp))
