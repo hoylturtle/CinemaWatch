@@ -84,7 +84,7 @@
     <string name="healthy_sample">已收到两种无线来源；仍需现场校准</string>
     <string name="privacy_title">数据只留在影院</string>
     <string name="privacy_description">RF 纪录只保存区域、时间与汇总。未授权的 MAC、名称、原始载荷不写入数据库或导出档；不建立跨日顾客识别。</string>
-    <string name="version">CinemaWatch 0.6.0</string>
+    <string name="version">CinemaWatch 0.6.1</string>
     <string name="licenses">授权与署名</string>
     <string name="license_intro">扫描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授权；查表数据另受 IEEE 与 Bluetooth SIG 条款约束。</string>
     <string name="reset">清除本机数据</string>

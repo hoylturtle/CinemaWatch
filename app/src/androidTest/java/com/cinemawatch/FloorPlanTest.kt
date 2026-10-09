@@ -27,11 +27,13 @@ import java.util.zip.ZipOutputStream
 @RunWith(AndroidJUnit4::class)
 class FloorPlanTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
-    @After fun capturePlanScreen() { runCatching {
+    @After fun capturePlanScreen() { saveScreen("plan-screen.png") }
+    private fun saveScreen(filename: String) { runCatching {
         val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
-        val bitmap = compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
-        File(dir, "plan-screen.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-        listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.path}/plan-screen.png /sdcard/cinemawatch-ui/plan-screen.png").forEach { command ->
+        compose.waitForIdle()
+        val bitmap = if (filename == "floor-plan-landscape.png") InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot() else compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
+        File(dir, filename).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.path}/$filename /sdcard/cinemawatch-ui/$filename").forEach { command ->
             InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command).use { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
         }
     } }
@@ -41,6 +43,7 @@ class FloorPlanTest {
         val cinema = runBlocking { app.repository.dao.cinemas().first().single() }
         val zones = runBlocking { app.repository.dao.zones().first() }
         val asset = runBlocking { app.repository.createAsset(zoneId, "Plan projector", true, location = "Rack A") }
+        val originalOrientation = compose.activity.requestedOrientation
         val store = FloorPlanStore(compose.activity, cinema.id)
         store.sketch(zones)
         compose.waitUntil(10000) { compose.onAllNodesWithText("Plan test · Hall 1").fetchSemanticsNodes().isNotEmpty() }
@@ -48,6 +51,24 @@ class FloorPlanTest {
         compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.floor_plan)))
         compose.onNodeWithText(compose.activity.getString(R.string.floor_plan)).performClick()
         compose.waitUntil(10000) { compose.onAllNodesWithTag("floor-plan-image").fetchSemanticsNodes().isNotEmpty() }
+        compose.waitUntil(10000) { compose.activity.resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE }
+        compose.onNodeWithTag("plan-tool-ROOM").performScrollTo().performClick()
+        val beforeGesture = store.pins()
+        compose.onNodeWithTag("floor-plan-image").performTouchInput {
+            down(0, androidx.compose.ui.geometry.Offset(width * .4f, height * .5f))
+            down(1, androidx.compose.ui.geometry.Offset(width * .6f, height * .5f))
+            for (step in 1..10) {
+                moveTo(0, androidx.compose.ui.geometry.Offset(width * (.4f - step * .01f), height * .5f))
+                moveTo(1, androidx.compose.ui.geometry.Offset(width * (.6f + step * .01f), height * .5f))
+                advanceEventTime(16)
+            }
+            up(0); up(1)
+        }
+        compose.onNodeWithTag("plan-zoom").assert(hasText("200%") or hasText("199%"))
+        assertEquals(beforeGesture, store.pins())
+        compose.onNodeWithTag("plan-finish").assertDoesNotExist()
+        compose.onNodeWithTag("plan-fit").performScrollTo().performClick()
+        compose.onNodeWithTag("plan-zoom").assertTextEquals("100%")
         compose.onNodeWithTag("plan-tool-ASSET").performScrollTo().performClick()
         compose.onNodeWithText("Plan projector").performScrollTo().performClick()
         compose.onNodeWithTag("floor-plan-image").performTouchInput { click(center) }
@@ -68,6 +89,9 @@ class FloorPlanTest {
         compose.waitUntil(10000) { store.pins().single { it.target == "zone:$zoneId" }.vertices.size == 4 }
         val marker = FloorPlanStore(compose.activity, cinema.id).pins().single { it.target == "asset:${asset.id}" }
         assertEquals(.5f, marker.x, .02f); assertEquals(.5f, marker.y, .02f)
+        saveScreen("floor-plan-landscape.png")
+        compose.onNodeWithText(compose.activity.getString(R.string.close)).performClick()
+        compose.waitUntil(10000) { compose.activity.requestedOrientation == originalOrientation }
         store.image.parentFile?.deleteRecursively()
     }
 

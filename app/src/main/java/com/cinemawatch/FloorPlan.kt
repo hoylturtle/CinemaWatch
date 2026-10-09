@@ -8,9 +8,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -125,6 +128,15 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
 
 @Composable internal fun FloorPlanDialog(cinema: Cinema, zones: List<Zone>, assets: List<CinemaAsset>, onDismiss: () -> Unit, onAddZone: suspend (String) -> Zone) {
     val context = LocalContext.current; val scope = rememberCoroutineScope()
+    val activity = remember(context) {
+        generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }
+            .filterIsInstance<android.app.Activity>().firstOrNull()
+    }
+    DisposableEffect(activity) {
+        val previous = activity?.requestedOrientation
+        activity?.requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        onDispose { if (previous != null) activity?.requestedOrientation = previous }
+    }
     val store = remember(cinema.id) { FloorPlanStore(context, cinema.id) }
     var bitmap by remember(cinema.id) { mutableStateOf<Bitmap?>(null) }
     var pins by remember(cinema.id) { mutableStateOf<List<PlanPin>>(emptyList()) }
@@ -154,7 +166,7 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
             busy = false
         }
     }
-    Dialog(onDismissRequest = { if (!busy) { draft = emptyList(); onDismiss() } }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(onDismissRequest = { if (!busy) { draft = emptyList(); onDismiss() } }, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Surface(Modifier.fillMaxSize().systemBarsPadding(), color = MaterialTheme.colorScheme.background) {
             Column(Modifier.fillMaxSize()) {
                 Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
@@ -172,14 +184,13 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                     TextButton(onClick = { val next = redo.last(); runCatching { store.save(next) }.onSuccess { undo = undo + listOf(pins); pins = next; redo = redo.dropLast(1) }.onFailure { error = true } }, enabled = !busy && redo.isNotEmpty() && draft.isEmpty(), modifier = Modifier.testTag("plan-redo")) { Text(stringResource(R.string.plan_redo)) }
                     FilterChip(snap, { snap = !snap }, label = { Text(stringResource(R.string.plan_snap)) })
                     TextButton(onClick = { zoom = (zoom / 1.25f).coerceAtLeast(.75f) }) { Text("−") }
-                    Text("${(zoom * 100).toInt()}%")
+                    Text("${(zoom * 100).toInt()}%", Modifier.testTag("plan-zoom"))
                     TextButton(onClick = { zoom = (zoom * 1.25f).coerceAtMost(5f) }) { Text("+") }
-                    TextButton(onClick = { zoom = 1f; pan = Offset.Zero }) { Text(stringResource(R.string.plan_fit)) }
+                    TextButton(onClick = { zoom = 1f; pan = Offset.Zero }, modifier = Modifier.testTag("plan-fit")) { Text(stringResource(R.string.plan_fit)) }
                 }
                 val hint = when (tool) { PlanTool.WALL -> R.string.plan_wall_hint; PlanTool.ROOM -> R.string.plan_room_hint; PlanTool.DOOR -> R.string.plan_door_hint; PlanTool.ASSET -> R.string.plan_asset_hint; PlanTool.PAN -> R.string.plan_pan_hint; else -> R.string.plan_select_hint }
                 Text(stringResource(hint), Modifier.padding(horizontal = 12.dp), style = MaterialTheme.typography.bodySmall)
                 if (error) Text(stringResource(R.string.plan_import_error), Modifier.padding(12.dp), color = MaterialTheme.colorScheme.error)
-                var dragging by remember { mutableStateOf<List<PlanPin>?>(null) }
                 val ratio = bitmap?.let { it.width.toFloat() / it.height } ?: 1.4f
                 fun metrics(size: androidx.compose.ui.geometry.Size): Pair<Float, Float> { val w = minOf(size.width * .94f, size.height * .94f * ratio); return w to w / ratio }
                 fun local(point: Offset, size: androidx.compose.ui.geometry.Size): PlanPoint {
@@ -189,37 +200,76 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                 fun hit(p: PlanPoint): PlanPin? = pins.asReversed().firstOrNull { pin ->
                     if (pin.target.startsWith("zone:")) PlanGeometry.contains(PlanGeometry.outline(pin), p) else if (pin.target.startsWith("wall:") || pin.target.startsWith("door:")) PlanGeometry.near(PlanGeometry.outline(pin), p, .025f / zoom) else kotlin.math.hypot((pin.x - p.x).toDouble(), (pin.y - p.y).toDouble()) < .035 / zoom
                 }
-                Canvas(Modifier.fillMaxWidth().weight(1f).testTag("floor-plan-image")
+                Row(Modifier.fillMaxWidth().weight(1f)) {
+                Column(Modifier.width(136.dp).fillMaxHeight().verticalScroll(rememberScrollState()).padding(horizontal = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    listOf(PlanTool.SELECT to R.string.plan_tool_select, PlanTool.PAN to R.string.plan_tool_pan, PlanTool.WALL to R.string.plan_tool_wall, PlanTool.ROOM to R.string.plan_tool_room, PlanTool.DOOR to R.string.plan_tool_door, PlanTool.ASSET to R.string.plan_tool_asset).forEach { (value, title) ->
+                        FilterChip(tool == value, { if (value == PlanTool.ASSET) pickerOpen = true else { tool = value; draft = emptyList(); selected = null } }, label = { Text(stringResource(title)) }, enabled = !busy, modifier = Modifier.fillMaxWidth().testTag("plan-tool-${value.name}"))
+                    }
+                }
+                Canvas(Modifier.weight(1f).fillMaxHeight().testTag("floor-plan-image")
                     .pointerInput(tool, busy, ratio) {
                         if (busy) return@pointerInput
-                        if (tool == PlanTool.PAN) detectTransformGestures { centroid, translation, scale, _ ->
-                            val next = (zoom * scale).coerceIn(.75f, 5f)
-                            val center = Offset(size.width / 2f, size.height / 2f)
-                            pan = centroid - center - (centroid - center - pan) * (next / zoom) + translation
-                            zoom = next
-                        }
-                        else detectTapGestures { at ->
-                            val size = androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()); val p = local(at, size)
-                            when (tool) {
-                                PlanTool.SELECT -> selected = hit(p)?.target
-                                PlanTool.ASSET -> selected?.takeIf { it.startsWith("asset:") }?.let { id -> commit(pins.filterNot { it.target == id } + PlanPin(id, p.x, p.y)) }
-                                PlanTool.ROOM, PlanTool.WALL, PlanTool.DOOR -> {
-                                    if (tool == PlanTool.ROOM && draft.size >= 3 && kotlin.math.hypot((p.x - draft.first().x).toDouble(), (p.y - draft.first().y).toDouble()) < .035 / zoom) finish()
-                                    else if (draft.size < 256) {
-                                        val point = PlanGeometry.snap(p, draft.lastOrNull(), snap)
-                                        if (draft.lastOrNull() != point) draft = draft + point
-                                        if (tool == PlanTool.DOOR && draft.size == 2) { commit(pins + PlanGeometry.shape("door:${java.util.UUID.randomUUID()}", draft)); draft = emptyList() }
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            val start = down.position
+                            val before = pins
+                            var moved = false
+                            var transformed = false
+                            var distance = Offset.Zero
+                            var target: String? = null
+                            do {
+                                val event = awaitPointerEvent()
+                                val pressed = event.changes.count { it.pressed }
+                                if (pressed >= 2 || transformed) {
+                                    if (!transformed) { pins = before; transformed = true }
+                                    if (pressed >= 2) {
+                                        val centroid = event.calculateCentroid(useCurrent = false)
+                                        val next = (zoom * event.calculateZoom()).coerceIn(.5f, 8f)
+                                        val center = Offset(size.width / 2f, size.height / 2f)
+                                        pan = centroid - center - (centroid - center - pan) * (next / zoom) + event.calculatePan()
+                                        zoom = next
+                                    }
+                                    event.changes.forEach { it.consume() }
+                                } else {
+                                    val change = event.changes.firstOrNull { it.id == down.id }
+                                    if (change != null && change.pressed) {
+                                        val amount = change.positionChange()
+                                        distance += amount
+                                        if (!moved && distance.getDistance() > viewConfiguration.touchSlop) {
+                                            moved = true
+                                            if (tool == PlanTool.SELECT) {
+                                                target = hit(local(start, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat())))?.target
+                                                selected = target
+                                            }
+                                        }
+                                        if (moved) {
+                                            if (tool == PlanTool.PAN) pan += amount
+                                            if (tool == PlanTool.SELECT && target != null) {
+                                                val (w, h) = metrics(androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()))
+                                                pins = before.map { if (it.target == target) PlanGeometry.move(it, distance.x / zoom / w, distance.y / zoom / h) else it }
+                                            }
+                                            change.consume()
+                                        }
                                     }
                                 }
-                                else -> Unit
+                            } while (event.changes.any { it.pressed })
+                            if (!transformed && moved && pins != before) commit(pins, before)
+                            if (!transformed && !moved) {
+                                val p = local(start, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()))
+                                when (tool) {
+                                    PlanTool.SELECT -> selected = hit(p)?.target
+                                    PlanTool.ASSET -> selected?.takeIf { it.startsWith("asset:") }?.let { id -> commit(pins.filterNot { it.target == id } + PlanPin(id, p.x, p.y)) }
+                                    PlanTool.ROOM, PlanTool.WALL, PlanTool.DOOR -> {
+                                        if (tool == PlanTool.ROOM && draft.size >= 3 && kotlin.math.hypot((p.x - draft.first().x).toDouble(), (p.y - draft.first().y).toDouble()) < .035 / zoom) finish()
+                                        else if (draft.size < 256) {
+                                            val point = PlanGeometry.snap(p, draft.lastOrNull(), snap)
+                                            if (draft.lastOrNull() != point) draft = draft + point
+                                            if (tool == PlanTool.DOOR && draft.size == 2) { commit(pins + PlanGeometry.shape("door:${java.util.UUID.randomUUID()}", draft)); draft = emptyList() }
+                                        }
+                                    }
+                                    else -> Unit
+                                }
                             }
-                        }
-                    }
-                    .pointerInput(tool, busy, ratio) {
-                        if (tool != PlanTool.SELECT || busy) return@pointerInput
-                        detectDragGestures(onDragStart = { at -> selected = hit(local(at, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat())))?.target ?: selected; dragging = pins }, onDragCancel = { dragging?.let { pins = it }; dragging = null }, onDragEnd = { dragging?.let { if (pins != it) commit(pins, it) }; dragging = null }) { change, amount ->
-                            change.consume(); val (w, h) = metrics(androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()))
-                            pins = pins.map { if (it.target == selected) PlanGeometry.move(it, amount.x / zoom / w, amount.y / zoom / h) else it }
                         }
                     }) {
                     val (w, h) = metrics(size)
@@ -241,10 +291,6 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                     }
                     draft.forEachIndexed { index, point -> val at = screen(point); drawCircle(Color(0xFF1AAFA0), 5.dp.toPx(), at); if (index > 0) drawLine(Color(0xFF1AAFA0), screen(draft[index - 1]), at, 4.dp.toPx()) }
                 }
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf(PlanTool.SELECT to R.string.plan_tool_select, PlanTool.PAN to R.string.plan_tool_pan, PlanTool.WALL to R.string.plan_tool_wall, PlanTool.ROOM to R.string.plan_tool_room, PlanTool.DOOR to R.string.plan_tool_door, PlanTool.ASSET to R.string.plan_tool_asset).forEach { (value, title) ->
-                        FilterChip(tool == value, { if (value == PlanTool.ASSET) pickerOpen = true else { tool = value; draft = emptyList(); selected = null } }, label = { Text(stringResource(title)) }, enabled = !busy, modifier = Modifier.testTag("plan-tool-${value.name}"))
-                    }
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     if (draft.isNotEmpty()) {
