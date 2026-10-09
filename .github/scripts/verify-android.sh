@@ -22,3 +22,5 @@ run_test UpdatesUiTest
 run_test FloorPlanTest
 
 run_test MaintenanceFlowTest
+
+run_test PhoneFlowTest

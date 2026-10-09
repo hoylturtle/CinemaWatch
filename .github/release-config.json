@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 10,
-  "versionName": "0.8.0",
+  "versionCode": 11,
+  "versionName": "0.9.0",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "新增影城资产巡检闭环：人工确认正常基线、异常待办、现场备注与照片、处理后复检自动关闭、平面图区域与设备联动、报告与导出处理记录。保留旧数据，固定签名覆盖升级。"
+  "notes": "新增多手机局域网采集验证：固定节点、授权 BLE 标签白名单、RSSI 对比、区域流向、现场已知位置核验及本地报告。仅实验标签，不代表顾客人数或真实顾客动线。保留资产数据与固定签名覆盖升级。"
 }
