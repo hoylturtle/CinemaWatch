@@ -71,7 +71,7 @@ class FlowTracker(private val targets: List<FlowTarget>, private val zones: Set<
             }
             FlowPresence(target.id, target.label, state.zone.takeIf { winner != null }, margin, evidence.size)
         }
-        last = FlowSnapshot(nodes.values.toList(),presence,signals,transitions.toList(),dwell.mapValues { it.value/1000 },truths.toList())
+        last = FlowSnapshot(nodes.values.map { it.copy(healthy=it.healthy && now-it.at in 0..10000) },presence,signals,transitions.toList(),dwell.mapValues { it.value/1000 },truths.toList())
         return last
     }
     @Synchronized fun snapshot() = last.copy(truths=truths.toList())

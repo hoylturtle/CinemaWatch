@@ -361,7 +361,6 @@ private val Muted = Color(0xFF99AFBF)
                 }
                 3 -> {
                     item { UpdateCard(app, busy) }
-                    item { Panel { Text(stringResource(R.string.flow_intro)); TextButton(onClick = { phoneFlowDialog = true }, enabled = !scan.running && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("phone-flow-open")) { Text(stringResource(R.string.flow_title)) } } }
                     item {
                         Panel {
                             SectionTitle(R.string.language)
@@ -375,6 +374,7 @@ private val Muted = Color(0xFF99AFBF)
                             }
                         }
                     }
+                    item { Panel { Text(stringResource(R.string.flow_intro)); TextButton(onClick = { phoneFlowDialog = true }, enabled = !scan.running && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("phone-flow-open")) { Text(stringResource(R.string.flow_title)) } } }
                     item {
                         Panel {
                             SectionTitle(R.string.privacy_title)
@@ -493,7 +493,7 @@ private val Muted = Color(0xFF99AFBF)
         }, confirmButton = { TextButton(onClick = { hunt = null }) { Text(stringResource(R.string.close)) } })
     }
     if (reset) ConfirmDialog(R.string.reset_title, R.string.reset_note, { reset = false }) {
-        scope.launch { runCatching { dao.clear(); withContext(Dispatchers.IO) { val plans = File(context.filesDir, "plans"); if (plans.exists()) check(plans.deleteRecursively()) } }.onSuccess { reset = false; floorPlan = false; zoneId = "" }.onFailure { error = R.string.error_save } }
+        scope.launch { runCatching { dao.clear(); app.phoneFlow.clearReports(); withContext(Dispatchers.IO) { val plans = File(context.filesDir, "plans"); if (plans.exists()) check(plans.deleteRecursively()) } }.onSuccess { reset = false; floorPlan = false; zoneId = "" }.onFailure { error = R.string.error_save } }
     }
     if (logic) AlertDialog(onDismissRequest = { logic = false }, title = { Text(stringResource(R.string.signal_logic)) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) { Text(stringResource(R.string.signal_logic_summary)) }

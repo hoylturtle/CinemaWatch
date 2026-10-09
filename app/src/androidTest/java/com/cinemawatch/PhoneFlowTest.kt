@@ -1,6 +1,10 @@
 package com.cinemawatch
 
 import android.graphics.Bitmap
+import android.app.NotificationManager
+import android.content.Intent
+import androidx.core.content.ContextCompat
+import com.cinemawatch.radio.ScanPermissions
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -30,10 +34,13 @@ class PhoneFlowTest {
             repo.createZone(cinema.id,"Corridor");repo.dao.zones().first()
         }
         val lobby=zones.first { it.name=="Lobby" }.id;val corridor=zones.first { it.name=="Corridor" }.id
+        ScanPermissions.required().forEach { InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(app.packageName,it) }
         runBlocking { withContext(Dispatchers.Main) {
             app.phoneFlow.prepareHost("Phone pilot",zones.associate { it.id to it.name },listOf("Authorized beacon" to "AA:BB:CC:DD:EE:01"),"Lobby → Corridor","Coordinator",lobby,0)
-            app.phoneFlow.begin()
+            ContextCompat.startForegroundService(compose.activity,Intent(compose.activity,PhoneFlowService::class.java))
         } }
+        compose.waitUntil(10000) { app.phoneFlow.state.value.active && app.phoneFlow.state.value.config!=null }
+        assertTrue(app.getSystemService(NotificationManager::class.java).activeNotifications.any { it.id==201 })
         val sender=Executors.newSingleThreadScheduledExecutor()
         try {
             val key=app.phoneFlow.state.value.key
@@ -49,7 +56,8 @@ class PhoneFlowTest {
             sender.scheduleAtFixedRate({ runCatching { sequence++;push("Lobby node",lobby,-75,sequence);push("Corridor node",corridor,-45,sequence) } },0,1,TimeUnit.SECONDS)
             compose.waitUntil(10000) { app.phoneFlow.state.value.snapshot.presence.firstOrNull()?.zone==corridor }
             compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
-            compose.onNodeWithTag("phone-flow-open").performScrollTo().performClick()
+            compose.onNodeWithTag("main-list").performScrollToNode(hasTestTag("phone-flow-open"))
+            compose.onNodeWithTag("phone-flow-open").performClick()
             compose.onNodeWithTag("truth-zone-$corridor").performScrollTo().performClick()
             compose.onNodeWithTag("flow-mark-truth").performScrollTo().performClick()
             assertEquals(corridor,app.phoneFlow.state.value.snapshot.truths.single().expected)
@@ -59,13 +67,15 @@ class PhoneFlowTest {
             val report=app.phoneFlow.reports().first { it.name==app.phoneFlow.state.value.latestReport }.readText()
             assertFalse(report.contains("AA:BB:CC:DD:EE:01"));assertFalse(report.contains(key));assertFalse(report.contains(cfg.targets.single().id))
             compose.onNodeWithText(compose.activity.getString(R.string.flow_preview)).performScrollTo().performClick()
-            compose.onNodeWithText("Phone pilot").assertExists()
+            compose.onAllNodesWithText("Phone pilot").onLast().assertIsDisplayed()
             val capture=InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot()
             val dest=File(compose.activity.getExternalFilesDir(null),"phone-flow.png")
             dest.outputStream().use { capture.compress(Bitmap.CompressFormat.PNG,100,it) };capture.recycle()
             listOf("mkdir -p /sdcard/cinemawatch-ui","cp ${dest.path} /sdcard/cinemawatch-ui/phone-flow.png").forEach { cmd ->
                 InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(cmd).use { fd -> android.os.ParcelFileDescriptor.AutoCloseInputStream(fd).use { it.readBytes() } }
             }
+            runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.clearReports() } }
+            assertTrue(app.phoneFlow.reports().isEmpty())
         } finally { sender.shutdownNow();runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.stop() } } }
     }
 }

@@ -37,6 +37,7 @@ internal class PhoneFlow(private val context:Context) {
     private var server:FlowServer?=null
     private var radio:BleRadio?=null
     private var job:Job?=null
+    private val reportWrites=ArrayList<Job>()
     @Volatile private var tracker:FlowTracker?=null
     @Volatile private var config:FlowConfig?=null
     private val samples=ArrayList<FlowReading>()
@@ -47,7 +48,6 @@ internal class PhoneFlow(private val context:Context) {
     private var clockOffset=0L
     private var lastConnected=0L
     private var startedElapsed=0L
-    private var serverKey=""
     fun prepareHost(cinema:String,zones:Map<String,String>,targets:List<Pair<String,String>>,route:String,name:String,zone:String,offset:Int) {
         require(!state.value.active && zone in zones && zones.size in 2..100 && name.isNotBlank() && name.length<=60 && offset in -20..20 && targets.size in 1..16)
         require(zones.values.distinct().size==zones.size) { "Area names must be unique" }
@@ -63,12 +63,12 @@ internal class PhoneFlow(private val context:Context) {
     suspend fun begin() {
         val settings=requireNotNull(setup);require(!state.value.active);setup=null
         nodeId=UUID.randomUUID().toString();sequence=0;clockOffset=0;samples.clear();heardAt=0;bleFailed=false
-        startedElapsed=SystemClock.elapsedRealtime();lastConnected=0;serverKey=settings.key
+        startedElapsed=SystemClock.elapsedRealtime();lastConnected=0
         mutable.value=PhoneFlowState(active=true,role=settings.role,key=if(settings.role=="HOST")settings.key else "",startedAt=System.currentTimeMillis())
         try {
             if(settings.role=="HOST") {
                 config=requireNotNull(settings.config);tracker=FlowTracker(config!!.targets,config!!.zones.keys)
-                server=withContext(Dispatchers.IO) { FlowServer(settings.key,::reply) };scope.launch(Dispatchers.IO) { server?.serve() }
+                val listener=withContext(Dispatchers.IO) { FlowServer(settings.key,::reply) };server=listener;scope.launch(Dispatchers.IO) { listener.serve() }
                 mutable.value=state.value.copy(config=config,host=localIp(),connected=true)
             } else {
                 val start=System.currentTimeMillis();val elapsed=SystemClock.elapsedRealtime()
@@ -102,14 +102,18 @@ internal class PhoneFlow(private val context:Context) {
                             if(rtt<=1500) {
                                 clockOffset=response.getLong("time")-(start+rtt/2);lastConnected=SystemClock.elapsedRealtime()
                                 mutable.value=state.value.copy(connected=true,rtt=rtt,snapshot=snapshotParse(response.getJSONObject("snapshot")),error=if(bleFailed)"SCAN" else "")
-                            } else mutable.value=state.value.copy(connected=false,rtt=rtt,error="NETWORK")
-                        }.onFailure { mutable.value=state.value.copy(connected=false,error="NETWORK") }
+                            } else offline(rtt)
+                        }.onFailure { offline() }
                         if(SystemClock.elapsedRealtime()-lastConnected>30000) { stop();break }
                     }
                     delay(2000)
                 }
             }
         } catch (_:Exception) { stop();mutable.value=state.value.copy(error="START") }
+    }
+    private fun offline(rtt:Long=state.value.rtt) {
+        val prior=state.value
+        mutable.value=prior.copy(connected=false,rtt=rtt,error="NETWORK",snapshot=prior.snapshot.copy(nodes=prior.snapshot.nodes.map { it.copy(healthy=false) },presence=prior.snapshot.presence.map { it.copy(zone=null) },signals=emptyList()))
     }
     private fun accept(o:Observation,cfg:FlowConfig) {
         if(!state.value.active)return
@@ -130,7 +134,7 @@ internal class PhoneFlow(private val context:Context) {
                 val rs=body.getJSONArray("readings");require(rs.length()<=512)
                 val values=(0 until rs.length()).map { rs.getJSONObject(it).let { r -> FlowReading(r.getString("target"),r.getInt("rssi"),r.getLong("at")) } }
                 tracker!!.ingest(node,values,now)
-                return JSONObject().put("time",System.currentTimeMillis()).put("snapshot",snapshotJson(tracker!!.snapshot().let { it.copy(transitions=it.transitions.takeLast(20),truths=it.truths.takeLast(20)) }))
+                return JSONObject().put("time",System.currentTimeMillis()).put("snapshot",wireSnapshotJson(tracker!!.snapshot()))
             }
             else -> error("Unknown operation")
         }
@@ -142,14 +146,21 @@ internal class PhoneFlow(private val context:Context) {
         val snapshot=tracker?.snapshot() ?: prior.snapshot
         val cfg=config
         mutable.value=prior.copy(active=false,connected=false,key="",snapshot=snapshot,config=cfg?.copy(targets=cfg.targets.map { it.copy(address="") }))
-        tracker=null;config=null;serverKey="";samples.clear();setup=null
-        if(prior.role=="HOST" && cfg!=null)scope.launch {
+        tracker=null;config=null;samples.clear();setup=null
+        reportWrites.removeAll { it.isCompleted }
+        if(prior.role=="HOST" && cfg!=null)reportWrites+=scope.launch {
             val report=runCatching { withContext(Dispatchers.IO) {
                 val json=reportJson(cfg,snapshot)
                 File(context.filesDir,"phone-flow/${cfg.id}.json").apply { parentFile?.mkdirs();writeText(json.toString(2)) }.name
             } }.getOrNull()
             mutable.value=state.value.copy(latestReport=report.orEmpty(),error=if(report==null)"SAVE" else state.value.error)
         }
+    }
+    suspend fun clearReports() {
+        check(!state.value.active)
+        reportWrites.toList().joinAll();reportWrites.clear()
+        withContext(Dispatchers.IO) { val folder=File(context.filesDir,"phone-flow");if(folder.exists())check(folder.deleteRecursively()) }
+        mutable.value=PhoneFlowState();setup=null
     }
     fun failStart() { mutable.value=state.value.copy(error="START") }
     fun reports()=File(context.filesDir,"phone-flow").listFiles()?.filter { it.extension=="json" }?.sortedByDescending { it.lastModified() }.orEmpty()
@@ -161,6 +172,7 @@ internal class PhoneFlow(private val context:Context) {
     }
 }
 internal fun nodeJson(n:FlowNode)=JSONObject().put("id",n.id).put("name",n.name).put("zone",n.zone).put("offset",n.offset).put("at",n.at).put("healthy",n.healthy).put("sequence",n.sequence)
+internal fun wireSnapshotJson(s:FlowSnapshot)=snapshotJson(s.copy(signals=s.signals.take(48),transitions=s.transitions.takeLast(20),truths=s.truths.takeLast(20)))
 internal fun snapshotJson(s:FlowSnapshot)=JSONObject().put("nodes",JSONArray().apply { s.nodes.forEach { put(nodeJson(it)) } })
     .put("presence",JSONArray().apply { s.presence.forEach { put(JSONObject().put("target",it.target).put("label",it.label).put("zone",it.zone ?: JSONObject.NULL).put("margin",it.margin).put("receivers",it.receivers)) } })
     .put("signals",JSONArray().apply { s.signals.forEach { put(JSONObject().put("label",it.label).put("node",it.node).put("zone",it.zone).put("median",it.median).put("samples",it.samples)) } })
