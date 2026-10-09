@@ -84,7 +84,7 @@
     <string name="healthy_sample">Both radio sources received; field calibration still required</string>
     <string name="privacy_title">Data stays in the cinema</string>
     <string name="privacy_description">RF records save zone, time and aggregates only. Unauthorized MACs, names and raw payloads are excluded from the database and exports. No cross-day customer identification.</string>
-    <string name="version">CinemaWatch 0.6.1</string>
+    <string name="version">CinemaWatch 0.7.0</string>
     <string name="licenses">Licenses and attribution</string>
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>
@@ -278,4 +278,8 @@
     <string name="plan_wall_object">Wall / door</string>
     <string name="plan_autosave">Autosaves locally · schematic, not measured to scale</string>
     <string name="plan_name_room">Link an area or create a room</string>
+    <string name="signature_count">%1$d signatures</string>
+    <string name="signal_average_short">avg %1$d</string>
+    <string name="signal_seen_times">first %1$d s ago · last %2$d s ago</string>
+    <string name="signal_average_note">Average of the latest up to 20 readings. RSSI bars show received signal strength, not distance.</string>
 </resources>

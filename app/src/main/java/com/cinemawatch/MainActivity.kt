@@ -92,7 +92,10 @@ private val Muted = Color(0xFF99AFBF)
     var reportId by rememberSaveable { mutableStateOf<String?>(null) }
     var zoneReports by rememberSaveable { mutableStateOf(false) }
     var collapseEmpty by rememberSaveable { mutableStateOf(true) }
-    var groupFilter by rememberSaveable { mutableStateOf<String?>(null) }
+    var openSignalGroups by rememberSaveable { mutableStateOf(listOf<String>()) }
+    var signalDetail by remember { mutableStateOf<LiveRadio?>(null) }
+    var signalNow by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(scan.running) { while (true) { signalNow = System.currentTimeMillis(); kotlinx.coroutines.delay(1000) } }
     var signalSearch by remember { mutableStateOf("") }
     var createAsset by remember { mutableStateOf(false) }
     var bindAsset by remember { mutableStateOf<CinemaAsset?>(null) }
@@ -160,6 +163,12 @@ private val Muted = Color(0xFF99AFBF)
         ReportPreview(session, cinemas.find { it.id == reportZone?.cinemaId }?.name.orEmpty(), reportZone?.name.orEmpty(), results, assets, groups) { reportId = null }
         return
     }
+    signalDetail?.let { opened ->
+        val current = scan.live.find { it.key == opened.key } ?: opened
+        SignalDetailDialog(current, assets.find { it.id == current.assetId }?.name,
+            canRegister = current.assetId == null && scan.running && scan.request?.demo != true,
+            now = signalNow, onDismiss = { signalDetail = null }, onRegister = { register = current; signalDetail = null })
+    }
     Scaffold(modifier = Modifier.fillMaxSize(), containerColor = Ink, snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             NavigationBar(containerColor = Surface) {
@@ -172,7 +181,7 @@ private val Muted = Color(0xFF99AFBF)
             }
         }
     ) { padding ->
-        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).testTag("main-list"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(padding).testTag("main-list"), contentPadding = PaddingValues(if (tab == 0) 12.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(if (tab == 0) 6.dp else 16.dp)) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.Theaters, null, tint = Mint, modifier = Modifier.size(28.dp))
@@ -237,55 +246,20 @@ private val Muted = Color(0xFF99AFBF)
                     if (scan.live.isEmpty()) item { EmptyCard(R.string.empty_radios, Icons.Outlined.Sensors) }
                     item {
                         Text(stringResource(R.string.signal_group_note), color = Muted, fontSize = 12.sp)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { groupFilter = null }) { Text(stringResource(R.string.all_groups)) }
-                            OutlinedButton(onClick = { collapseEmpty = !collapseEmpty }) { Text(stringResource(if (collapseEmpty) R.string.show_empty else R.string.collapse_empty)) }
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilterChip(!collapseEmpty, { collapseEmpty = false }, label = { Text(stringResource(R.string.all_groups)) }, modifier = Modifier.weight(1f))
+                            FilterChip(collapseEmpty, { collapseEmpty = true }, label = { Text(stringResource(R.string.collapse_empty)) }, modifier = Modifier.weight(1f))
                         }
                         Text(stringResource(R.string.group_overview, scan.live.size,
                             scan.live.count { SignalGroup.UNKNOWN in it.categories },
                             scan.live.count { radio -> radio.categories.count { it in SignalGrouping.deviceTypes && it != SignalGroup.UNKNOWN } > 1 }), color = Muted, fontSize = 12.sp)
-                        Text(stringResource(R.string.group_multi_note), color = Muted, fontSize = 12.sp)
-                        listOf(R.string.device_classes to SignalGrouping.deviceTypes, R.string.ecosystem_classes to SignalGrouping.ecosystems).forEach { (title, categories) ->
-                            SectionTitle(title)
-                            categories.forEach { category ->
-                                val members = scan.live.filter { category in it.categories }
-                                if (!collapseEmpty || members.isNotEmpty()) {
-                                    OutlinedButton(onClick = { groupFilter = if (groupFilter == category.name) null else category.name }, modifier = Modifier.fillMaxWidth().testTag("group-${category.name}")) {
-                                        Column(Modifier.weight(1f)) {
-                                            Text((if (groupFilter == category.name) "▾ " else "▸ ") + stringResource(groupLabel(category)))
-                                            val rules = members.flatMap { it.signatureHits }.filter { SignalGrouping.fromSignature(it.category) == category }.map { it.name }.distinct()
-                                            if (rules.isNotEmpty()) Text(rules.take(3).joinToString(" · "), color = Muted, fontSize = 11.sp)
-                                        }
-                                        Text(members.size.toString())
-                                    }
-                                }
-                            }
-                        }
-                        OutlinedTextField(signalSearch, { signalSearch = it.take(80) }, label = { Text(stringResource(R.string.signal_search)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                        OutlinedTextField(signalSearch, { signalSearch = it.take(80) }, label = { Text(stringResource(R.string.signal_search)) }, modifier = Modifier.fillMaxWidth().testTag("signal-search"), singleLine = true)
                     }
-                    val visibleRadios = scan.live.filter { (groupFilter == null || it.categories.any { category -> category.name == groupFilter }) && (signalSearch.isBlank() || it.name.contains(signalSearch, true) || it.vendor.orEmpty().contains(signalSearch, true)) }
-                    if (scan.live.isNotEmpty() && visibleRadios.isEmpty()) item { Text(stringResource(R.string.no_matching_signals)) }
-                    items(visibleRadios, key = { it.key }) { radio ->
-                        Panel {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(if (radio.kind == "WIFI") Icons.Outlined.Wifi else Icons.Outlined.Bluetooth, null, tint = Mint)
-                                Spacer(Modifier.width(10.dp))
-                                Column(Modifier.weight(1f)) {
-                                    Text(assets.find { it.id == radio.assetId }?.name ?: radio.name.ifBlank { stringResource(R.string.unknown_radio) }, fontWeight = FontWeight.SemiBold)
-                                    Text("${radio.kind} · …${radio.address.takeLast(5)}", color = Muted, fontSize = 12.sp)
-                                    radio.vendor?.let { Text(it, color = Muted, fontSize = 12.sp) }
-                                }
-                                Text("${radio.rssi} dBm", color = Mint)
-                            }
-                            Text(radio.categories.joinToString(" · ") { context.getString(groupLabel(it)) }, color = Mint)
-                            if (radio.signatureHits.isNotEmpty()) Text(stringResource(R.string.match_rules, radio.signatureHits.map { it.name }.distinct().joinToString(" · ")), color = Muted, fontSize = 12.sp)
-                            Text(stringResource(evidenceLabel(radio.guess.evidence)), color = Muted, fontSize = 12.sp)
-                            Text(stringResource(when (radio.guess.confidence) { "MEDIUM" -> R.string.confidence_medium; "LOW" -> R.string.confidence_low; else -> R.string.confidence_unknown }), color = Muted, fontSize = 12.sp)
-                            Text(stringResource(R.string.signal_age, ((System.currentTimeMillis() - radio.lastAt) / 1000).toInt().coerceAtLeast(0)), color = Muted, fontSize = 12.sp)
-                            if (radio.assetId == null && scan.running && scan.request?.demo != true) TextButton(onClick = { register = radio }) { Text(stringResource(R.string.register)) }
-                            else if (radio.assetId != null) Text(stringResource(R.string.registered_signal), color = Mint)
-                        }
-                    }
+                    val searchedRadios = scan.live.filter { signalSearch.isBlank() || it.name.contains(signalSearch, true) || it.vendor.orEmpty().contains(signalSearch, true) || it.signatureHits.any { hit -> hit.name.contains(signalSearch, true) } }
+                    if (scan.live.isNotEmpty() && searchedRadios.isEmpty()) item { Text(stringResource(R.string.no_matching_signals)) }
+                    signalOutline(searchedRadios, assets, collapseEmpty, openSignalGroups.toSet(), signalNow,
+                        onToggle = { category -> openSignalGroups = if (category.name in openSignalGroups) openSignalGroups - category.name else openSignalGroups + category.name },
+                        onOpen = { signalDetail = it })
                 }
                 1 -> {
                     item {
