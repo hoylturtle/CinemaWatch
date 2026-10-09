@@ -10,6 +10,7 @@ import androidx.core.app.ServiceCompat
 import com.cinemawatch.*
 import com.cinemawatch.radio.ScanPermissions
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 
 /** User-started, bounded foreground BLE experiment. Never restart an old session. */
 class PhoneFlowService : Service() {

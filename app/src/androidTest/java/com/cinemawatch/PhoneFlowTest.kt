@@ -14,6 +14,8 @@ import org.junit.*
 import org.junit.Assert.*
 import org.junit.runner.RunWith
 import java.io.File
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /** Synthetic encrypted LAN packets. Real RF coverage must be validated with fixed physical phones. */
 @RunWith(AndroidJUnit4::class)
@@ -32,6 +34,7 @@ class PhoneFlowTest {
             app.phoneFlow.prepareHost("Phone pilot",zones.associate { it.id to it.name },listOf("Authorized beacon" to "AA:BB:CC:DD:EE:01"),"Lobby → Corridor","Coordinator",lobby,0)
             app.phoneFlow.begin()
         } }
+        val sender=Executors.newSingleThreadScheduledExecutor()
         try {
             val key=app.phoneFlow.state.value.key
             val joined=FlowWire.exchange("127.0.0.1",JSONObject().put("action","join"),key)
@@ -42,7 +45,8 @@ class PhoneFlowTest {
                 val readings=JSONArray().apply { repeat(3) { put(JSONObject().put("target",cfg.targets.single().id).put("rssi",rssi).put("at",now-it*20)) } }
                 FlowWire.exchange("127.0.0.1",JSONObject().put("action","push").put("session",cfg.id).put("time",now).put("node",nodeJson(FlowNode(id,id,zone,0,now,true,seq))).put("readings",readings),key)
             }
-            push("Lobby node",lobby,-75,1);push("Corridor node",corridor,-45,1)
+            var sequence=0L
+            sender.scheduleAtFixedRate({ runCatching { sequence++;push("Lobby node",lobby,-75,sequence);push("Corridor node",corridor,-45,sequence) } },0,1,TimeUnit.SECONDS)
             compose.waitUntil(10000) { app.phoneFlow.state.value.snapshot.presence.firstOrNull()?.zone==corridor }
             compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
             compose.onNodeWithTag("phone-flow-open").performScrollTo().performClick()
@@ -62,6 +66,6 @@ class PhoneFlowTest {
             listOf("mkdir -p /sdcard/cinemawatch-ui","cp ${dest.path} /sdcard/cinemawatch-ui/phone-flow.png").forEach { cmd ->
                 InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(cmd).use { fd -> android.os.ParcelFileDescriptor.AutoCloseInputStream(fd).use { it.readBytes() } }
             }
-        } finally { runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.stop() } } }
+        } finally { sender.shutdownNow();runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.stop() } } }
     }
 }
