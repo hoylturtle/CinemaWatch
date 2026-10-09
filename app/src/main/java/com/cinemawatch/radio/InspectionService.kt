@@ -33,7 +33,7 @@ class InspectionService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val scanner = (application as CinemaApp).scanner
         if (intent?.action == "STOP") { scanner.stop(); return START_NOT_STICKY }
-        if (intent == null || !ScanPermissions.granted(this)) { stopSelf(); return START_NOT_STICKY }
+        if (intent == null || !ScanPermissions.granted(this) || (application as CinemaApp).phoneFlow.state.value.active) { stopSelf(); return START_NOT_STICKY }
         val seconds = intent.getIntExtra("seconds", 120)
         if (seconds !in setOf(120, 180)) { stopSelf(); return START_NOT_STICKY }
         if (wakeLock?.isHeld != true) wakeLock = getSystemService(PowerManager::class.java)

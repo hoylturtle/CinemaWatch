@@ -89,6 +89,8 @@ private val Muted = Color(0xFF99AFBF)
     val issueEvents by remember(dao) { dao.issueEvents() }.collectAsStateWithLifecycle(emptyList())
     var maintenanceAsset by remember { mutableStateOf<CinemaAsset?>(null) }
     val scan by app.scanner.state.collectAsStateWithLifecycle()
+    val phoneFlowState by app.phoneFlow.state.collectAsStateWithLifecycle()
+    var phoneFlowDialog by remember { mutableStateOf(false) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val preferences = remember(context) { context.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE) }
     var zoneId by rememberSaveable { mutableStateOf(preferences.getString("zone", "").orEmpty()) }
@@ -124,13 +126,14 @@ private val Muted = Color(0xFF99AFBF)
     var license by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     var request by remember { mutableStateOf<SampleRequest?>(null) }
-    val busy = scan.running || scan.saving || scan.saveFailed
+    val busy = scan.running || scan.saving || scan.saveFailed || phoneFlowState.active
     val snackbar = remember { SnackbarHostState() }
     val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, issues, issueEvents, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups, issues, issueEvents) }
     LaunchedEffect(scan.running) { if (!scan.running) { register = null; signalSearch = "" } }
     fun assetError(t: Throwable) { error = when (t) { is InvalidRadioAddressException -> R.string.invalid_address; is DuplicateRadioException -> R.string.duplicate_asset; else -> R.string.error_save } }
 
     fun launchSample(r: SampleRequest) {
+        if (app.phoneFlow.state.value.active) { error = R.string.flow_busy; return }
         if (r.demo) { scope.launch { app.scanner.start(r) }; return }
         if (!ScanPermissions.granted(context)) { error = R.string.permissions_denied; return }
         if (context.getSystemService(LocationManager::class.java)?.isLocationEnabled != true) { error = R.string.location_required; return }
@@ -162,9 +165,10 @@ private val Muted = Color(0xFF99AFBF)
             importing = false
         }
     }
+    if (phoneFlowDialog) PhoneFlowDialog(app, cinema, zones.filter { it.cinemaId == cinema?.id }, assets, bindings, scan.running || scan.saving || scan.saveFailed) { phoneFlowDialog = false }
     maintenanceAsset?.let { asset -> MaintenanceDialog(asset, zones.find { it.id == asset.zoneId }?.name.orEmpty(), app.repository,
         results, sessions, baselines.find { it.assetId == asset.id }, issues, issueEvents,
-        scan.running || scan.saving || scan.saveFailed,
+        busy,
         onDismiss = { maintenanceAsset = null }, onInspect = { zoneId = asset.zoneId; reportId = null; maintenanceAsset = null; tab = 0; setupMode = "INSPECTION" }) }
     sessions.find { it.id == reportId }?.let { session ->
         val reportZone = zones.find { it.id == session.zoneId }
@@ -357,6 +361,7 @@ private val Muted = Color(0xFF99AFBF)
                 }
                 3 -> {
                     item { UpdateCard(app, busy) }
+                    item { Panel { Text(stringResource(R.string.flow_intro)); TextButton(onClick = { phoneFlowDialog = true }, enabled = !scan.running && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("phone-flow-open")) { Text(stringResource(R.string.flow_title)) } } }
                     item {
                         Panel {
                             SectionTitle(R.string.language)

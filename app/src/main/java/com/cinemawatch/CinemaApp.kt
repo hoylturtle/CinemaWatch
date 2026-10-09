@@ -9,5 +9,6 @@ class CinemaApp : Application() {
     internal var updateSource: com.cinemawatch.update.UpdateSource = com.cinemawatch.update.GithubUpdates(this)
     val updates by lazy { com.cinemawatch.update.UpdateController { updateSource } }
     val repository by lazy { CinemaRepository(CinemaDatabase.create(this)) }
+    internal val phoneFlow by lazy { com.cinemawatch.flow.PhoneFlow(this) }
     val scanner by lazy { ScanEngine(this, repository) }
 }
