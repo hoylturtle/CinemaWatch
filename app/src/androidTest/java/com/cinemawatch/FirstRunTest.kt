@@ -1,6 +1,11 @@
 package com.cinemawatch
 
+import app.fieldwatch.domain.SignatureClass
 import android.graphics.Bitmap
+import androidx.activity.compose.setContent
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.test.*
@@ -97,7 +102,18 @@ class FirstRunTest {
         compose.onNodeWithTag("group-ACCESS_POINT").assertIsDisplayed()
         shot("fieldwatch-groups")
         compose.onNodeWithTag("group-ACCESS_POINT").performClick()
+        val ap = "WIFI:02:00:00:00:00:01"
+        compose.onNodeWithTag("main-list").performScrollToNode(hasTestTag("radio-ACCESS_POINT-$ap"))
+        compose.onNodeWithTag("radio-ACCESS_POINT-$ap").assertIsDisplayed()
+        compose.onNodeWithTag("rssi-ACCESS_POINT-$ap", useUnmergedTree = true).assertExists()
+        shot("fieldwatch-devices")
+        compose.onNodeWithTag("radio-ACCESS_POINT-$ap").performClick()
+        compose.onNodeWithText(text(R.string.signal_average_note)).assertExists()
+        compose.onNodeWithText(text(R.string.register)).assertDoesNotExist()
+        compose.onNodeWithText(text(R.string.close)).performClick()
+        compose.onNodeWithTag("main-list").performScrollToNode(hasTestTag("group-ACCESS_POINT"))
         compose.onNodeWithTag("group-ACCESS_POINT").performClick()
+        compose.onNodeWithTag("radio-ACCESS_POINT-$ap").assertDoesNotExist()
         compose.waitUntil(40000) { !app.scanner.state.value.running && !app.scanner.state.value.saving }
         val session = runBlocking { app.repository.dao.sessions().first().single() }
         compose.onNodeWithText(text(R.string.reports)).performClick()
@@ -121,5 +137,38 @@ class FirstRunTest {
         compose.waitUntil(15000) { compose.onAllNodesWithText("设置").fetchSemanticsNodes().isNotEmpty() }
         Assert.assertEquals("zh-Hans", AppCompatDelegate.getApplicationLocales().toLanguageTags())
         shot("settings-simplified")
+    }
+    @Test fun domesticEcosystemsShowDevicesInsideIndependentGroups() {
+        val now = System.currentTimeMillis()
+        val cameras = com.cinemawatch.domain.SignalGroup.CAMERA
+        val apple = com.cinemawatch.domain.SignalGroup.APPLE
+        val huawei = com.cinemawatch.domain.SignalGroup.HUAWEI
+        fun radio(address: String, label: String, ecosystem: com.cinemawatch.domain.SignalGroup) = com.cinemawatch.radio.LiveRadio(
+            "BLE", address, label, -58, label, SignatureClass.CAMERA, now, null, listOf(-62, -58),
+            signatureHits = listOf(com.cinemawatch.radio.SignatureHit("Camera signature", SignatureClass.CAMERA)),
+            ecosystem = ecosystem, firstAt = now - 12000)
+        val radios = listOf(radio("02:00:00:00:01:01", "Apple camera", apple), radio("02:00:00:00:01:02", "Huawei camera", huawei))
+        val expanded = androidx.compose.runtime.mutableStateOf(listOf(cameras.name, apple.name, huawei.name))
+        compose.activityRule.scenario.onActivity { activity ->
+            activity.setContent {
+                androidx.compose.material3.MaterialTheme {
+                    androidx.compose.foundation.lazy.LazyColumn(Modifier.testTag("outline-test"), verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp)) {
+                        signalOutline(radios, emptyList(), true, expanded.value.toSet(), now,
+                            onToggle = { group -> expanded.value = if (group.name in expanded.value) expanded.value - group.name else expanded.value + group.name }, onOpen = {})
+                    }
+                }
+            }
+        }
+        compose.onNodeWithTag("radio-CAMERA-BLE:02:00:00:00:01:02").assertExists()
+        compose.onNodeWithTag("outline-test").performScrollToNode(hasTestTag("radio-HUAWEI-BLE:02:00:00:00:01:02"))
+        compose.onNodeWithTag("radio-HUAWEI-BLE:02:00:00:00:01:02").assertIsDisplayed()
+        shot("fieldwatch-domestic-ecosystem")
+        compose.onNodeWithTag("outline-test").performScrollToNode(hasTestTag("group-APPLE"))
+        compose.onNodeWithTag("group-APPLE").performClick()
+        compose.onNodeWithTag("radio-APPLE-BLE:02:00:00:00:01:01").assertDoesNotExist()
+        compose.onNodeWithTag("outline-test").performScrollToNode(hasTestTag("radio-HUAWEI-BLE:02:00:00:00:01:02"))
+        compose.onNodeWithTag("radio-HUAWEI-BLE:02:00:00:00:01:02").assertIsDisplayed()
+        compose.onNodeWithTag("outline-test").performScrollToNode(hasTestTag("radio-CAMERA-BLE:02:00:00:00:01:02"))
+        compose.onNodeWithTag("radio-CAMERA-BLE:02:00:00:00:01:02").assertIsDisplayed()
     }
 }

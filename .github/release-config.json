@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 8,
-  "versionName": "0.6.1",
+  "versionCode": 9,
+  "versionName": "0.7.0",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "修复户型图布局：自动横屏、左侧绘图工具栏、所有工具支持双指缩放和平移。退出恢复屏幕方向，保留旧数据，固定签名覆盖升级。"
+  "notes": "基于 Fieldwatch 固定版改造实时分组界面：填充卡片、分组内直接展开设备、RSSI 强度条、频率、均值与发现时间；国内生态统一样式，点击设备查看详情并登记资产。固定签名覆盖升级保留数据。"
 }
