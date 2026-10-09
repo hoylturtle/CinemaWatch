@@ -84,7 +84,7 @@
     <string name="healthy_sample">Both radio sources received; field calibration still required</string>
     <string name="privacy_title">Data stays in the cinema</string>
     <string name="privacy_description">RF records save zone, time and aggregates only. Unauthorized MACs, names and raw payloads are excluded from the database and exports. No cross-day customer identification.</string>
-    <string name="version">CinemaWatch 0.6.0</string>
+    <string name="version">CinemaWatch 0.6.1</string>
     <string name="licenses">Licenses and attribution</string>
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>

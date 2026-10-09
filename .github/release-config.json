@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 7,
-  "versionName": "0.6.0",
+  "versionCode": 8,
+  "versionName": "0.6.1",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "改为全屏户型图编辑器：墙线、房间/通道轮廓、门扇、设备标点、移动、缩放、网格吸附、撤销重做。保留旧底图与资产资料，固定签名覆盖升级。"
+  "notes": "修复户型图布局：自动横屏、左侧绘图工具栏、所有工具支持双指缩放和平移。退出恢复屏幕方向，保留旧数据，固定签名覆盖升级。"
 }
