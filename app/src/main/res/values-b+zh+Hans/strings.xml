@@ -338,7 +338,7 @@
     <string name="flow_busy">多手机采集验证进行中，请先停止再进行资产巡检。</string>
     <string name="flow_nodes">固定节点状态</string>
     <string name="flow_ready">有近期广播</string>
-    <string name="flow_unready">无近期广播 / 已离线</string>
+    <string name="flow_unready">证据不足 / 离线 / 过载</string>
     <string name="flow_algorithm">每 2 秒判断：取最近 6 秒 RSSI 中位数；每节点至少 3 个样本；至少两个区域有证据；领先 6 dB 并连续稳定两次才确认。节点 10 秒无心跳即排除，不跨失联区间拼接路线。</string>
     <string name="flow_presence">标签区域与节点信号</string>
     <string name="flow_unknown">无法判断</string>

@@ -338,7 +338,7 @@
     <string name="flow_busy">多手機採集驗證進行中，請先停止再進行資產巡檢。</string>
     <string name="flow_nodes">固定節點狀態</string>
     <string name="flow_ready">有近期廣播</string>
-    <string name="flow_unready">無近期廣播 / 已離線</string>
+    <string name="flow_unready">證據不足 / 離線 / 過載</string>
     <string name="flow_algorithm">每 2 秒判斷：取最近 6 秒 RSSI 中位數；每節點至少 3 個樣本；至少兩個區域有證據；領先 6 dB 並連續穩定兩次才確認。節點 10 秒無心跳即排除，不跨失聯區間拼接路線。</string>
     <string name="flow_presence">標籤區域與節點訊號</string>
     <string name="flow_unknown">無法判斷</string>

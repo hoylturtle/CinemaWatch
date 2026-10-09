@@ -18,7 +18,7 @@ class FlowInboxTest {
         val inbox=FlowInbox(listOf(target),2)
         inbox.offer(target.address,127,10000,10000,0);inbox.offer(target.address,-55,3000,10000,0)
         assertTrue(inbox.queue.tryReceive().isFailure)
-        repeat(10) { inbox.offer(target.address,-55,10000+it,10000+it,0) }
+        repeat(10) { inbox.offer(target.address,-55,10000L+it,10000L+it,0) }
         assertEquals(8,inbox.drops.get());assertNotNull(inbox.queue.tryReceive().getOrNull());assertNotNull(inbox.queue.tryReceive().getOrNull())
         assertTrue(inbox.queue.tryReceive().isFailure);inbox.close()
     }

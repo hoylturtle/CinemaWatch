@@ -338,7 +338,7 @@
     <string name="flow_busy">Stop the multi-phone experiment before asset inspection.</string>
     <string name="flow_nodes">Fixed nodes</string>
     <string name="flow_ready">Recent advertisements</string>
-    <string name="flow_unready">No recent advertisements / offline</string>
+    <string name="flow_unready">Insufficient evidence / offline / overloaded</string>
     <string name="flow_algorithm">Every 2 seconds: median RSSI over 6 seconds, at least 3 samples per node and evidence from 2 distinct areas. Require a 6 dB lead for 2 consecutive decisions. Exclude nodes after 10 seconds without heartbeat; do not join routes across lost evidence.</string>
     <string name="flow_presence">Tag regions and node signals</string>
     <string name="flow_unknown">Unknown</string>

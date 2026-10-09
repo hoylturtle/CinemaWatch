@@ -30,6 +30,7 @@ internal object FlowCipher {
 internal object FlowWire {
     const val PORT=8765
     fun privateHost(host: String): Boolean {
+        if(!Regex("(0|[1-9][0-9]{0,2})([.](0|[1-9][0-9]{0,2})){3}").matches(host))return false
         val parts=host.split('.').map { it.toIntOrNull() ?: return false }
         if(parts.size!=4 || parts.any { it !in 0..255 })return false
         return parts[0]==10 || parts[0]==192 && parts[1]==168 || parts[0]==172 && parts[1] in 16..31 || parts==listOf(127,0,0,1)

@@ -23,7 +23,7 @@ class FlowTransportTest {
     }
     @Test fun allowsOnlyNumericLocalAddresses() {
         listOf("10.0.0.1","192.168.1.2","172.16.0.1","172.31.255.2","127.0.0.1").forEach { assertTrue(FlowWire.privateHost(it)) }
-        listOf("github.com","8.8.8.8","172.32.0.1","192.168.1.999","localhost","10.0.0.1/path").forEach { assertFalse(FlowWire.privateHost(it)) }
+        listOf("github.com","8.8.8.8","172.32.0.1","192.168.1.999","localhost","10.0.0.1/path","+10.0.0.1","010.0.0.1").forEach { assertFalse(FlowWire.privateHost(it)) }
     }
     @Test fun slowUnauthenticatedConnectionDoesNotBlockAuthorizedExchange() {
         val key=FlowCipher.newKey();val server=FlowServer(key) { JSONObject().put("value",it.getInt("value")) }
