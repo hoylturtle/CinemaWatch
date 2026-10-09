@@ -67,7 +67,7 @@ class MaintenanceTest {
         try { repo.updateIssue(issue.id,"CLOSED","skip recheck");fail() } catch (_:IllegalArgumentException) { }
         assertEquals("OPEN",repo.dao.issue(issue.id)!!.state)
     }
-    @Test fun versionThreeMigrationRetainsAssetsAndAddsEmptyWorkflowTables() = runBlocking {
+    @Test fun versionThreeMigrationRetainsAssetsAndAddsEmptyWorkflowTables() = runBlocking<Unit> {
         val c=ApplicationProvider.getApplicationContext<Context>();val name="maintenance-v3.db";c.deleteDatabase(name)
         c.openOrCreateDatabase(name,0,null).use { sql ->
             javaClass.classLoader!!.getResourceAsStream("v1-schema.sql")!!.bufferedReader().useLines { lines -> lines.filter(String::isNotBlank).forEach { sql.execSQL(it) } }

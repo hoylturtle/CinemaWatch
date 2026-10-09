@@ -58,14 +58,14 @@
     <string name="trend_up">訊號增強</string>
     <string name="trend_down">訊號減弱</string>
     <string name="trend_flat">訊號平穩</string>
-    <string name="baseline_learning">基準採集中</string>
+    <string name="baseline_learning">基準待確認</string>
     <string name="normal">正常</string>
     <string name="weak">訊號偏弱</string>
     <string name="unstable">訊號不穩</string>
     <string name="missing">連續未見</string>
     <string name="review">需要複查</string>
     <string name="unavailable">資料不足</string>
-    <string name="baseline_note">累積至少 3 次有效巡檢建立基準；連續 2 次有效巡檢未見才提示缺失。</string>
+    <string name="baseline_note">完成合格巡檢後，人工確認正常並建立基準；連續 2 次健康巡檢未見才提示缺失。</string>
     <string name="no_reports">第一份紀錄，從一趟巡檢開始。</string>
     <string name="export">匯出 CSV</string>
     <string name="share">分享紀錄</string>
@@ -182,7 +182,7 @@
     <string name="sampling_ended">巡檢已結束；未授權信號已清除。資產仍可手動創建。</string>
     <string name="seconds_format">%1$d 秒</string>
     <string name="signal_logic">瞭解信號檢測邏輯</string>
-    <string name="signal_logic_summary">Wi-Fi 接收 AP／熱點廣播，BLE 接收附近廣播；只接受有效 RSSI 與新鮮掃描，會話內按無線地址去重。分組用名稱、廠商與 Signature 線索，不能證明型號或歸屬。授權資產使用獨立 ID；未授權標識結束即清除，只保存分組數量與採樣質量。至少 3 次有效巡檢建立 RSSI 基準；連續 2 次健康巡檢未見才提示缺失。未校準前不估算人數。</string>
+    <string name="signal_logic_summary">Wi-Fi 接收 AP／熱點廣播，BLE 接收附近廣播；只接受有效 RSSI 與新鮮掃描，會話內按無線地址去重。分組用名稱、廠商與 Signature 線索，不能證明型號或歸屬。授權資產使用獨立 ID；未授權標識結束即清除，只保存分組數量與採樣質量。合格巡檢後人工確認正常，建立 RSSI 基準；連續 2 次健康巡檢未見才提示缺失。未校準前不估算人數。</string>
     <string name="update_title">軟體更新</string>
     <string name="update_current_version">目前版本：%1$s</string>
     <string name="check_update">檢查更新</string>

@@ -58,14 +58,14 @@
     <string name="trend_up">Signal increasing</string>
     <string name="trend_down">Signal decreasing</string>
     <string name="trend_flat">Signal steady</string>
-    <string name="baseline_learning">Learning baseline</string>
+    <string name="baseline_learning">Baseline awaiting confirmation</string>
     <string name="normal">Normal</string>
     <string name="weak">Weak signal</string>
     <string name="unstable">Unstable signal</string>
     <string name="missing">Repeatedly unseen</string>
     <string name="review">Review needed</string>
     <string name="unavailable">Insufficient data</string>
-    <string name="baseline_note">At least 3 valid inspections establish a baseline. An asset is flagged missing only after 2 consecutive valid inspections without a sighting.</string>
+    <string name="baseline_note">Confirm normal operation after a valid inspection to establish a baseline. Missing is flagged only after 2 consecutive healthy inspections without a sighting.</string>
     <string name="no_reports">Your first record starts with an inspection.</string>
     <string name="export">Export CSV</string>
     <string name="share">Share records</string>
@@ -182,7 +182,7 @@
     <string name="sampling_ended">Inspection ended; unregistered signals were cleared. Assets can still be created manually.</string>
     <string name="seconds_format">%1$d seconds</string>
     <string name="signal_logic">How signal detection works</string>
-    <string name="signal_logic_summary">Wi-Fi receives AP / hotspot broadcasts; BLE receives nearby advertisements. Valid RSSI and fresh scans are accepted and radio addresses are deduplicated within a session. Names, vendors and signature clues support tentative groups, not verified models or ownership. Authorized assets have independent IDs. Unregistered identifiers are cleared at the end; only category counts and sampling quality persist. At least 3 healthy inspections establish an RSSI baseline; 2 consecutive healthy inspections without a sighting flag absence. No people estimates before calibration.</string>
+    <string name="signal_logic_summary">Wi-Fi receives AP / hotspot broadcasts; BLE receives nearby advertisements. Valid RSSI and fresh scans are accepted and radio addresses are deduplicated within a session. Names, vendors and signature clues support tentative groups, not verified models or ownership. Authorized assets have independent IDs. Unregistered identifiers are cleared at the end; only category counts and sampling quality persist. An RSSI baseline requires confirmation of normal operation after a valid inspection; 2 consecutive healthy inspections without a sighting flag absence. No people estimates before calibration.</string>
     <string name="update_title">Software updates</string>
     <string name="update_current_version">Current version: %1$s</string>
     <string name="check_update">Check for updates</string>
