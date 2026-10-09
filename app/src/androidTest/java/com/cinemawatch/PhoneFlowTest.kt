@@ -42,6 +42,7 @@ class PhoneFlowTest {
         compose.waitUntil(10000) { app.phoneFlow.state.value.active && app.phoneFlow.state.value.config!=null }
         assertTrue(app.getSystemService(NotificationManager::class.java).activeNotifications.any { it.id==201 })
         val sender=Executors.newSingleThreadScheduledExecutor()
+        val collector=PhoneFlow(app)
         try {
             val key=app.phoneFlow.state.value.key
             val joined=FlowWire.exchange("127.0.0.1",JSONObject().put("action","join"),key)
@@ -55,6 +56,10 @@ class PhoneFlowTest {
             var sequence=0L
             sender.scheduleAtFixedRate({ runCatching { sequence++;push("Lobby node",lobby,-75,sequence);push("Corridor node",corridor,-45,sequence) } },0,1,TimeUnit.SECONDS)
             compose.waitUntil(10000) { app.phoneFlow.state.value.snapshot.presence.firstOrNull()?.zone==corridor }
+            runBlocking { withContext(Dispatchers.Main) {
+                collector.prepareNode("127.0.0.1",key,"Additional test node","Lobby",0);collector.begin()
+            } }
+            compose.waitUntil(10000) { collector.state.value.connected && collector.state.value.snapshot.presence.firstOrNull()?.zone==corridor }
             compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
             compose.onNodeWithTag("main-list").performScrollToNode(hasTestTag("phone-flow-open"))
             compose.onNodeWithTag("phone-flow-open").performClick()
@@ -64,6 +69,7 @@ class PhoneFlowTest {
             assertEquals(corridor,app.phoneFlow.state.value.snapshot.truths.single().observed)
             compose.onNodeWithTag("flow-stop").performScrollTo().performClick()
             compose.waitUntil(10000) { app.phoneFlow.state.value.latestReport.isNotBlank() }
+            compose.waitUntil(10000) { !collector.state.value.connected && collector.state.value.snapshot.presence.all { it.zone==null } }
             val report=app.phoneFlow.reports().first { it.name==app.phoneFlow.state.value.latestReport }.readText()
             assertFalse(report.contains("AA:BB:CC:DD:EE:01"));assertFalse(report.contains(key));assertFalse(report.contains(cfg.targets.single().id))
             compose.onNodeWithText(compose.activity.getString(R.string.flow_preview)).performScrollTo().performClick()
@@ -76,6 +82,6 @@ class PhoneFlowTest {
             }
             runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.clearReports() } }
             assertTrue(app.phoneFlow.reports().isEmpty())
-        } finally { sender.shutdownNow();runBlocking { withContext(Dispatchers.Main) { app.phoneFlow.stop() } } }
+        } finally { sender.shutdownNow();runBlocking { withContext(Dispatchers.Main) { collector.stop();app.phoneFlow.stop() } } }
     }
 }

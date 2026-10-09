@@ -80,7 +80,7 @@ internal class PhoneFlow(private val context:Context) {
             }
             val cfg=requireNotNull(config)
             val zone=if(settings.role=="HOST")settings.zone else cfg.zones.entries.first { it.value==settings.zone }.key
-            radio=BleRadio(context,{ observation -> scope.launch { accept(observation,cfg) } },{ scope.launch { bleFailed=true } })
+            radio=BleRadio(context,{ observation -> scope.launch { accept(observation,cfg) } },{ scope.launch { if(config?.id==cfg.id)bleFailed=true } })
             runCatching { radio?.start(ScanIntensity.BALANCED) }.onFailure { bleFailed=true }
             job=scope.launch {
                 while(isActive && state.value.active) {
@@ -112,11 +112,12 @@ internal class PhoneFlow(private val context:Context) {
         } catch (_:Exception) { stop();mutable.value=state.value.copy(error="START") }
     }
     private fun offline(rtt:Long=state.value.rtt) {
+        if(!state.value.active)return
         val prior=state.value
         mutable.value=prior.copy(connected=false,rtt=rtt,error="NETWORK",snapshot=prior.snapshot.copy(nodes=prior.snapshot.nodes.map { it.copy(healthy=false) },presence=prior.snapshot.presence.map { it.copy(zone=null) },signals=emptyList()))
     }
     private fun accept(o:Observation,cfg:FlowConfig) {
-        if(!state.value.active)return
+        if(!state.value.active || config?.id!=cfg.id)return
         heardAt=System.currentTimeMillis()
         if(!InspectionPolicy.validRssi(o.rssi))return
         val address=runCatching { com.cinemawatch.data.RadioAddress.normalize(o.mac,"BLE") }.getOrNull() ?: return
