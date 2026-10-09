@@ -30,7 +30,8 @@ class FloorPlanTest {
     @After fun capturePlanScreen() { saveScreen("plan-screen.png") }
     private fun saveScreen(filename: String) { runCatching {
         val dir = File(compose.activity.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
-        val bitmap = compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
+        compose.waitForIdle()
+        val bitmap = if (filename == "floor-plan-landscape.png") InstrumentationRegistry.getInstrumentation().uiAutomation.takeScreenshot() else compose.onAllNodes(isRoot()).onLast().captureToImage().asAndroidBitmap()
         File(dir, filename).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         listOf("mkdir -p /sdcard/cinemawatch-ui", "cp ${dir.path}/$filename /sdcard/cinemawatch-ui/$filename").forEach { command ->
             InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command).use { descriptor -> android.os.ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { it.readBytes() } }
