@@ -73,7 +73,7 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
     appendLine("${c.getString(R.string.wifi_aps)}: ${s.wifiCount}"); appendLine("${c.getString(R.string.ble_radios)}: ${s.bleCount}")
     results.filter { it.sessionId == s.id }.forEach { result ->
         val own = issues.filter { it.assetId == result.assetId }
-        own.firstOrNull { it.state != "CLOSED" }?.let { appendLine(c.getString(issueLabel(it.state))) }
+        own.firstOrNull { it.state != "CLOSED" }?.let { appendLine(assets.find { it.id == result.assetId }?.name.orEmpty() + " · " + c.getString(issueLabel(it.state))) }
         events.filter { e -> own.any { it.id == e.issueId } }.take(5).forEach { e -> appendLine(c.getString(issueLabel(e.action)) + " · " + e.note) }
     }
     appendLine(c.getString(R.string.calibration_pending)); appendLine(c.getString(R.string.signal_group_note))

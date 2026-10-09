@@ -21,7 +21,7 @@ object HistoryImport {
         require(text.toByteArray(Charsets.UTF_8).size <= 2_000_000)
         val rows = cells(text.removePrefix("\uFEFF"))
         val header = rows.firstOrNull() ?: error("Empty CSV")
-        require(header.size in 25..29 && header.first() in setOf("Record ID", "记录编号", "纪录编号", "紀錄編號")) { "Not a CinemaWatch aggregate export" }
+        require(header.size in 25..31 && header.first() in setOf("Record ID", "记录编号", "纪录编号", "紀錄編號")) { "Not a CinemaWatch aggregate export" }
         require(rows.size <= 10_001)
         val records = LinkedHashMap<String, Record>()
         rows.drop(1).filter { it.any(String::isNotBlank) }.forEach { row ->
