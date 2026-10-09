@@ -87,6 +87,7 @@ class CinemaRepository(val database: CinemaDatabase) {
     }
     suspend fun save(session: Inspection, results: List<AssetResult>, groups: List<SignalGroupCount> = emptyList()) = database.withTransaction {
         dao.insertSession(session); dao.insertResults(results); dao.insertGroups(groups)
+        updateMaintenance(session, results)
     }
     /** Import aggregate history only; never fabricate assets or wireless bindings from names. */
     suspend fun importHistory(text: String): Int = database.withTransaction {
@@ -101,5 +102,41 @@ class CinemaRepository(val database: CinemaDatabase) {
             }
         }
         imported
+    }
+    suspend fun confirmBaseline(assetId: String, sessionId: String) = database.withTransaction {
+        val session = requireNotNull(dao.session(sessionId))
+        val result = dao.history(assetId).firstOrNull { it.sessionId == sessionId }
+        require(result != null && result.status in setOf("LEARNING", "NORMAL") && result.medianRssi != null && result.spread < 18)
+        val radios = dao.allBindings().filter { it.assetId == assetId }.map { it.radio }
+        require(dao.asset(assetId)?.authorized == true && dao.asset(assetId)?.zoneId == session.zoneId && validInspection(session) && radios.isNotEmpty() && radios.all { if (it == "WIFI") session.wifiHealthy else session.bleHealthy })
+        require(com.cinemawatch.domain.InspectionPolicy.validRssi(result.medianRssi))
+        dao.putBaseline(AssetBaseline(assetId, result.medianRssi, sessionId, System.currentTimeMillis()))
+    }
+    suspend fun updateIssue(id: String, action: String, note: String, photo: String = "") = database.withTransaction {
+        require(action in setOf("NOTE", "IN_PROGRESS", "WAITING_RECHECK", "OPEN") && note.trim().length <= 1000)
+        require(photo.isBlank() || Regex("[a-zA-Z0-9-]+[.]jpg").matches(photo))
+        val issue = requireNotNull(dao.issue(id)); require(issue.state != "CLOSED")
+        require(action == "NOTE" || note.isNotBlank() || photo.isNotBlank())
+        val at = System.currentTimeMillis()
+        dao.updateIssue(issue.copy(state = if (action == "NOTE") issue.state else action, updatedAt = at))
+        dao.insertEvent(IssueEvent(UUID.randomUUID().toString(), id, at, action, note.trim(), photo))
+    }
+    private fun validInspection(s: Inspection) = !s.demo && !s.imported && s.mode == "INSPECTION" && s.durationSeconds <= (s.requestedSeconds?.plus(5) ?: 185)
+    private suspend fun updateMaintenance(s: Inspection, results: List<AssetResult>) {
+        if (!validInspection(s)) return
+        for (result in results) {
+            val radios = dao.allBindings().filter { it.assetId == result.assetId }.map { it.radio }
+            if (dao.asset(result.assetId)?.authorized != true || dao.asset(result.assetId)?.zoneId != s.zoneId || radios.isEmpty() || !radios.all { if (it == "WIFI") s.wifiHealthy else s.bleHealthy }) continue
+            val existing = dao.activeIssue(result.assetId)
+            if (existing != null && s.endMs <= existing.createdAt) continue
+            if (result.status in setOf("WEAK", "UNSTABLE", "MISSING", "REVIEW")) {
+                val issue = existing ?: MaintenanceIssue(UUID.randomUUID().toString(), result.assetId, s.id, result.status, "OPEN", s.endMs, s.endMs).also { dao.insertIssue(it) }
+                if (existing != null) dao.updateIssue(issue.copy(sourceSessionId = s.id, reason = result.status, state = if (issue.state == "WAITING_RECHECK" && s.startMs > issue.updatedAt) "OPEN" else issue.state))
+                dao.insertEvent(IssueEvent(UUID.randomUUID().toString(), issue.id, s.endMs, if (existing == null) "DETECTED" else "RECHECK_ABNORMAL", "", sessionId = s.id))
+            } else if (existing?.state == "WAITING_RECHECK" && result.status == "NORMAL" && dao.baseline(result.assetId) != null && s.startMs > existing.updatedAt) {
+                dao.updateIssue(existing.copy(state = "CLOSED", updatedAt = s.endMs))
+                dao.insertEvent(IssueEvent(UUID.randomUUID().toString(), existing.id, s.endMs, "RECHECK_PASSED", "", sessionId = s.id))
+            }
+        }
     }
 }

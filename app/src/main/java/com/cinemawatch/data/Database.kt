@@ -41,6 +41,15 @@ data class SignalGroupCount(val sessionId: String, val groupCode: String, val ra
 ], indices = [Index("sessionId"), Index("assetId")], primaryKeys = ["sessionId", "assetId"])
 data class AssetResult(val sessionId: String, val assetId: String, val at: Long, val status: String, val medianRssi: Int?, val spread: Int, val consecutiveMisses: Int, val baselineRssi: Int?)
 
+@Entity(tableName = "asset_baselines", foreignKeys = [ForeignKey(entity = CinemaAsset::class, parentColumns = ["id"], childColumns = ["assetId"], onDelete = ForeignKey.CASCADE)])
+data class AssetBaseline(@PrimaryKey val assetId: String, val rssi: Int, val sourceSessionId: String, val confirmedAt: Long)
+
+@Entity(tableName = "maintenance_issues", foreignKeys = [ForeignKey(entity = CinemaAsset::class, parentColumns = ["id"], childColumns = ["assetId"], onDelete = ForeignKey.CASCADE)], indices = [Index("assetId")])
+data class MaintenanceIssue(@PrimaryKey val id: String, val assetId: String, val sourceSessionId: String, val reason: String, val state: String, val createdAt: Long, val updatedAt: Long)
+
+@Entity(tableName = "issue_events", foreignKeys = [ForeignKey(entity = MaintenanceIssue::class, parentColumns = ["id"], childColumns = ["issueId"], onDelete = ForeignKey.CASCADE)], indices = [Index("issueId")])
+data class IssueEvent(@PrimaryKey val id: String, val issueId: String, val at: Long, val action: String, val note: String, val photo: String = "", val sessionId: String = "")
+
 @Dao
 interface CinemaDao {
     @Query("SELECT * FROM cinemas ORDER BY name") fun cinemas(): Flow<List<Cinema>>
@@ -65,10 +74,20 @@ interface CinemaDao {
     @Query("UPDATE assets SET name = :name WHERE id = :id") suspend fun renameAsset(id: String, name: String)
     @Query("UPDATE assets SET name = :name, location = :location, notes = :notes WHERE id = :id") suspend fun updateAssetDetails(id: String, name: String, location: String, notes: String)
     @Query("DELETE FROM assets WHERE id = :id") suspend fun deleteAsset(id: String)
+    @Query("SELECT * FROM asset_baselines") fun baselines(): Flow<List<AssetBaseline>>
+    @Query("SELECT * FROM asset_baselines WHERE assetId = :id") suspend fun baseline(id: String): AssetBaseline?
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun putBaseline(value: AssetBaseline)
+    @Query("SELECT * FROM maintenance_issues ORDER BY updatedAt DESC") fun issues(): Flow<List<MaintenanceIssue>>
+    @Query("SELECT * FROM maintenance_issues WHERE id = :id") suspend fun issue(id: String): MaintenanceIssue?
+    @Query("SELECT * FROM maintenance_issues WHERE assetId = :asset AND state != 'CLOSED' LIMIT 1") suspend fun activeIssue(asset: String): MaintenanceIssue?
+    @Insert suspend fun insertIssue(value: MaintenanceIssue)
+    @Update suspend fun updateIssue(value: MaintenanceIssue)
+    @Query("SELECT * FROM issue_events ORDER BY at DESC") fun issueEvents(): Flow<List<IssueEvent>>
+    @Insert suspend fun insertEvent(value: IssueEvent)
     @Query("DELETE FROM cinemas") suspend fun clear()
 }
 
-@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class, SignalGroupCount::class], version = 3, exportSchema = false)
+@Database(entities = [Cinema::class, Zone::class, CinemaAsset::class, RadioBinding::class, Inspection::class, AssetResult::class, SignalGroupCount::class, AssetBaseline::class, MaintenanceIssue::class, IssueEvent::class], version = 4, exportSchema = false)
 abstract class CinemaDatabase : RoomDatabase() {
     abstract fun dao(): CinemaDao
     companion object {
@@ -86,6 +105,15 @@ abstract class CinemaDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE assets ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
             }
         }
-        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS asset_baselines (assetId TEXT NOT NULL PRIMARY KEY, rssi INTEGER NOT NULL, sourceSessionId TEXT NOT NULL, confirmedAt INTEGER NOT NULL, FOREIGN KEY(assetId) REFERENCES assets(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS maintenance_issues (id TEXT NOT NULL PRIMARY KEY, assetId TEXT NOT NULL, sourceSessionId TEXT NOT NULL, reason TEXT NOT NULL, state TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, FOREIGN KEY(assetId) REFERENCES assets(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_maintenance_issues_assetId ON maintenance_issues(assetId)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS issue_events (id TEXT NOT NULL PRIMARY KEY, issueId TEXT NOT NULL, at INTEGER NOT NULL, action TEXT NOT NULL, note TEXT NOT NULL, photo TEXT NOT NULL, sessionId TEXT NOT NULL, FOREIGN KEY(issueId) REFERENCES maintenance_issues(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_issue_events_issueId ON issue_events(issueId)")
+            }
+        }
+        fun create(context: Context) = Room.databaseBuilder(context, CinemaDatabase::class.java, "cinemawatch.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     }
 }

@@ -133,7 +133,7 @@ class AssetAndImportTest {
             sqlite.execSQL("INSERT INTO sessions VALUES ('s','z','INSPECTION',1000,121000,120,2,4,1,3,30,0,0,1,1,0,NULL,NULL,NULL,'',0,120)")
             sqlite.version = 2
         }
-        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_2_3).build()
+        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_2_3, CinemaDatabase.MIGRATION_3_4).build()
         val old = upgraded.dao().asset("a")!!
         assertEquals("", old.location); assertEquals("", old.notes); assertEquals("Old projector", old.name)
         assertEquals("a", upgraded.dao().allBindings().single().assetId)
@@ -151,7 +151,7 @@ class AssetAndImportTest {
             sqlite.execSQL("INSERT INTO sessions VALUES ('s','z','INSPECTION',1000,121000,120,2,4,1,3,30,0,0,1,1,0,NULL,NULL,NULL,'')")
             sqlite.version = 1
         }
-        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_1_2, CinemaDatabase.MIGRATION_2_3).build()
+        val upgraded = Room.databaseBuilder(c, CinemaDatabase::class.java, name).addMigrations(CinemaDatabase.MIGRATION_1_2, CinemaDatabase.MIGRATION_2_3, CinemaDatabase.MIGRATION_3_4).build()
         assertEquals("Old projector", upgraded.dao().assets().first().single().name)
         assertEquals("AA:BB:CC:DD:EE:00", upgraded.dao().allBindings().single().address)
         assertEquals(120, upgraded.dao().sessions().first().single().durationSeconds)

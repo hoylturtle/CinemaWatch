@@ -84,6 +84,10 @@ private val Muted = Color(0xFF99AFBF)
     val results by remember(dao) { dao.results() }.collectAsStateWithLifecycle(emptyList())
     val bindings by remember(dao) { dao.bindings() }.collectAsStateWithLifecycle(emptyList())
     val groups by remember(dao) { dao.groups() }.collectAsStateWithLifecycle(emptyList())
+    val baselines by remember(dao) { dao.baselines() }.collectAsStateWithLifecycle(emptyList())
+    val issues by remember(dao) { dao.issues() }.collectAsStateWithLifecycle(emptyList())
+    val issueEvents by remember(dao) { dao.issueEvents() }.collectAsStateWithLifecycle(emptyList())
+    var maintenanceAsset by remember { mutableStateOf<CinemaAsset?>(null) }
     val scan by app.scanner.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val preferences = remember(context) { context.getSharedPreferences("ui", android.content.Context.MODE_PRIVATE) }
@@ -122,7 +126,7 @@ private val Muted = Color(0xFF99AFBF)
     var request by remember { mutableStateOf<SampleRequest?>(null) }
     val busy = scan.running || scan.saving || scan.saveFailed
     val snackbar = remember { SnackbarHostState() }
-    val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups) }
+    val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, issues, issueEvents, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups, issues, issueEvents) }
     LaunchedEffect(scan.running) { if (!scan.running) { register = null; signalSearch = "" } }
     fun assetError(t: Throwable) { error = when (t) { is InvalidRadioAddressException -> R.string.invalid_address; is DuplicateRadioException -> R.string.duplicate_asset; else -> R.string.error_save } }
 
@@ -158,9 +162,13 @@ private val Muted = Color(0xFF99AFBF)
             importing = false
         }
     }
+    maintenanceAsset?.let { asset -> MaintenanceDialog(asset, zones.find { it.id == asset.zoneId }?.name.orEmpty(), app.repository,
+        results, sessions, baselines.find { it.assetId == asset.id }, issues, issueEvents,
+        scan.running || scan.saving || scan.saveFailed,
+        onDismiss = { maintenanceAsset = null }, onInspect = { zoneId = asset.zoneId; reportId = null; maintenanceAsset = null; tab = 0; setupMode = "INSPECTION" }) }
     sessions.find { it.id == reportId }?.let { session ->
         val reportZone = zones.find { it.id == session.zoneId }
-        ReportPreview(session, cinemas.find { it.id == reportZone?.cinemaId }?.name.orEmpty(), reportZone?.name.orEmpty(), results, assets, groups) { reportId = null }
+        ReportPreview(session, cinemas.find { it.id == reportZone?.cinemaId }?.name.orEmpty(), reportZone?.name.orEmpty(), results, assets, groups, issues, issueEvents, { maintenanceAsset = it }) { reportId = null }
         return
     }
     signalDetail?.let { opened ->
@@ -268,6 +276,13 @@ private val Muted = Color(0xFF99AFBF)
                         Button(onClick = { createAsset = true }, enabled = zone != null && !assetSaving && !scan.saving && !scan.saveFailed, modifier = Modifier.testTag("create-asset")) { Text(stringResource(R.string.create_asset)) }
                         Text(stringResource(R.string.asset_help), color = Muted, fontSize = 13.sp)
                     }
+                    val areaIssues = issues.filter { it.state != "CLOSED" && assets.any { asset -> asset.id == it.assetId && asset.zoneId == zone?.id } }
+                    item { Text(stringResource(R.string.issue_queue, areaIssues.size), style = MaterialTheme.typography.titleMedium) }
+                    items(areaIssues, key = { "issue-${it.id}" }) { issue ->
+                        assets.find { it.id == issue.assetId }?.let { asset -> Panel(onClick = { maintenanceAsset = asset }) {
+                            Text(asset.name); Text(asset.location); StatusChip(issue.reason); Text(stringResource(issueLabel(issue.state)))
+                        } }
+                    }
                     val currentAssets = assets.filter { it.zoneId == zone?.id }
                     if (currentAssets.isEmpty()) item { EmptyCard(R.string.no_assets, Icons.Outlined.Inventory2); Text(stringResource(R.string.asset_help), color = Muted, fontSize = 13.sp) }
                     items(currentAssets, key = { it.id }) { asset ->
@@ -282,6 +297,7 @@ private val Muted = Color(0xFF99AFBF)
                             if (asset.notes.isNotBlank()) Text(asset.notes, color = Muted, fontSize = 12.sp)
                             Text(last?.medianRssi?.let { "$it dBm" } ?: stringResource(R.string.no_signal), color = Muted)
                             bindings.filter { it.assetId == asset.id }.forEach { b -> Text("${b.radio} · …${b.address.takeLast(5)}", color = Muted, fontSize = 12.sp) }
+                            TextButton(onClick = { maintenanceAsset = asset }, modifier = Modifier.testTag("workflow-${asset.id}")) { Text(stringResource(R.string.asset_workflow)) }
                             TextButton(onClick = { renameAsset = asset }, enabled = !busy) { Text(stringResource(R.string.edit_asset_details)) }
                             Row {
                                 TextButton(onClick = { hunt = asset }, enabled = scan.running && bindings.any { it.assetId == asset.id }) { Text(stringResource(R.string.hunt)) }
@@ -391,7 +407,7 @@ private val Muted = Color(0xFF99AFBF)
             item { Spacer(Modifier.height(8.dp)) }
         }
     }
-    if (floorPlan && cinema != null) FloorPlanDialog(cinema, zones.filter { it.cinemaId == cinema.id }, assets.filter { asset -> zones.any { it.id == asset.zoneId && it.cinemaId == cinema.id } }, { floorPlan = false }, { name -> app.repository.createZone(cinema.id, name) })
+    if (floorPlan && cinema != null) FloorPlanDialog(cinema, zones.filter { it.cinemaId == cinema.id }, assets.filter { asset -> zones.any { it.id == asset.zoneId && it.cinemaId == cinema.id } }, { floorPlan = false }, { name -> app.repository.createZone(cinema.id, name) }, assetStatuses = results.groupBy { it.assetId }.mapValues { it.value.first().status }, onOpenAsset = { floorPlan = false; maintenanceAsset = it })
     if (createCinema) CinemaDialog(saving = cinemaSaving, onDismiss = { createCinema = false }) { name, count, prefix ->
         if (!cinemaSaving) scope.launch {
             cinemaSaving = true
