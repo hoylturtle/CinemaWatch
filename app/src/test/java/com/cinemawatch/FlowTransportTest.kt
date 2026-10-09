@@ -25,6 +25,17 @@ class FlowTransportTest {
         listOf("10.0.0.1","192.168.1.2","172.16.0.1","172.31.255.2","127.0.0.1").forEach { assertTrue(FlowWire.privateHost(it)) }
         listOf("github.com","8.8.8.8","172.32.0.1","192.168.1.999","localhost","10.0.0.1/path").forEach { assertFalse(FlowWire.privateHost(it)) }
     }
+    @Test fun slowUnauthenticatedConnectionDoesNotBlockAuthorizedExchange() {
+        val key=FlowCipher.newKey();val server=FlowServer(key) { JSONObject().put("value",it.getInt("value")) }
+        val thread=Thread { server.serve() }.apply { isDaemon=true;start() }
+        val slow=java.net.Socket("127.0.0.1",FlowWire.PORT)
+        try {
+            val start=System.nanoTime()
+            val reply=FlowWire.exchange("127.0.0.1",JSONObject().put("value",42),key)
+            assertEquals(42,reply.getInt("value"));assertTrue((System.nanoTime()-start)/1000000<900)
+        } finally { slow.close();server.close();thread.join(3000) }
+        assertFalse(thread.isAlive)
+    }
     @Test fun maximumChineseLabelProfileFitsBoundedEncryptedFrame() {
         val zones=(0 until 100).map { java.util.UUID.randomUUID().toString() }
         val nodes=(0 until 16).map { FlowNode(java.util.UUID.randomUUID().toString(),"节".repeat(60),zones[it],20,1700000000000,true,450) }

@@ -2,7 +2,6 @@ package com.cinemawatch.flow
 
 import android.content.Context
 import android.os.SystemClock
-import app.fieldwatch.domain.Observation
 import app.fieldwatch.domain.ScanIntensity
 import app.fieldwatch.radio.BleRadio
 import com.cinemawatch.domain.InspectionPolicy
@@ -41,11 +40,12 @@ internal class PhoneFlow(private val context:Context) {
     @Volatile private var tracker:FlowTracker?=null
     @Volatile private var config:FlowConfig?=null
     private val samples=ArrayList<FlowReading>()
-    private var heardAt=0L
+    @Volatile private var inbox:FlowInbox?=null
+    private var pump:Job?=null
     private var bleFailed=false
     private var nodeId=""
     private var sequence=0L
-    private var clockOffset=0L
+    @Volatile private var clockOffset=0L
     private var lastConnected=0L
     private var startedElapsed=0L
     fun prepareHost(cinema:String,zones:Map<String,String>,targets:List<Pair<String,String>>,route:String,name:String,zone:String,offset:Int) {
@@ -62,7 +62,7 @@ internal class PhoneFlow(private val context:Context) {
     }
     suspend fun begin() {
         val settings=requireNotNull(setup);require(!state.value.active);setup=null
-        nodeId=UUID.randomUUID().toString();sequence=0;clockOffset=0;samples.clear();heardAt=0;bleFailed=false
+        nodeId=UUID.randomUUID().toString();sequence=0;clockOffset=0;samples.clear();bleFailed=false
         startedElapsed=SystemClock.elapsedRealtime();lastConnected=0
         mutable.value=PhoneFlowState(active=true,role=settings.role,key=if(settings.role=="HOST")settings.key else "",startedAt=System.currentTimeMillis())
         try {
@@ -80,19 +80,29 @@ internal class PhoneFlow(private val context:Context) {
             }
             val cfg=requireNotNull(config)
             val zone=if(settings.role=="HOST")settings.zone else cfg.zones.entries.first { it.value==settings.zone }.key
-            radio=BleRadio(context,{ observation -> scope.launch { accept(observation,cfg) } },{ scope.launch { if(config?.id==cfg.id)bleFailed=true } })
+            val mailbox=FlowInbox(cfg.targets);inbox=mailbox
+            pump=scope.launch { var processed=0;for(reading in mailbox.queue) { if(config?.id==cfg.id && state.value.active)accept(reading);if(++processed % 32==0)yield() } }
+            radio=BleRadio(context,{ observation ->
+                if(inbox===mailbox && config?.id==cfg.id) {
+                    val address=runCatching { com.cinemawatch.data.RadioAddress.normalize(observation.mac,"BLE") }.getOrDefault("")
+                    mailbox.offer(address,observation.rssi,observation.at,System.currentTimeMillis(),clockOffset)
+                }
+            },{ scope.launch { if(config?.id==cfg.id)bleFailed=true } })
             runCatching { radio?.start(ScanIntensity.BALANCED) }.onFailure { bleFailed=true }
             job=scope.launch {
+                var previousDrops=0
                 while(isActive && state.value.active) {
                     if(SystemClock.elapsedRealtime()-startedElapsed>=900000 || System.currentTimeMillis()+clockOffset>=cfg.expires) { stop();break }
                     if(radio?.needsRestart()==true) { runCatching { radio?.stop() };delay(radio?.restartBackoffMs() ?: 2500);if(state.value.active) { bleFailed=false;runCatching { radio?.start(ScanIntensity.BALANCED) }.onFailure { bleFailed=true } } }
                     val now=System.currentTimeMillis()+clockOffset
                     samples.removeAll { now-it.at>6000 };sequence++
-                    val healthy=!bleFailed && System.currentTimeMillis()-heardAt in 0..10000
-                    val node=FlowNode(nodeId,settings.name,zone,settings.offset,now,healthy,sequence)
+                    val drops=mailbox.drops.get();val overloaded=drops>previousDrops;previousDrops=drops
+                    val healthy=!bleFailed && !overloaded && System.currentTimeMillis()-mailbox.heardAt.get() in 0..10000
+                    val scanError=if(bleFailed)"SCAN" else if(overloaded)"LOAD" else ""
+                    val node=FlowNode(nodeId,settings.name,zone,settings.offset,now,healthy,sequence,drops)
                     if(settings.role=="HOST") {
                         tracker?.ingest(node,samples.toList(),now)
-                        mutable.value=state.value.copy(snapshot=tracker!!.evaluate(now),error=if(bleFailed)"SCAN" else "")
+                        mutable.value=state.value.copy(snapshot=tracker!!.evaluate(now),error=scanError)
                     } else {
                         val request=JSONObject().put("action","push").put("session",cfg.id).put("time",now)
                             .put("node",nodeJson(node)).put("readings",JSONArray().apply { samples.forEach { put(JSONObject().put("target",it.target).put("rssi",it.rssi).put("at",it.at)) } })
@@ -101,7 +111,7 @@ internal class PhoneFlow(private val context:Context) {
                             val rtt=SystemClock.elapsedRealtime()-elapsed
                             if(rtt<=1500) {
                                 clockOffset=response.getLong("time")-(start+rtt/2);lastConnected=SystemClock.elapsedRealtime()
-                                mutable.value=state.value.copy(connected=true,rtt=rtt,snapshot=snapshotParse(response.getJSONObject("snapshot")),error=if(bleFailed)"SCAN" else "")
+                                mutable.value=state.value.copy(connected=true,rtt=rtt,snapshot=snapshotParse(response.getJSONObject("snapshot")),error=scanError)
                             } else offline(rtt)
                         }.onFailure { offline() }
                         if(SystemClock.elapsedRealtime()-lastConnected>30000) { stop();break }
@@ -116,13 +126,9 @@ internal class PhoneFlow(private val context:Context) {
         val prior=state.value
         mutable.value=prior.copy(connected=false,rtt=rtt,error="NETWORK",snapshot=prior.snapshot.copy(nodes=prior.snapshot.nodes.map { it.copy(healthy=false) },presence=prior.snapshot.presence.map { it.copy(zone=null) },signals=emptyList()))
     }
-    private fun accept(o:Observation,cfg:FlowConfig) {
-        if(!state.value.active || config?.id!=cfg.id)return
-        heardAt=System.currentTimeMillis()
-        if(!InspectionPolicy.validRssi(o.rssi))return
-        val address=runCatching { com.cinemawatch.data.RadioAddress.normalize(o.mac,"BLE") }.getOrNull() ?: return
-        val target=cfg.targets.firstOrNull { it.address==address } ?: return
-        samples+=FlowReading(target.id,o.rssi,System.currentTimeMillis()+clockOffset)
+    private fun accept(reading:FlowReading) {
+        if(System.currentTimeMillis()+clockOffset-reading.at !in 0..6000)return
+        samples+=reading
         while(samples.size>512)samples.removeAt(0)
     }
     private fun reply(body:JSONObject):JSONObject {
@@ -131,7 +137,7 @@ internal class PhoneFlow(private val context:Context) {
             "join" -> return JSONObject().put("time",now).put("config",cfg.json())
             "push" -> {
                 require(body.getString("session")==cfg.id && now-body.getLong("time") in -1500L..6000L)
-                val n=body.getJSONObject("node");val node=FlowNode(n.getString("id"),n.getString("name"),n.getString("zone"),n.getInt("offset"),now,n.getBoolean("healthy"),n.getLong("sequence"))
+                val n=body.getJSONObject("node");val node=FlowNode(n.getString("id"),n.getString("name"),n.getString("zone"),n.getInt("offset"),now,n.getBoolean("healthy"),n.getLong("sequence"),n.optInt("drops",0))
                 val rs=body.getJSONArray("readings");require(rs.length()<=512)
                 val values=(0 until rs.length()).map { rs.getJSONObject(it).let { r -> FlowReading(r.getString("target"),r.getInt("rssi"),r.getLong("at")) } }
                 tracker!!.ingest(node,values,now)
@@ -143,7 +149,7 @@ internal class PhoneFlow(private val context:Context) {
     fun markTruth(target:String,zone:String) { tracker?.markTruth(target,zone,System.currentTimeMillis());tracker?.snapshot()?.let { mutable.value=state.value.copy(snapshot=it) } }
     fun stop() {
         val prior=state.value;if(!prior.active) { setup=null;return }
-        job?.cancel();job=null;runCatching { server?.close() };server=null;runCatching { radio?.stop() };radio=null
+        job?.cancel();job=null;inbox?.close();inbox=null;pump?.cancel();pump=null;runCatching { server?.close() };server=null;runCatching { radio?.stop() };radio=null
         val snapshot=tracker?.snapshot() ?: prior.snapshot
         val cfg=config
         mutable.value=prior.copy(active=false,connected=false,key="",snapshot=snapshot,config=cfg?.copy(targets=cfg.targets.map { it.copy(address="") }))
@@ -172,7 +178,7 @@ internal class PhoneFlow(private val context:Context) {
         }.getOrDefault("")
     }
 }
-internal fun nodeJson(n:FlowNode)=JSONObject().put("id",n.id).put("name",n.name).put("zone",n.zone).put("offset",n.offset).put("at",n.at).put("healthy",n.healthy).put("sequence",n.sequence)
+internal fun nodeJson(n:FlowNode)=JSONObject().put("id",n.id).put("name",n.name).put("zone",n.zone).put("offset",n.offset).put("at",n.at).put("healthy",n.healthy).put("sequence",n.sequence).put("drops",n.drops)
 internal fun wireSnapshotJson(s:FlowSnapshot)=snapshotJson(s.copy(signals=s.signals.take(48),transitions=s.transitions.takeLast(20),truths=s.truths.takeLast(20)))
 internal fun snapshotJson(s:FlowSnapshot)=JSONObject().put("nodes",JSONArray().apply { s.nodes.forEach { put(nodeJson(it)) } })
     .put("presence",JSONArray().apply { s.presence.forEach { put(JSONObject().put("target",it.target).put("label",it.label).put("zone",it.zone ?: JSONObject.NULL).put("margin",it.margin).put("receivers",it.receivers)) } })
@@ -181,7 +187,7 @@ internal fun snapshotJson(s:FlowSnapshot)=JSONObject().put("nodes",JSONArray().a
     .put("dwell",JSONObject(s.dwellSeconds)).put("truths",JSONArray().apply { s.truths.forEach { put(JSONObject().put("label",it.label).put("expected",it.expected).put("observed",it.observed ?: JSONObject.NULL).put("at",it.at)) } })
 internal fun snapshotParse(j:JSONObject):FlowSnapshot {
     fun array(name:String)=j.getJSONArray(name).let { a -> require(a.length()<=1000);(0 until a.length()).map { a.getJSONObject(it) } }
-    val dwell=j.getJSONObject("dwell");val nodes=array("nodes").map { FlowNode(it.getString("id"),it.getString("name"),it.getString("zone"),it.getInt("offset"),it.getLong("at"),it.getBoolean("healthy"),it.getLong("sequence")) }
+    val dwell=j.getJSONObject("dwell");val nodes=array("nodes").map { FlowNode(it.getString("id"),it.getString("name"),it.getString("zone"),it.getInt("offset"),it.getLong("at"),it.getBoolean("healthy"),it.getLong("sequence"),it.optInt("drops",0)) }
     return FlowSnapshot(nodes,array("presence").map { FlowPresence(it.getString("target"),it.getString("label"),if(it.isNull("zone"))null else it.getString("zone"),it.getInt("margin"),it.getInt("receivers")) },
         array("signals").map { FlowSignal(it.getString("label"),it.getString("node"),it.getString("zone"),it.getInt("median"),it.getInt("samples")) },
         array("transitions").map { FlowTransition(it.getString("label"),it.getString("from"),it.getString("to"),it.getLong("at")) },dwell.keys().asSequence().associateWith { dwell.getLong(it) },

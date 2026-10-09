@@ -354,4 +354,6 @@
     <string name="flow_preview">Preview</string>
     <string name="flow_export">Export experiment JSON</string>
     <string name="flow_archive_summary">%1$d nodes · %2$d transitions · %3$d ground-truth checks</string>
+    <string name="flow_load_error">Authorized-signal queue overloaded. This node is excluded for this window. Reduce tag count or advertising frequency.</string>
+    <string name="flow_drops">Authorized sample queue dropped %1$d readings</string>
 </resources>

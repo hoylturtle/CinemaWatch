@@ -354,4 +354,6 @@
     <string name="flow_preview">直接預覽</string>
     <string name="flow_export">匯出驗證 JSON</string>
     <string name="flow_archive_summary">%1$d 個節點 · %2$d 次區域切換 · %3$d 次現場核驗</string>
+    <string name="flow_load_error">授權訊號佇列過載：本視窗排除此節點，保留丟棄計數；減少標籤數量或降低廣播頻率。</string>
+    <string name="flow_drops">授權樣本佇列累計丟棄 %1$d 條</string>
 </resources>

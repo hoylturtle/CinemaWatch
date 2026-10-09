@@ -126,7 +126,7 @@ import java.util.Date
                         } else Text(stringResource(R.string.flow_rtt,state.rtt))
                         OutlinedButton(onClick={ app.phoneFlow.stop() },modifier=Modifier.fillMaxWidth().testTag("flow-stop")) { Text(stringResource(R.string.flow_stop)) }
                     }
-                    if(error || state.error.isNotBlank())Text(stringResource(when(state.error) { "SCAN" -> R.string.flow_scan_error;"SAVE" -> R.string.error_save;else -> R.string.flow_error }),color=MaterialTheme.colorScheme.error)
+                    if(error || state.error.isNotBlank())Text(stringResource(when(state.error) { "SCAN" -> R.string.flow_scan_error;"LOAD" -> R.string.flow_load_error;"SAVE" -> R.string.error_save;else -> R.string.flow_error }),color=MaterialTheme.colorScheme.error)
                     if(state.config!=null) {
                         val cfg=state.config!!
                         val snapshot=state.snapshot
@@ -135,6 +135,7 @@ import java.util.Date
                             snapshot.nodes.forEach { node ->
                                 val online=node.healthy && (state.role!="HOST" || System.currentTimeMillis()-node.at in 0..10000)
                                 Text(node.name+" · "+cfg.zones[node.zone]+" · "+stringResource(if(online)R.string.flow_ready else R.string.flow_unready))
+                                if(node.drops>0)Text(stringResource(R.string.flow_drops,node.drops),style=MaterialTheme.typography.bodySmall)
                             }
                             Text(stringResource(R.string.flow_algorithm),style=MaterialTheme.typography.bodySmall)
                         }

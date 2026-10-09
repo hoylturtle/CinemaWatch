@@ -354,4 +354,6 @@
     <string name="flow_preview">直接预览</string>
     <string name="flow_export">导出验证 JSON</string>
     <string name="flow_archive_summary">%1$d 个节点 · %2$d 次区域切换 · %3$d 次现场核验</string>
+    <string name="flow_load_error">授权信号队列过载：本窗口排除此节点，保留丢弃计数；减少标签数量或降低广播频率。</string>
+    <string name="flow_drops">授权样本队列累计丢弃 %1$d 条</string>
 </resources>

@@ -7,6 +7,9 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.security.SecureRandom
+import java.util.concurrent.ArrayBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -39,12 +42,37 @@ internal object FlowWire {
 }
 internal class FlowServer(private val key:String,private val handler:(JSONObject)->JSONObject): AutoCloseable {
     private val server=ServerSocket().apply { reuseAddress=true;bind(InetSocketAddress(FlowWire.PORT));soTimeout=1000 }
+    private val guard=Any()
+    private val clients=HashSet<Socket>()
+    private val peers=HashMap<String,Int>()
+    private val workers=ThreadPoolExecutor(4,4,0L,TimeUnit.MILLISECONDS,ArrayBlockingQueue<Runnable>(16),{ task -> Thread(task,"CinemaWatch-LAN").apply { isDaemon=true } },ThreadPoolExecutor.AbortPolicy())
     @Volatile private var running=true
+    private fun release(socket:Socket,peer:String) {
+        runCatching { socket.close() }
+        synchronized(guard) { clients.remove(socket);val remaining=(peers[peer] ?: 1)-1;if(remaining<=0)peers.remove(peer) else peers[peer]=remaining }
+    }
     fun serve() {
         while(running) {
-            try { server.accept().use { socket -> socket.soTimeout=2000;runCatching { FlowWire.write(socket,handler(FlowWire.read(socket,key)),key) } } }
-            catch (_: Exception) { if(!running)break }
+            try {
+                val socket=server.accept();val peer=socket.inetAddress.hostAddress.orEmpty()
+                val accepted=synchronized(guard) {
+                    if(!running || clients.size>=20 || (peers[peer] ?: 0)>=2)false
+                    else { clients+=socket;peers[peer]=(peers[peer] ?: 0)+1;true }
+                }
+                if(!accepted) { socket.close();continue }
+                try {
+                    workers.execute {
+                        try { socket.soTimeout=1000;runCatching { FlowWire.write(socket,handler(FlowWire.read(socket,key)),key) } }
+                        finally { release(socket,peer) }
+                    }
+                } catch (_:Exception) { release(socket,peer) }
+            } catch (_:Exception) { if(!running)break }
         }
     }
-    override fun close() { running=false;server.close() }
+    override fun close() {
+        running=false;server.close()
+        val pending=synchronized(guard) { clients.toList() }
+        pending.forEach { runCatching { it.close() } }
+        workers.shutdownNow()
+    }
 }

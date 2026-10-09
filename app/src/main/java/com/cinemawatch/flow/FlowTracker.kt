@@ -3,7 +3,7 @@ package com.cinemawatch.flow
 import com.cinemawatch.domain.InspectionPolicy
 
 data class FlowTarget(val id: String, val label: String, val address: String)
-data class FlowNode(val id: String, val name: String, val zone: String, val offset: Int, val at: Long, val healthy: Boolean, val sequence: Long)
+data class FlowNode(val id: String, val name: String, val zone: String, val offset: Int, val at: Long, val healthy: Boolean, val sequence: Long, val drops: Int = 0)
 data class FlowReading(val target: String, val rssi: Int, val at: Long)
 data class FlowPresence(val target: String, val label: String, val zone: String?, val margin: Int, val receivers: Int)
 data class FlowSignal(val label: String, val node: String, val zone: String, val median: Int, val samples: Int)
@@ -24,7 +24,7 @@ class FlowTracker(private val targets: List<FlowTarget>, private val zones: Set<
     private var last = FlowSnapshot()
     init { require(targets.size in 1..16 && targets.map { it.id }.distinct().size == targets.size && zones.size in 2..100) }
     @Synchronized fun ingest(node: FlowNode, readings: List<FlowReading>, now: Long) {
-        require(node.zone in zones && node.name.length in 1..60 && node.id.length in 1..80 && node.offset in -20..20 && node.sequence >= 0 && readings.size <= 512)
+        require(node.zone in zones && node.name.length in 1..60 && node.id.length in 1..80 && node.offset in -20..20 && node.sequence >= 0 && node.drops >= 0 && readings.size <= 512)
         nodes.entries.filter { now - it.value.at > 60000 }.map { it.key }.forEach { id -> nodes.remove(id); samples.keys.filter { it.second == id }.forEach(samples::remove) }
         val prior = nodes[node.id]
         require(prior == null || node.sequence > prior.sequence) { "Replay or duplicate sequence" }
