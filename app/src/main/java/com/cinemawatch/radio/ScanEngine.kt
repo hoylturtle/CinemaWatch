@@ -295,8 +295,8 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
             val history = repository.dao.history(asset.id)
             val radios = p.bindings.filter { it.assetId == asset.id }.map { it.radio }
             val healthy = radios.isNotEmpty() && radios.all { if (it == "WIFI") s.wifiHealthy else s.bleHealthy }
-            val past = history.filter { it.status in setOf("NORMAL", "LEARNING") }.mapNotNull { it.medianRssi }
-            val e = InspectionPolicy.evaluate(p.samples[asset.id].orEmpty(), past, history.firstOrNull()?.consecutiveMisses ?: 0, healthy)
+            val confirmed = repository.dao.baseline(asset.id)?.rssi
+            val e = InspectionPolicy.evaluate(p.samples[asset.id].orEmpty(), emptyList(), history.firstOrNull()?.consecutiveMisses ?: 0, healthy, confirmed)
             AssetResult(s.id, asset.id, s.endMs, e.status.name, e.median, e.spread, e.misses, e.baseline)
         }
         repository.save(s, results, p.groups)

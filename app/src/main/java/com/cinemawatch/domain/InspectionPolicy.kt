@@ -11,11 +11,11 @@ object InspectionPolicy {
     }
     /** Valid receiving RSSI only. Never count positive/sentinel values as evidence. */
     fun validRssi(value: Int) = value in -120..-1
-    fun evaluate(samples: List<Int>, priorHealthyMedians: List<Int>, previousMisses: Int, healthy: Boolean): Evaluation {
+    fun evaluate(samples: List<Int>, priorHealthyMedians: List<Int>, previousMisses: Int, healthy: Boolean, confirmedBaseline: Int? = null): Evaluation {
         val valid = samples.filter(::validRssi)
         val m = median(valid)
         val spread = if (valid.isEmpty()) 0 else valid.max() - valid.min()
-        val baseline = if (priorHealthyMedians.size >= 3) median(priorHealthyMedians.take(5)) else null
+        val baseline = confirmedBaseline ?: if (priorHealthyMedians.size >= 3) median(priorHealthyMedians.take(5)) else null
         if (!healthy) return Evaluation(AssetStatus.UNAVAILABLE, m, spread, previousMisses, baseline)
         if (m == null) {
             val misses = previousMisses + 1

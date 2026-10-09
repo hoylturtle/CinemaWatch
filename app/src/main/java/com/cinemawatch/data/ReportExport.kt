@@ -4,9 +4,9 @@ import app.fieldwatch.domain.CsvCells
 
 /** Export exclusively from the aggregate/authorized-result database projections. Never accept raw radio objects. */
 object ReportExport {
-    fun csv(sessions: List<Inspection>, zones: List<Zone>, cinemas: List<Cinema>, results: List<AssetResult>, assets: List<CinemaAsset>, context: android.content.Context? = null, groups: List<SignalGroupCount> = emptyList()): String = buildString {
+    fun csv(sessions: List<Inspection>, zones: List<Zone>, cinemas: List<Cinema>, results: List<AssetResult>, assets: List<CinemaAsset>, context: android.content.Context? = null, groups: List<SignalGroupCount> = emptyList(), issues: List<MaintenanceIssue> = emptyList(), events: List<IssueEvent> = emptyList()): String = buildString {
         append('\uFEFF')
-        append(context?.getString(com.cinemawatch.R.string.csv_header) ?: "Record ID,Cinema,Zone,Mode,Start milliseconds,End milliseconds,Seconds,Unregistered WiFi APs,Unregistered BLE addresses,Seen authorized assets,Fresh WiFi batches,BLE advertisements,Discarded,Dropped,WiFi coverage,BLE coverage,Demo,Planned attendance,Manual count,Gate count,Measurement location,Asset,Status,Median RSSI,Baseline RSSI,Signal groups (aggregate only),Requested seconds").append(",").append(context?.getString(com.cinemawatch.R.string.asset_location) ?: "Asset location").append(",").append(context?.getString(com.cinemawatch.R.string.asset_notes) ?: "Asset notes").append('\n')
+        append(context?.getString(com.cinemawatch.R.string.csv_header) ?: "Record ID,Cinema,Zone,Mode,Start milliseconds,End milliseconds,Seconds,Unregistered WiFi APs,Unregistered BLE addresses,Seen authorized assets,Fresh WiFi batches,BLE advertisements,Discarded,Dropped,WiFi coverage,BLE coverage,Demo,Planned attendance,Manual count,Gate count,Measurement location,Asset,Status,Median RSSI,Baseline RSSI,Signal groups (aggregate only),Requested seconds").append(",").append(context?.getString(com.cinemawatch.R.string.asset_location) ?: "Asset location").append(",").append(context?.getString(com.cinemawatch.R.string.asset_notes) ?: "Asset notes").append(",").append(context?.getString(com.cinemawatch.R.string.csv_maintenance_state) ?: "Current maintenance state").append(",").append(context?.getString(com.cinemawatch.R.string.processing_history) ?: "Maintenance history").append('\n')
         sessions.forEach { s ->
             val zone = zones.find { it.id == s.zoneId }
             val base = listOf(s.id, cinemas.find { it.id == zone?.cinemaId }?.name.orEmpty(), zone?.name.orEmpty(),
@@ -15,9 +15,9 @@ object ReportExport {
                 s.demo, s.planned ?: "", s.actual ?: "", s.gate ?: "", s.point)
             val extra = listOf(groups.filter { it.sessionId == s.id }.sortedWith(compareBy({ it.radio }, { it.groupCode })).joinToString(";") { "${it.radio}/${it.groupCode}=${it.count}" }, s.requestedSeconds ?: "")
             val rows = results.filter { it.sessionId == s.id }
-            if (rows.isEmpty()) append((base + listOf("", "", "", "") + extra + listOf("", "")).joinToString(",") { CsvCells.quote(it.toString()) }).append('\n')
+            if (rows.isEmpty()) append((base + listOf("", "", "", "") + extra + listOf("", "", "", "")).joinToString(",") { CsvCells.quote(it.toString()) }).append('\n')
             else rows.forEach { r ->
-                append((base + listOf(assets.find { it.id == r.assetId }?.name.orEmpty(), context?.getString(statusResource(r.status)) ?: r.status, r.medianRssi ?: "", r.baselineRssi ?: "") + extra + listOf(assets.find { it.id == r.assetId }?.location.orEmpty(), assets.find { it.id == r.assetId }?.notes.orEmpty()))
+                append((base + listOf(assets.find { it.id == r.assetId }?.name.orEmpty(), context?.getString(statusResource(r.status)) ?: r.status, r.medianRssi ?: "", r.baselineRssi ?: "") + extra + listOf(assets.find { it.id == r.assetId }?.location.orEmpty(), assets.find { it.id == r.assetId }?.notes.orEmpty(), issues.firstOrNull { it.assetId == r.assetId }?.state.orEmpty(), events.filter { e -> issues.any { it.assetId == r.assetId && it.id == e.issueId } }.joinToString("; ") { e -> "${e.action}: ${e.note}" }))
                     .joinToString(",") { CsvCells.quote(it.toString()) }).append('\n')
             }
         }

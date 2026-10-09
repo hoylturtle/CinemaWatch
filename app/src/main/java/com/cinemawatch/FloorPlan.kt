@@ -126,7 +126,7 @@ class FloorPlanStore(private val context: Context, cinemaId: String) {
 
 private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
 
-@Composable internal fun FloorPlanDialog(cinema: Cinema, zones: List<Zone>, assets: List<CinemaAsset>, onDismiss: () -> Unit, onAddZone: suspend (String) -> Zone) {
+@Composable internal fun FloorPlanDialog(cinema: Cinema, zones: List<Zone>, assets: List<CinemaAsset>, onDismiss: () -> Unit, onAddZone: suspend (String) -> Zone, assetStatuses: Map<String, String> = emptyMap(), onOpenAsset: (CinemaAsset) -> Unit = {}) {
     val context = LocalContext.current; val scope = rememberCoroutineScope()
     val activity = remember(context) {
         generateSequence(context) { (it as? android.content.ContextWrapper)?.baseContext }
@@ -146,6 +146,7 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
     var pickerOpen by remember { mutableStateOf(false) }; var importOpen by remember { mutableStateOf(false) }; var blankOpen by remember { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }; var error by remember { mutableStateOf(false) }; var snap by remember { mutableStateOf(true) }
     var zoom by remember { mutableFloatStateOf(1f) }; var pan by remember { mutableStateOf(Offset.Zero) }
+    var zoneDetail by remember { mutableStateOf<Zone?>(null) }
     var page by remember { mutableStateOf("1") }; var name by remember { mutableStateOf("") }
     val labels = zones.associate { "zone:${it.id}" to it.name } + assets.associate { "asset:${it.id}" to it.name }
     fun commit(next: List<PlanPin>, previous: List<PlanPin> = pins) {
@@ -257,7 +258,13 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                             if (!transformed && !moved) {
                                 val p = local(start, androidx.compose.ui.geometry.Size(size.width.toFloat(), size.height.toFloat()))
                                 when (tool) {
-                                    PlanTool.SELECT -> selected = hit(p)?.target
+                                    PlanTool.SELECT -> {
+                                        selected = hit(p)?.target
+                                        selected?.let { id ->
+                                            if (id.startsWith("asset:")) assets.find { "asset:${it.id}" == id }?.let(onOpenAsset)
+                                            if (id.startsWith("zone:")) zoneDetail = zones.find { "zone:${it.id}" == id }
+                                        }
+                                    }
                                     PlanTool.ASSET -> selected?.takeIf { it.startsWith("asset:") }?.let { id -> commit(pins.filterNot { it.target == id } + PlanPin(id, p.x, p.y)) }
                                     PlanTool.ROOM, PlanTool.WALL, PlanTool.DOOR -> {
                                         if (tool == PlanTool.ROOM && draft.size >= 3 && kotlin.math.hypot((p.x - draft.first().x).toDouble(), (p.y - draft.first().y).toDouble()) < .035 / zoom) finish()
@@ -286,7 +293,7 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
                             if (isRoom) drawPath(path, Color(0x2059DBC6))
                             drawPath(path, color, style = androidx.compose.ui.graphics.drawscope.Stroke(if (pin.target.startsWith("door:")) 2.dp.toPx() else 5.dp.toPx()))
                             if (pin.target.startsWith("door:")) { val a = screen(points.first()); val b = screen(points.last()); val length = (b - a).getDistance(); drawArc(Color(0xFF1AAFA0), (kotlin.math.atan2((b.y - a.y).toDouble(), (b.x - a.x).toDouble()) * 180 / kotlin.math.PI).toFloat(), 90f, false, Offset(a.x - length, a.y - length), androidx.compose.ui.geometry.Size(length * 2, length * 2), style = androidx.compose.ui.graphics.drawscope.Stroke(1.dp.toPx())) }
-                        } else drawCircle(if (pin.target.startsWith("asset:")) Color(0xFFFFB545) else color, 7.dp.toPx(), screen(PlanPoint(pin.x, pin.y)))
+                        } else drawCircle(if (pin.target.startsWith("asset:")) when (assetStatuses[pin.target.removePrefix("asset:")]) { "NORMAL" -> Color(0xFF66D2A5); "MISSING", "REVIEW" -> Color(0xFFFF7A7A); "WEAK", "UNSTABLE" -> Color(0xFFFFB545); else -> Color(0xFF92A2B0) } else color, 7.dp.toPx(), screen(PlanPoint(pin.x, pin.y)))
                         labels[pin.target]?.let { label -> val point = screen(PlanPoint(pin.x, pin.y)); val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { this.color = android.graphics.Color.BLACK; textSize = 12.dp.toPx(); setShadowLayer(2f, 0f, 0f, android.graphics.Color.WHITE) }; drawContext.canvas.nativeCanvas.drawText(label.take(24), point.x, point.y - 10.dp.toPx(), paint) }
                     }
                     draft.forEachIndexed { index, point -> val at = screen(point); drawCircle(Color(0xFF1AAFA0), 5.dp.toPx(), at); if (index > 0) drawLine(Color(0xFF1AAFA0), screen(draft[index - 1]), at, 4.dp.toPx()) }
@@ -304,6 +311,15 @@ private enum class PlanTool { SELECT, PAN, WALL, ROOM, DOOR, ASSET }
             }
         }
     }
+    zoneDetail?.let { zone -> AlertDialog(onDismissRequest = { zoneDetail = null }, title = { Text(zone.name) }, text = {
+        androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 360.dp)) {
+            val own = assets.filter { it.zoneId == zone.id }
+            if (own.isEmpty()) item { Text(stringResource(R.string.no_assets)) }
+            items(own.size) { index -> val asset = own[index]; TextButton(onClick = { zoneDetail = null; onOpenAsset(asset) }) {
+                Column { Text(asset.name); Text(asset.location); StatusChip(assetStatuses[asset.id] ?: "PENDING") }
+            } }
+        }
+    }, confirmButton = { TextButton(onClick = { zoneDetail = null }) { Text(stringResource(R.string.close)) } }) }
     if (room) AlertDialog(onDismissRequest = { room = false }, title = { Text(stringResource(R.string.plan_name_room)) }, text = {
         Column { OutlinedTextField(name, { name = it.take(80) }, label = { Text(stringResource(R.string.zone_name)) }, modifier = Modifier.testTag("plan-room-name")); androidx.compose.foundation.lazy.LazyColumn(Modifier.heightIn(max = 220.dp)) { items(zones.size) { index -> val zone = zones[index]; TextButton(onClick = { addRoom("zone:${zone.id}") }) { Text(zone.name) } } } }
     }, confirmButton = { Button(onClick = { scope.launch { busy = true; runCatching { onAddZone(name) }.onSuccess { addRoom("zone:${it.id}") }.onFailure { error = true }; busy = false } }, enabled = !busy && name.isNotBlank()) { Text(stringResource(R.string.add_zone)) } }, dismissButton = { TextButton(onClick = { room = false }) { Text(stringResource(R.string.cancel)) } })

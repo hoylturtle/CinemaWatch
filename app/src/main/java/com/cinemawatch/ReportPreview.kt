@@ -64,13 +64,18 @@ internal fun statusLabel(status: String) = when (status) {
 internal fun Inspection.overran(): Boolean = durationSeconds > (requestedSeconds?.plus(5) ?: 185)
 
 /** Text shares exclusively the same aggregate and authorized-result projections as the preview. */
-internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String, results: List<AssetResult>, assets: List<CinemaAsset>, groups: List<SignalGroupCount>): String = buildString {
+internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String, results: List<AssetResult>, assets: List<CinemaAsset>, groups: List<SignalGroupCount>, issues: List<MaintenanceIssue> = emptyList(), events: List<IssueEvent> = emptyList()): String = buildString {
     appendLine(c.getString(R.string.report_title)); appendLine("$cinema · $zone")
     appendLine(SimpleDateFormat("yyyy/MM/dd HH:mm", c.resources.configuration.locales[0]).format(Date(s.startMs)))
     if (s.demo) appendLine(c.getString(R.string.demo_note))
     if (s.imported) appendLine(c.getString(R.string.imported_record))
     appendLine("${c.getString(R.string.actual_duration)}: ${c.getString(R.string.seconds_format, s.durationSeconds)}")
     appendLine("${c.getString(R.string.wifi_aps)}: ${s.wifiCount}"); appendLine("${c.getString(R.string.ble_radios)}: ${s.bleCount}")
+    results.filter { it.sessionId == s.id }.forEach { result ->
+        val own = issues.filter { it.assetId == result.assetId }
+        own.firstOrNull { it.state != "CLOSED" }?.let { appendLine(c.getString(issueLabel(it.state))) }
+        events.filter { e -> own.any { it.id == e.issueId } }.take(5).forEach { e -> appendLine(c.getString(issueLabel(e.action)) + " · " + e.note) }
+    }
     appendLine(c.getString(R.string.calibration_pending)); appendLine(c.getString(R.string.signal_group_note))
     groups.filter { it.sessionId == s.id }.forEach { g ->
         val category = SignalGroup.entries.find { it.name == g.groupCode } ?: SignalGroup.UNKNOWN
@@ -89,7 +94,7 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable internal fun ReportPreview(s: Inspection, cinema: String, zone: String, results: List<AssetResult>, assets: List<CinemaAsset>, groups: List<SignalGroupCount>, onClose: () -> Unit) {
+@Composable internal fun ReportPreview(s: Inspection, cinema: String, zone: String, results: List<AssetResult>, assets: List<CinemaAsset>, groups: List<SignalGroupCount>, issues: List<MaintenanceIssue> = emptyList(), events: List<IssueEvent> = emptyList(), onOpenAsset: (CinemaAsset) -> Unit = {}, onClose: () -> Unit) {
     val c = LocalContext.current
     BackHandler(onBack = onClose)
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.report_title)) }, navigationIcon = { TextButton(onClick = onClose) { Text(stringResource(R.string.close)) } }) }, modifier = Modifier.testTag("report-preview")) { padding ->
@@ -99,7 +104,7 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
                 Text(SimpleDateFormat("yyyy/MM/dd HH:mm", c.resources.configuration.locales[0]).format(Date(s.startMs)))
                 if (s.demo) Text(stringResource(R.string.demo_note), color = MaterialTheme.colorScheme.primary)
                 if (s.imported) Text(stringResource(R.string.imported_record))
-                TextButton(onClick = { c.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, reportText(c, s, cinema, zone, results, assets, groups)), c.getString(R.string.share_preview))) }) { Text(stringResource(R.string.share_preview)) }
+                TextButton(onClick = { c.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, reportText(c, s, cinema, zone, results, assets, groups, issues, events)), c.getString(R.string.share_preview))) }) { Text(stringResource(R.string.share_preview)) }
             }
             item { Panel {
                 SectionTitle(R.string.report_summary)
@@ -127,6 +132,11 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
                     Text("${stringResource(groupLabel(category))} · ${g.radio}: ${g.count}")
                 }
             } }
+            item { Panel {
+                val ownResults = results.filter { it.sessionId == s.id }
+                Text(stringResource(R.string.report_action_summary, ownResults.count { it.status in setOf("WEAK", "UNSTABLE", "REVIEW", "MISSING") }, ownResults.count { it.status == "UNAVAILABLE" }))
+                Text(stringResource(R.string.recheck_rule), style = MaterialTheme.typography.bodySmall)
+            } }
             item { SectionTitle(R.string.report_assets) }
             val rows = results.filter { it.sessionId == s.id }
             if (rows.isEmpty()) item { Text(stringResource(R.string.report_no_assets)) }
@@ -135,6 +145,14 @@ internal fun reportText(c: Context, s: Inspection, cinema: String, zone: String,
                 assets.find { it.id == r.assetId }?.let { asset ->
                     if (asset.location.isNotBlank()) Metric(R.string.asset_location, asset.location)
                     if (asset.notes.isNotBlank()) Metric(R.string.asset_notes, asset.notes)
+                }
+                assets.find { it.id == r.assetId }?.let { asset ->
+                    TextButton(onClick = { onOpenAsset(asset) }, modifier = Modifier.testTag("report-workflow-${asset.id}")) { Text(stringResource(R.string.asset_workflow)) }
+                    val ownIssues = issues.filter { it.assetId == asset.id }
+                    ownIssues.firstOrNull { it.state != "CLOSED" }?.let { Text(stringResource(issueLabel(it.state))) }
+                    events.filter { event -> ownIssues.any { it.id == event.issueId } && (event.sessionId == s.id || event.at >= s.endMs) }.take(5).forEach { event ->
+                        Text(stringResource(issueLabel(event.action)) + if (event.note.isNotBlank()) " · ${event.note}" else "")
+                    }
                 }
                 Metric(R.string.baseline_rssi, r.baselineRssi?.let { "$it dBm" } ?: stringResource(R.string.no_baseline))
                 Text("RSSI: ${r.medianRssi ?: "—"} dBm")

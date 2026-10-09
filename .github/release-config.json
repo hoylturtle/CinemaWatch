@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 9,
-  "versionName": "0.7.0",
+  "versionCode": 10,
+  "versionName": "0.8.0",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "基于 Fieldwatch 固定版改造实时分组界面：填充卡片、分组内直接展开设备、RSSI 强度条、频率、均值与发现时间；国内生态统一样式，点击设备查看详情并登记资产。固定签名覆盖升级保留数据。"
+  "notes": "新增影城资产巡检闭环：人工确认正常基线、异常待办、现场备注与照片、处理后复检自动关闭、平面图区域与设备联动、报告与导出处理记录。保留旧数据，固定签名覆盖升级。"
 }

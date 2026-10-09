@@ -20,3 +20,5 @@ run_test FirstRunTest
 run_test UpdatesUiTest
 
 run_test FloorPlanTest
+
+run_test MaintenanceFlowTest
