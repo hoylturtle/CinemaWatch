@@ -11,7 +11,11 @@ run_test() {
   local test_class="$1"
   local log_path="build/upgrade-check/${test_class}.log"
   adb logcat -c
-  timeout 180s adb shell am instrument -w -e class "com.cinemawatch.${test_class}" com.cinemawatch.test/androidx.test.runner.AndroidJUnitRunner > "$log_path"
+  if ! timeout 180s adb shell am instrument -w -e class "com.cinemawatch.${test_class}" com.cinemawatch.test/androidx.test.runner.AndroidJUnitRunner > "$log_path"; then
+    cat "$log_path"
+    adb logcat -b crash -d -v threadtime || true
+    exit 1
+  fi
   if ! grep -Eq 'OK \([1-9][0-9]* tests?\)' "$log_path"; then
     cat "$log_path"
     adb logcat -b crash -d -v threadtime || true

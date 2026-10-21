@@ -32,3 +32,7 @@ Room 与文件系统无法原子提交。附件清理失败时保留数据库记
 [运行39688838422](https://github.com/hoylturtle/CinemaWatch/actions/runs/39688838422)：单元测试及真实旧版校验通过，release 应用包构建成功；release instrumentation 的 R8 因 Error Prone 编译期注解引用 `javax.lang.model.element.Modifier` 失败。仅在测试混淆规则中忽略这一 Android 不存在的编译器类型警告，保留 release 混淆及后续界面测试；仍需新一轮 CI 通过。
 
 检查首轮 R8 usage/mapping 还发现测试调用的 updater 注入 setter 和 Kotlin 默认参数 bridge 被优化删除。生产 release 和测试使用同一候选：保留应用公开调用面及跨模块测试使用的 SignatureClass，允许名称混淆，继续裁剪依赖与私有实现。不能只给 CI 构建特殊的“不混淆版本”再发布另一份包。
+
+## Release instrumentation 运行时诊断
+
+运行39692364179中真实旧版 seed 成功，新版安装成功，但 API35 在 AndroidJUnitRunner.onCreate 以 `NoClassDefFoundError: androidx.tracing.Trace` 崩溃，API29 超时。新增的 crash/logcat 采集提供了实际原因。APK 类型引用检查显示还有 Compose/协程共享入口被目标包优化删除；AGP 已从测试包排除了这些重复依赖。生产候选中保留测试框架所需的共享 ABI（Trace、Compose runtime/ui/foundation、核心 Activity/Lifecycle/Core、Kotlin/协程），不保留整套图标库；发布与测试仍使用同一候选。此轮失败不代表旧版安装失败，也不能据此宣称新版运行正常，需下一轮验收。
