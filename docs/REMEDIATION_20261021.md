@@ -36,3 +36,5 @@ Room 与文件系统无法原子提交。附件清理失败时保留数据库记
 ## Release instrumentation 运行时诊断
 
 运行39692364179中真实旧版 seed 成功，新版安装成功，但 API35 在 AndroidJUnitRunner.onCreate 以 `NoClassDefFoundError: androidx.tracing.Trace` 崩溃，API29 超时。新增的 crash/logcat 采集提供了实际原因。APK 类型引用检查显示还有 Compose/协程共享入口被目标包优化删除；AGP 已从测试包排除了这些重复依赖。生产候选中保留测试框架所需的共享 ABI（Trace、Compose runtime/ui/foundation、核心 Activity/Lifecycle/Core、Kotlin/协程），不保留整套图标库；发布与测试仍使用同一候选。此轮失败不代表旧版安装失败，也不能据此宣称新版运行正常，需下一轮验收。
+
+运行39694459827已通过旧代码升级、报告、三语言、平面图及维修验证；API29后续清除测试未点到确认按钮，API35实验测试未授予Android13+通知权限却断言通知可见。补充稳定的按钮tag/滚动/等待，以及通知断言的权限前提；保留全部功能断言，待下一轮完整矩阵验证。

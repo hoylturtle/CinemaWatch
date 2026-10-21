@@ -27,8 +27,9 @@ class DataResetUiTest {
         paths.forEach { it.parentFile!!.mkdirs(); it.writeText("Synthetic test content") }
         compose.onNodeWithText(compose.activity.getString(R.string.settings)).performClick()
         compose.onNodeWithTag("main-list").performScrollToNode(hasText(compose.activity.getString(R.string.reset)))
-        compose.onNodeWithText(compose.activity.getString(R.string.reset)).performClick()
-        compose.onNodeWithText(compose.activity.getString(R.string.delete)).performClick()
+        compose.onNodeWithTag("reset-cinema-data").performScrollTo().assertIsDisplayed().assertIsEnabled().performClick()
+        compose.waitUntil(10000) { compose.onAllNodesWithTag("confirm-delete").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("confirm-delete").assertIsDisplayed().performClick()
         compose.waitUntil(15000) { runBlocking { app.repository.dao.cinemas().first().isEmpty() } && paths.none { it.exists() } }
         assertEquals(language, AppCompatDelegate.getApplicationLocales().toLanguageTags())
         assertTrue(runBlocking { app.repository.dao.assets().first().isEmpty() })

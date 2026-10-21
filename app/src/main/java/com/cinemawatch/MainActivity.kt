@@ -405,7 +405,7 @@ private val Muted = Color(0xFF99AFBF)
                             Text(stringResource(R.string.import_note), color = Muted, fontSize = 12.sp)
                             TextButton(onClick = { license = true }) { Text(stringResource(R.string.licenses)) }
                             Text(stringResource(R.string.version), color = Muted, fontSize = 12.sp)
-                            TextButton(onClick = { reset = true }, enabled = !busy) { Text(stringResource(R.string.reset), color = MaterialTheme.colorScheme.error) }
+                            TextButton(onClick = { reset = true }, enabled = !busy, modifier = Modifier.testTag("reset-cinema-data")) { Text(stringResource(R.string.reset), color = MaterialTheme.colorScheme.error) }
                         }
                     }
                 }
@@ -565,7 +565,7 @@ private val Muted = Color(0xFF99AFBF)
 }
 @Composable private fun ConfirmDialog(title: Int, body: Int, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(title)) }, text = { Text(stringResource(body)) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+        confirmButton = { TextButton(onClick = onConfirm, modifier = Modifier.testTag("confirm-delete")) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) } }, dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
 }
 @Composable private fun SampleDialog(mode: String, onDismiss: () -> Unit, onStart: (Int, Int?, Int?, Int?, String) -> Unit) {
     var seconds by remember { mutableIntStateOf(120) }
