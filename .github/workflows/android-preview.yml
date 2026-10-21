@@ -43,6 +43,7 @@ jobs:
       - name: Check production flags and prepare candidates
         run: |
           python3 .github/scripts/check-release.py app/build/outputs/apk/release/app-release.apk > build/release-manifest.json
+          ./gradlew --no-daemon --max-workers=2 :app:dependencies --configuration releaseRuntimeClasspath > build/release-dependencies.txt
           mkdir -p candidate
           cp app/build/outputs/apk/release/app-release.apk candidate/
           cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk candidate/
@@ -62,9 +63,10 @@ jobs:
             app/build/reports
             app/build/test-results
             fieldwatch-core/build/test-results
-            app/build/outputs/mapping/release
+            app/build/outputs/mapping
             build/*-evidence.json
             build/release-manifest.json
+            build/release-dependencies.txt
           if-no-files-found: ignore
       - name: Remove disposable private key
         if: always()

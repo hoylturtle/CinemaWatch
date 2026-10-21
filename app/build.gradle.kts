@@ -41,6 +41,7 @@ android {
                 require(System.getenv("CW_TEST_KEYSTORE_FILE") != null) { "Verification signing requires a disposable CI key" }
                 signingConfig = signingConfigs.getByName("verification")
             } else if (System.getenv("CW_KEYSTORE_FILE") != null) signingConfig = signingConfigs.getByName("persistent")
+            testProguardFiles("test-proguard-rules.pro")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

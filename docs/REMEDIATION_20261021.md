@@ -26,3 +26,7 @@ Room 与文件系统无法原子提交。附件清理失败时保留数据库记
 - 多信号融合与双设备测绘是研究提案；没有实现米级坐标、可靠人数或顾客动线。
 
 研究方案见 [多信号融合](MULTISIGNAL_FUSION_PROPOSAL.md) 和 [双设备测绘](DUAL_DEVICE_MAPPING_RESEARCH.md)。本次不改51项 Fieldwatch固定源码/资产，不更换上游，不发版或合并 main。
+
+## 首轮 CI
+
+[运行39688838422](https://github.com/hoylturtle/CinemaWatch/actions/runs/39688838422)：单元测试及真实旧版校验通过，release 应用包构建成功；release instrumentation 的 R8 因 Error Prone 编译期注解引用 `javax.lang.model.element.Modifier` 失败。仅在测试混淆规则中忽略这一 Android 不存在的编译器类型警告，保留 release 混淆及后续界面测试；仍需新一轮 CI 通过。

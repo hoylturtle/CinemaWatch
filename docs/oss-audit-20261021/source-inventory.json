@@ -1,0 +1,1302 @@
+[
+  {
+    "path": ".github/release-config.json",
+    "bytes": 468,
+    "sha256": "14b335a09f884b9d158551440610b88620cdf8a52d843b6229bf74774b9bbbb7",
+    "binary": false,
+    "lines": 8,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": ".github/scripts/sign-release.py",
+    "bytes": 2263,
+    "sha256": "2e7ad5b0e6f74342e25371e05c1720a5fc450656727b98a02a71d606fba2b2bc",
+    "binary": false,
+    "lines": 36,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": ".github/scripts/verify-android.sh",
+    "bytes": 870,
+    "sha256": "561770888a2800ef396c754fe1f2c746ce03793fd6424dd8831b78bb6dac1e73",
+    "binary": false,
+    "lines": 26,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": ".github/workflows/android-preview.yml",
+    "bytes": 5717,
+    "sha256": "3091dcb0ca1c1ab4310e921995b9c9cb2ea4ea712e55e61dd4fd3e585980f96d",
+    "binary": false,
+    "lines": 124,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": ".gitignore",
+    "bytes": 71,
+    "sha256": "04deaac2945eb980e20720196e5dbeb7fc449a24fd03d963b72e01851d93740b",
+    "binary": false,
+    "lines": 7,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "AGENTS.md",
+    "bytes": 863,
+    "sha256": "e6a38f31060667d5f6fb6f4e6a88b4d5d66b70dfa6bb6d064b7f5e8f5b8548ac",
+    "binary": false,
+    "lines": 20,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "FIELDWATCH_REUSE_REPORT.md",
+    "bytes": 34539,
+    "sha256": "2ed240914d6d0b8a48116adbd441a3e25d7166e25d00d077900669324c5cd54c",
+    "binary": false,
+    "lines": 418,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "README.md",
+    "bytes": 2225,
+    "sha256": "2851339c3576d2257bca1df44bd35bc487897dac0ab54425729e023049ecb47f",
+    "binary": false,
+    "lines": 24,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/build.gradle.kts",
+    "bytes": 3613,
+    "sha256": "77163791050265554c25a9e135e8a808802788d7982ccbe59549cc66309507b4",
+    "binary": false,
+    "lines": 75,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/proguard-rules.pro",
+    "bytes": 82,
+    "sha256": "63431959118a2bd496c75c1a9cebf3629b6aa1c151dc9611c21f62c63afbf76c",
+    "binary": false,
+    "lines": 2,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/FirstRunTest.kt",
+    "bytes": 12026,
+    "sha256": "b607d74f587f475bafd0683ae1fee03c38c3d06328d76c5a1f6a2ffe2a0925c1",
+    "binary": false,
+    "lines": 174,
+    "mac_literal_occurrences": 13
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/FloorPlanTest.kt",
+    "bytes": 8568,
+    "sha256": "1d357e02cea3a7bdbf13c8977063f99e945abefbbb585078bc5a01fdf65458c0",
+    "binary": false,
+    "lines": 129,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/MaintenanceFlowTest.kt",
+    "bytes": 4446,
+    "sha256": "e1b29e92b1353fb682cfc513592dd513be21eb043f1e869acd371da6ac815f72",
+    "binary": false,
+    "lines": 67,
+    "mac_literal_occurrences": 1
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/PhoneFlowTest.kt",
+    "bytes": 6077,
+    "sha256": "0826060782a2b8ee057442d9f62cdc7135125fdf4b92546ea3a22b39b5751ac6",
+    "binary": false,
+    "lines": 87,
+    "mac_literal_occurrences": 2
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/UpdatesUiTest.kt",
+    "bytes": 2581,
+    "sha256": "09c82e0db451903208ed3c410707fb8f07c2197b89882396ebf15f54bf061d4f",
+    "binary": false,
+    "lines": 42,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/androidTest/java/com/cinemawatch/UpgradePersistenceTest.kt",
+    "bytes": 3097,
+    "sha256": "69276e98c25490c2e1065f60fbcf37009774e36192fa37e8707dca938d991d1a",
+    "binary": false,
+    "lines": 53,
+    "mac_literal_occurrences": 2
+  },
+  {
+    "path": "app/src/main/AndroidManifest.xml",
+    "bytes": 2956,
+    "sha256": "55b1f4b1aa654a53669343cf91e9546792cf1567b7f601bff17c7a5b80c9e4ea",
+    "binary": false,
+    "lines": 34,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/assets/attribution/LICENSE",
+    "bytes": 1074,
+    "sha256": "58ef16f0c87f0cbe252241fb2bf15eddc2aa88426ee45c500bfea0e0b2208acf",
+    "binary": false,
+    "lines": 21,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/assets/attribution/NOTICE",
+    "bytes": 1456,
+    "sha256": "921941da143ad0b3454546cfae6e672ddda87205adb008adbcbcaa929d5ab89a",
+    "binary": false,
+    "lines": 36,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/AppLanguage.kt",
+    "bytes": 570,
+    "sha256": "6cc774781f54ff2a21920dcc250d94f724ea5d3736aa57d6493c1fd553566a8e",
+    "binary": false,
+    "lines": 14,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/AssetDialogs.kt",
+    "bytes": 7019,
+    "sha256": "91994581e0b9e4ad9ac48408329c072bbadbfd1fb1ef7a1e0541c3134a93a33c",
+    "binary": false,
+    "lines": 79,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/CinemaApp.kt",
+    "bytes": 628,
+    "sha256": "4fa14060aec78c4c31289e50bab2eeb7fe7a4e8e9eee08c245c1dbc3818800ef",
+    "binary": false,
+    "lines": 14,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/FloorPlan.kt",
+    "bytes": 30075,
+    "sha256": "a9417fddd87ebc561d90ded409c17bf004cdaf55a7510422da54a4812bfaa70b",
+    "binary": false,
+    "lines": 331,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/MainActivity.kt",
+    "bytes": 47022,
+    "sha256": "b6761beed761b0529d05e0051c613de5ec3bc8ed48bfe3d847dc7f2b517df3dc",
+    "binary": false,
+    "lines": 580,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/MaintenanceUi.kt",
+    "bytes": 10122,
+    "sha256": "42d7fdae87c3f9ff262af40186af49c228d2b6eb4b9e3f602b44934cee728b6c",
+    "binary": false,
+    "lines": 124,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/PhoneFlowUi.kt",
+    "bytes": 15166,
+    "sha256": "e4a871e54d3108bdf04e2ffc1ccee3cdfa25bcd7c5a79456c28e32524c772e6e",
+    "binary": false,
+    "lines": 192,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/PlanGeometry.kt",
+    "bytes": 2497,
+    "sha256": "edd3b7fa95df906a6e0bc3d4100c064be7ff43a944f1762b23cb8564ef35e27c",
+    "binary": false,
+    "lines": 38,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/ReportPreview.kt",
+    "bytes": 12513,
+    "sha256": "f7b700eba2ac425ec8bb6af811eca6403a53c464888adc51156885a3fdc07dcc",
+    "binary": false,
+    "lines": 164,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/SignalOutline.kt",
+    "bytes": 12984,
+    "sha256": "897e259da17e2a1c0a9b5674a767405d65ee963c49dc9ba7bab39dbb21c2aebe",
+    "binary": false,
+    "lines": 191,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/UpdateCard.kt",
+    "bytes": 5667,
+    "sha256": "6ab60b0172930734635ace066921f43b3cbe7a079675e9562c3588021910eb2b",
+    "binary": false,
+    "lines": 93,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/data/CinemaRepository.kt",
+    "bytes": 10044,
+    "sha256": "f6471f66de1059ac43b5c5f173647f8f159e12e32ce8f5a00a636279da25a728",
+    "binary": false,
+    "lines": 142,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/data/Database.kt",
+    "bytes": 10369,
+    "sha256": "5e50e444e57cb611304f9504a4bedbb9e7676662559312eb5ca9e92ae6e86162",
+    "binary": false,
+    "lines": 119,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/data/HistoryImport.kt",
+    "bytes": 5249,
+    "sha256": "ea19b957b651bdba422a014f66d26a0440f174e690f2d36a4a63c0f77c3e400d",
+    "binary": false,
+    "lines": 86,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/data/ReportExport.kt",
+    "bytes": 3644,
+    "sha256": "c80b2ecca387c409eefcc8234411a54f2884734798118178468f96e1e63f396e",
+    "binary": false,
+    "lines": 34,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/domain/InspectionPolicy.kt",
+    "bytes": 3115,
+    "sha256": "98e09859ddc996544816c47a8997d49329eddc67cc6dafe312811bb7c01c4e9d",
+    "binary": false,
+    "lines": 60,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/domain/SamplingQuality.kt",
+    "bytes": 856,
+    "sha256": "76bbb85246d7d8396ff671afc89fcd05d15f2dff68faa7e201c2c581f197b948",
+    "binary": false,
+    "lines": 19,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/domain/SignalGrouping.kt",
+    "bytes": 4638,
+    "sha256": "2a4b1305662057aaf6f85d828ad25838f7a5fb852483b1bb0fed223d69dfc827",
+    "binary": false,
+    "lines": 57,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/flow/FlowInbox.kt",
+    "bytes": 918,
+    "sha256": "e373239aa9b4da145e21467994e2b29d205620954f920e81d201373132f4dee5",
+    "binary": false,
+    "lines": 22,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/flow/FlowTracker.kt",
+    "bytes": 6093,
+    "sha256": "aabd6316b530c6d2fadc9ab4d2aa5e16b5ed93292f7fee05efd6fb8dd80acdeb",
+    "binary": false,
+    "lines": 84,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/flow/FlowTransport.kt",
+    "bytes": 4707,
+    "sha256": "1b0a2a1e121d9fa2412b79fc085a5d79f4d550d61b0ba44ccfd9e907279eb703",
+    "binary": false,
+    "lines": 79,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/flow/PhoneFlow.kt",
+    "bytes": 16583,
+    "sha256": "1eb0ed66fcf2b99b50159cb39cff92fd6b8a57bbc9cab3b82730756a90307072",
+    "binary": false,
+    "lines": 202,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/flow/PhoneFlowService.kt",
+    "bytes": 2965,
+    "sha256": "ab426cf03684dfd67e12f473998f3c9eed028e382178f23c707abe8bb6fa20b7",
+    "binary": false,
+    "lines": 49,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/radio/InspectionService.kt",
+    "bytes": 4039,
+    "sha256": "ce59fa51d65cb0a9d0c2183ee1950e4c8612647f47278e23ecf56587c0ec1e94",
+    "binary": false,
+    "lines": 60,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/radio/ScanEngine.kt",
+    "bytes": 18971,
+    "sha256": "c261eb5db929bbec4d0f2d9d6e01533f92d995c15487d44a8d8bd0f049796a6c",
+    "binary": false,
+    "lines": 304,
+    "mac_literal_occurrences": 3
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/update/GithubUpdates.kt",
+    "bytes": 7883,
+    "sha256": "ef27ee683f2fcc4c912b88b5c45ff7c3b052f092dc9586944daa824535b341f9",
+    "binary": false,
+    "lines": 140,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/update/UpdateController.kt",
+    "bytes": 2110,
+    "sha256": "2d10edf1cab4dd2e80682a7f8086fd146f1f9ae332fe0d2c55c1703f5ce8da6d",
+    "binary": false,
+    "lines": 40,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/java/com/cinemawatch/update/UpdateRules.kt",
+    "bytes": 3336,
+    "sha256": "875a65d9701bbe55f2bee61b3291b7d6f3b303d8d5c4c4e3f43b5a8c4bf7826c",
+    "binary": false,
+    "lines": 51,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/drawable/ic_cinema.xml",
+    "bytes": 497,
+    "sha256": "44984b1c845b0ea67b093f1cd47871184d69588836f33e613038d73b35f21071",
+    "binary": false,
+    "lines": 5,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/values/strings.xml",
+    "bytes": 28532,
+    "sha256": "9c8dccab65c10ece762fdc487823b1b9224a759555a24b7d05b535dfd95045d5",
+    "binary": false,
+    "lines": 359,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/values/styles.xml",
+    "bytes": 423,
+    "sha256": "3bec5142b4ee8d8794489e2368c267b2aa843e61030e49d0554511f79509f820",
+    "binary": false,
+    "lines": 9,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/values-b+zh+Hans/strings.xml",
+    "bytes": 28532,
+    "sha256": "9c8dccab65c10ece762fdc487823b1b9224a759555a24b7d05b535dfd95045d5",
+    "binary": false,
+    "lines": 359,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/values-b+zh+Hant/strings.xml",
+    "bytes": 28565,
+    "sha256": "4f60f7c9aa96219075e92592d307701b1cb32b12f9de8d50fc8c2fbc8b7a70a6",
+    "binary": false,
+    "lines": 359,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/values-en/strings.xml",
+    "bytes": 29420,
+    "sha256": "acddc054baf9032961def2a713323e80808f2fc03e448e512eea9eed6d27d410",
+    "binary": false,
+    "lines": 359,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/xml/file_paths.xml",
+    "bytes": 233,
+    "sha256": "0ddc7ca7374d32a453bde8be1466ce471932137d6fca47f9f1e15c26e18e2519",
+    "binary": false,
+    "lines": 1,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/main/res/xml/locales_config.xml",
+    "bytes": 181,
+    "sha256": "e4699e428303c44c78ba8ad5ba48b1064ed848cc106c23c3b1beedc62d91b2be",
+    "binary": false,
+    "lines": 1,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/AssetAndImportTest.kt",
+    "bytes": 12404,
+    "sha256": "e14d2426c637bace3a53f493e3c295c79b6892b14b462c0345dd4b6025ff10a8",
+    "binary": false,
+    "lines": 161,
+    "mac_literal_occurrences": 11
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/FlowInboxTest.kt",
+    "bytes": 1247,
+    "sha256": "d90b3280feb037fb6e824f25c99c52506604ba5f9deee4b893347a5cbaedf74c",
+    "binary": false,
+    "lines": 25,
+    "mac_literal_occurrences": 1
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/FlowTrackerTest.kt",
+    "bytes": 4005,
+    "sha256": "6e7104a9e719f480023b5b12875bd6d1166c83e8f6ff76efc586936433c3deda",
+    "binary": false,
+    "lines": 64,
+    "mac_literal_occurrences": 1
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/FlowTransportTest.kt",
+    "bytes": 3830,
+    "sha256": "5f27ce07d53cf4d266d64c55448725e6a2b58ba4df2953d05e28f89d36da457d",
+    "binary": false,
+    "lines": 56,
+    "mac_literal_occurrences": 3
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/InspectionPolicyTest.kt",
+    "bytes": 1822,
+    "sha256": "4417b7830bd48868d895bd247b0c52447f3742fc6070b5d9a6df60cb990c375d",
+    "binary": false,
+    "lines": 42,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/LanguageTest.kt",
+    "bytes": 1408,
+    "sha256": "30470962da47cd1ecb84b7f1b75d46e55928218f5d5c6f58bc30afb619feaf1a",
+    "binary": false,
+    "lines": 31,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/MaintenanceTest.kt",
+    "bytes": 6726,
+    "sha256": "1e3fd7434f67f1d0b6f4bbf5c22af839c9c88ed271de0f5670c304ad6d12832d",
+    "binary": false,
+    "lines": 90,
+    "mac_literal_occurrences": 1
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/PersistenceTest.kt",
+    "bytes": 3565,
+    "sha256": "5943d1872d3dabda3d913a2bf036c1ed1b29dce92ac300e1fc2ccffa44e4e8c0",
+    "binary": false,
+    "lines": 62,
+    "mac_literal_occurrences": 6
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/PlanGeometryTest.kt",
+    "bytes": 1828,
+    "sha256": "f0acef7ba5497c3ece9ca58f283b05fba121d21c8e75d1566a784e2ce4da7e8c",
+    "binary": false,
+    "lines": 33,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/SignalGroupingTest.kt",
+    "bytes": 4690,
+    "sha256": "a680b15866b0482cd20f78db976f61111e798c51e4773a4dbcf07b271957fc81",
+    "binary": false,
+    "lines": 71,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/java/com/cinemawatch/UpdateRulesTest.kt",
+    "bytes": 3267,
+    "sha256": "d36f12cf832c7f855efed221f3f26eacb464ec82a91dd3f727f022f0d699a998",
+    "binary": false,
+    "lines": 45,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "app/src/test/resources/v1-schema.sql",
+    "bytes": 2687,
+    "sha256": "d7340edac397824a6b9cbfed16a44a1a22a5b7f0c352dbd2d2247847fecf8246",
+    "binary": false,
+    "lines": 15,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "build.gradle.kts",
+    "bytes": 421,
+    "sha256": "718e85ca67817b9c37660e5518be81afaf344cdc221187dc4d425f880be2828a",
+    "binary": false,
+    "lines": 8,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/ARCHITECTURE.md",
+    "bytes": 839,
+    "sha256": "dd1968611854563b8f8f20b495f646d5e0fcfe78b7bfecffbf517d364e19f4fe",
+    "binary": false,
+    "lines": 17,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/ASSET_DETAILS_AND_FLOOR_PLANS.md",
+    "bytes": 2000,
+    "sha256": "d289714f3964ec0e0f25b4d5fb00163594403cd08fb5a79548ff0f87013e16ea",
+    "binary": false,
+    "lines": 13,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/ASSET_INSPECTION_WORKFLOW.md",
+    "bytes": 2150,
+    "sha256": "cdc9cb234ae69dcbdca946834811d0891a5d6892901cb2c2fff4649c65d90fcb",
+    "binary": false,
+    "lines": 13,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/COMMON_AREAS.md",
+    "bytes": 1062,
+    "sha256": "fc561475d57012652abf020a182493cfd92b28d913852c401ccf856a12b1a15c",
+    "binary": false,
+    "lines": 10,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/FLOOR_PLAN_EDITOR.md",
+    "bytes": 1871,
+    "sha256": "66ca0efbc04997477a39057f2b4a96d0df8801333224b44f60145bf3e07db78a",
+    "binary": false,
+    "lines": 12,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/LOCAL_MIGRATION.md",
+    "bytes": 606,
+    "sha256": "02998e75917f18d0bf27bf91687c2c1a6141147a62cbafbc249972ce01d9b7c1",
+    "binary": false,
+    "lines": 12,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/MVP_ARCHITECTURE.md",
+    "bytes": 2756,
+    "sha256": "c435dca98e008fa74f4901d317d5f135396cb313fdf48333c4d99079e75b3c61",
+    "binary": false,
+    "lines": 24,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/PHONE_FLOW_PILOT.md",
+    "bytes": 7947,
+    "sha256": "fae954e57d03e8613d08101d4e7b332c9c880272d0ba6a01a79c32368e30395f",
+    "binary": false,
+    "lines": 46,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/PRODUCT_BOUNDARY.md",
+    "bytes": 653,
+    "sha256": "17264d37b925f215a19966e688f14337c330292427d03d5f303ec557a5f75860",
+    "binary": false,
+    "lines": 12,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/SIGNAL_DETECTION_LOGIC.md",
+    "bytes": 9343,
+    "sha256": "9ddd23f23411cdf3344839ad8625b0ed68c713b0dc5837a3359891176ee65851",
+    "binary": false,
+    "lines": 108,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/SIGNAL_GROUPS.md",
+    "bytes": 2065,
+    "sha256": "636118e0c5c78045fd7e882051f5e0bef84ac4b01e7f78ec68dfbbfb6d322377",
+    "binary": false,
+    "lines": 13,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/SIGNAL_OUTLINE_UI.md",
+    "bytes": 1768,
+    "sha256": "b42971180e3b8d6a072aad3104d080d99891e1e72a4457f36f855e554c25218f",
+    "binary": false,
+    "lines": 13,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/UPDATES_AND_SIGNING.md",
+    "bytes": 3823,
+    "sha256": "893c1afe95c8496e9bf2262e6c04f68c5e9b2c6b758034b0fad2d07d6eaf8bb2",
+    "binary": false,
+    "lines": 42,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/UPSTREAM_PIN.md",
+    "bytes": 638,
+    "sha256": "a626e8e08d700e6a86ebabc1b2cc450dfa6d964d06caf6f9284e9e3c5c346481",
+    "binary": false,
+    "lines": 14,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/V0_2_CHANGES.md",
+    "bytes": 2379,
+    "sha256": "3fdfcfcd123f7fbc074ea979cb95289c867010c65f9bf0f8b1d554d18be25ee6",
+    "binary": false,
+    "lines": 14,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/SHA256.txt",
+    "bytes": 96,
+    "sha256": "4bd93414741768e4fbc72db31e79365c6fcae2d881dcae9f0d2be0de7b2472bf",
+    "binary": false,
+    "lines": 1,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/VALIDATION.md",
+    "bytes": 2391,
+    "sha256": "b99cad7b7ffce5627d1419967cb932b6fa61222d00f9c0b0be5377e4fac324f5",
+    "binary": false,
+    "lines": 20,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/build.log",
+    "bytes": 6955,
+    "sha256": "512f3082b1d8a0a81eb42565fda51cc0c9c88a5904f8655e82a2d18d0811fd4b",
+    "binary": false,
+    "lines": 138,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/instrumentation-final.log",
+    "bytes": 1087,
+    "sha256": "552bf16b779c11f03213ed3da261f2354d0c616ea5808f82473f21ff7a0af242",
+    "binary": false,
+    "lines": 19,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/instrumentation-first.log",
+    "bytes": 1958,
+    "sha256": "d576360cb01bec0d0142ac23d4fe26209c0c3f473417e4f01d22dd92a5101688",
+    "binary": false,
+    "lines": 31,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/unit-tests.json",
+    "bytes": 1272,
+    "sha256": "ed1465e166f150e8c58404aa408ace85279e218b868d811d031b91653c348919",
+    "binary": false,
+    "lines": 65,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/cinemawatch-v0.1.0/upstream-integrity.json",
+    "bytes": 109,
+    "sha256": "470c9e07d612bf8e1c16333907bfaabea07a08d883e2c54be808c3da9c37590a",
+    "binary": false,
+    "lines": 5,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/fieldwatch-v1.1.21/baseline-build.log",
+    "bytes": 9475,
+    "sha256": "6a5d75a46ab6c31e4444dad9f1e07683be76cbb474613bc1c9d45ca0bd55f170",
+    "binary": false,
+    "lines": 112,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "docs/evidence/fieldwatch-v1.1.21/baseline-evidence.json",
+    "bytes": 6864,
+    "sha256": "8a21381ed0692766c0b89d019bb8b49cf582e8516be5a5ae1561747fafea480a",
+    "binary": false,
+    "lines": 308,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/build.gradle.kts",
+    "bytes": 696,
+    "sha256": "ed497f7b780c02ed112382e745e9e4145ac90294275471f2b72ce660bc40690f",
+    "binary": false,
+    "lines": 19,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/AndroidManifest.xml",
+    "bytes": 13,
+    "sha256": "571f2735faf5e857752ee057ac8ef63425576a721616c60b86ee5d4c0a2d682f",
+    "binary": false,
+    "lines": 1,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/assets/lookups/radiodb.bin",
+    "bytes": 1311124,
+    "sha256": "5bf338b03c9777a96d77d6ca08369a951e6391bf523db637f066c230e40a4866",
+    "binary": true
+  },
+  {
+    "path": "fieldwatch-core/src/main/assets/lookups/radiodb.txt",
+    "bytes": 430,
+    "sha256": "c7ad43a66324876b33f6115bf65271f1f1043ca7fa1f133acf38ab833caff4f2",
+    "binary": false,
+    "lines": 10,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/AdvPayloadDecoder.kt",
+    "bytes": 28102,
+    "sha256": "b5393b23d345d1d9da064e40bc232f329612ada2d8d30026f8d696b7382a9f1f",
+    "binary": false,
+    "lines": 653,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/AircraftTrail.kt",
+    "bytes": 20849,
+    "sha256": "528355e43c3845516c8f2e6576c1552b96a21c0ba46ddb772e583031500f57f7",
+    "binary": false,
+    "lines": 499,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ApVendorOuis.kt",
+    "bytes": 85385,
+    "sha256": "2062a93aa3dc712ef9897c6bdbb2e5968950ae681bb6203f485b67bb913c7f88",
+    "binary": false,
+    "lines": 1080,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CatalogDecodes.kt",
+    "bytes": 28389,
+    "sha256": "0254075eb73d66b086e6eeb9571e58504c77a5b891079e0bc364ba465ec8a367",
+    "binary": false,
+    "lines": 681,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ClassOutline.kt",
+    "bytes": 5753,
+    "sha256": "fb52ec1f79af00e9614e0f447720900cfd5d92adc3be431ec558a65fd773179a",
+    "binary": false,
+    "lines": 157,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CodDecoder.kt",
+    "bytes": 6431,
+    "sha256": "5db41e46c7376edc603f17150793317847f6be76f36373351af63e20acece92c",
+    "binary": false,
+    "lines": 183,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/CsvCells.kt",
+    "bytes": 1045,
+    "sha256": "c29968101a4121a4bf393949e440ff6fefe15908017dbe842896ac87ea6bd2e3",
+    "binary": false,
+    "lines": 32,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Cta2063.kt",
+    "bytes": 972,
+    "sha256": "6a47124238805236b4b56712100eb9ad42edf2c656f75550c5d5bb24434b1218",
+    "binary": false,
+    "lines": 31,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DebriefPrompt.kt",
+    "bytes": 15469,
+    "sha256": "9e637134ecb2de812c8e8350925e051e5cca148b07336de99dbb1aceaa77cf66",
+    "binary": false,
+    "lines": 258,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DebriefReport.kt",
+    "bytes": 71172,
+    "sha256": "2c102ac98babacea2687e840ad971326363454653971f2712d3090cf12ecf6c4",
+    "binary": false,
+    "lines": 1525,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DefaultCatalog.kt",
+    "bytes": 157015,
+    "sha256": "760202ce62ed18abc13b6d6906a3c8a04b50fc3fcb936b7dd03694094c23e488",
+    "binary": false,
+    "lines": 4726,
+    "mac_literal_occurrences": 2
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceDetailPrompt.kt",
+    "bytes": 6439,
+    "sha256": "5ff54e45af3c854988011b093dc6add83cc06b129a9fcd9891f82ce4de0a02b5",
+    "binary": false,
+    "lines": 76,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceDetailText.kt",
+    "bytes": 12944,
+    "sha256": "b62685ba448462e1c7d231c59c8f660a4cbb66914d2f727f64422ab342c8c3a1",
+    "binary": false,
+    "lines": 302,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/DeviceExplain.kt",
+    "bytes": 43160,
+    "sha256": "3891dffa9c842c87f9fffaf21d6aa005bbfaebec9a115900be20e0e9a582dc26",
+    "binary": false,
+    "lines": 767,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FastPair.kt",
+    "bytes": 1105,
+    "sha256": "0720659469dee96eba5c374431f49ef7a118654fb92a577698a8cdf390ba75e6",
+    "binary": false,
+    "lines": 32,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FastPairModels.kt",
+    "bytes": 4735,
+    "sha256": "a6e5269e457498afd008b2ee21bd7d8ef046d5647562cfa09cf1745d3a552870",
+    "binary": false,
+    "lines": 122,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FieldwatchDisclaimer.kt",
+    "bytes": 4639,
+    "sha256": "96df8420d315c3f40206509cf635cadcb8abdf17967c7431c6812b2ca79d6176",
+    "binary": false,
+    "lines": 86,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/FilterEngine.kt",
+    "bytes": 4065,
+    "sha256": "a95e39b25d9f375555a4f58bade5dbb9c3e5e1a5ce017f44f9db0da96fe52967",
+    "binary": false,
+    "lines": 82,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Geo.kt",
+    "bytes": 16928,
+    "sha256": "ff2c1b4db5809c54e2cc16e2705ac2578be773e545f57fb2fb3de71baf4feca8",
+    "binary": false,
+    "lines": 448,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/GeoExport.kt",
+    "bytes": 8804,
+    "sha256": "68a37df5a80ec820697b020ace8afe1dda2112f34558ce5eaa6068571a76a5fe",
+    "binary": false,
+    "lines": 223,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Hunt.kt",
+    "bytes": 3488,
+    "sha256": "43c17e8328e538b331ea545addd91f7acef14b6212769fe9d38cac6f51b0fc58",
+    "binary": false,
+    "lines": 89,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/LogReplay.kt",
+    "bytes": 11518,
+    "sha256": "99d862569f8ca0b3a29897e06e52c5c9c2e73fa6276cfefda4c7a2c209164f97",
+    "binary": false,
+    "lines": 277,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Models.kt",
+    "bytes": 36814,
+    "sha256": "492eb47a890ef8d1ababca38158d9748cfd61e30fb4fcc688078c4498aad0179",
+    "binary": false,
+    "lines": 1077,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/OpenDroneId.kt",
+    "bytes": 7533,
+    "sha256": "5fde23dcf7e00a2cf62db799dec016d264b4fd72bf7a6e600a148e5242cb99b1",
+    "binary": false,
+    "lines": 207,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/OuiLookup.kt",
+    "bytes": 117,
+    "sha256": "43ddd64d335d62d5072fa7a4418774aebbaa95c7c58050211e5d8fc7e3c0a6c1",
+    "binary": false,
+    "lines": 5,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/PairingFlood.kt",
+    "bytes": 25188,
+    "sha256": "8d6e1391fd8a25a40ba304f2f0602d827e72a81f96c27772129a124dabfd8abd",
+    "binary": false,
+    "lines": 626,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/PayloadLocation.kt",
+    "bytes": 7630,
+    "sha256": "3847431f6382f28f1492516cd0d70dbc3527104712281fd46431e9b0df2bc9ba",
+    "binary": false,
+    "lines": 177,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadarPlot.kt",
+    "bytes": 695,
+    "sha256": "8e55d01d453de6e6be52af5161d7a7d03043d2defd4030205c0e59145e7b84dd",
+    "binary": false,
+    "lines": 21,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioBookmarks.kt",
+    "bytes": 8854,
+    "sha256": "46a6cf19695e479ee3408d7d42334557c5c7474b32b10420d188d075ab960de9",
+    "binary": false,
+    "lines": 240,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioDb.kt",
+    "bytes": 7628,
+    "sha256": "98fa04977cca47c97692bf0fc119558a51ba72300c220487e38b95e6229e75cd",
+    "binary": false,
+    "lines": 227,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/RadioFacts.kt",
+    "bytes": 4777,
+    "sha256": "67efcee7cce66296765b0e0324987ff9ac8d0ef1751eff21e8970c461f4f1562",
+    "binary": false,
+    "lines": 126,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Rssi.kt",
+    "bytes": 909,
+    "sha256": "aa67f97657fb5fb59d7481078b592c01022b6ff479e5e07e2112f27bb3597f97",
+    "binary": false,
+    "lines": 25,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/ScanStatus.kt",
+    "bytes": 8008,
+    "sha256": "3ca8f82d02e255537d962c89bcc542e260285036d319f9a849b93e3365c346f8",
+    "binary": false,
+    "lines": 184,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SettingsExchange.kt",
+    "bytes": 5491,
+    "sha256": "5fd014a50ae50b2e204e60949077d677662ecb5fdfbf8699a6325745fd856529",
+    "binary": false,
+    "lines": 145,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureCandidates.kt",
+    "bytes": 27405,
+    "sha256": "191d8f0f83b61eb95d66ccc94a1184e94595feef32e830e1edaf28a65b5c8e60",
+    "binary": false,
+    "lines": 692,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureEngine.kt",
+    "bytes": 26424,
+    "sha256": "fce4b8e5b4c134d1da126254de817eb58d3f90576b14e9816561c38e80a0c65d",
+    "binary": false,
+    "lines": 647,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureExchange.kt",
+    "bytes": 10774,
+    "sha256": "d809535cc7925d6be711952667370c748da210061fccd3a6e82266d526735ef4",
+    "binary": false,
+    "lines": 285,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SignatureFieldDecoder.kt",
+    "bytes": 17559,
+    "sha256": "cfdfc4ccfc98e143e49d339f5b989c6381f8b5043a6092422ce30d986d5be524",
+    "binary": false,
+    "lines": 450,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/Sit.kt",
+    "bytes": 17762,
+    "sha256": "ebb6c4831167c6b75cc9aaf7f6a693d0059137ed1039a5abec97f5d17a50f3e9",
+    "binary": false,
+    "lines": 508,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitDiff.kt",
+    "bytes": 26382,
+    "sha256": "4c910a7e63907453ff1d94d3a2511b5399ceeabafde8b34f13429ceaac4ddcda",
+    "binary": false,
+    "lines": 641,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitDiffPrompt.kt",
+    "bytes": 10236,
+    "sha256": "562274268d853614e7f6df466069e39dc63840c30a7045ba1a686bf38e9fb6af",
+    "binary": false,
+    "lines": 150,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitExport.kt",
+    "bytes": 7808,
+    "sha256": "5bddd98f243449826fd873e071f75471757294ff406a82eb296fc6a8ff4c0f8f",
+    "binary": false,
+    "lines": 201,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/SitPathPlot.kt",
+    "bytes": 16990,
+    "sha256": "f938955f38f42e8d873544db0ac015f4ce9c15074499771b9c09ac3c97b1e155",
+    "binary": false,
+    "lines": 432,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/TakPublish.kt",
+    "bytes": 20408,
+    "sha256": "5f448acbb0b2b6bcdece7ec67b12fbcd374230aab97e946c38d72121b738f1a1",
+    "binary": false,
+    "lines": 577,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/domain/WifiBeaconFlood.kt",
+    "bytes": 13930,
+    "sha256": "f1664dc9499a44d110c90564815edaff142ee12d0b0a7265f509f54aaf7b9662",
+    "binary": false,
+    "lines": 374,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/BleAdParser.kt",
+    "bytes": 11270,
+    "sha256": "cd1bdc849394610663770c112c90cb910915eec2eb35314ae2a9a170b2a094d0",
+    "binary": false,
+    "lines": 250,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/BleRadio.kt",
+    "bytes": 9913,
+    "sha256": "6a026edc99e819e8818f9c5b9bb12f326cbed434573d0fec8ba95f1fb24d3ffe",
+    "binary": false,
+    "lines": 275,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/WifiIeParser.kt",
+    "bytes": 8343,
+    "sha256": "69bc81e8dd99771d3c55bc69c7f8768fc0ceb544a99e4a41548c0800cf5a2573",
+    "binary": false,
+    "lines": 219,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/main/java/app/fieldwatch/radio/WifiRadio.kt",
+    "bytes": 10352,
+    "sha256": "ce8a56ce56afc9c247d390ba4089e62025d827d4aec4d57110bca19abb526372",
+    "binary": false,
+    "lines": 264,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/domain/AdvPayloadDecoderTest.kt",
+    "bytes": 5352,
+    "sha256": "994fd9e1c58777e82d9c9f8791a8a5feb10bfe416e9e5ae8311960d25571cdf0",
+    "binary": false,
+    "lines": 128,
+    "mac_literal_occurrences": 2
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureCandidatesTest.kt",
+    "bytes": 13887,
+    "sha256": "d4b309cbead5846f4bf0bb6aac61aa47093e7107743cb9dc8c464e1dc69c1dd4",
+    "binary": false,
+    "lines": 321,
+    "mac_literal_occurrences": 26
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureExchangeTest.kt",
+    "bytes": 59774,
+    "sha256": "a8662e3305bd47822930ece4cc5fadbc0fd83622f0725bbf6c5576b090499790",
+    "binary": false,
+    "lines": 1281,
+    "mac_literal_occurrences": 112
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureFieldDecoderTest.kt",
+    "bytes": 37213,
+    "sha256": "5d52f0097d9d30aa6b6ff3f7039d6091b0082ba394a6f68bbdc57877be88e1ec",
+    "binary": false,
+    "lines": 913,
+    "mac_literal_occurrences": 10
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/radio/BleAdParserTest.kt",
+    "bytes": 3923,
+    "sha256": "19e8b35fe2d9dead31ed3194524535c97b0c179baceace404eee4fa23767be58",
+    "binary": false,
+    "lines": 110,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "fieldwatch-core/src/test/java/app/fieldwatch/radio/WifiIeParserTest.kt",
+    "bytes": 4025,
+    "sha256": "d6b788ce18e4e27d2fcafcb0720dcd0a135c7b20d9c9ab9d24edbe143936b9d6",
+    "binary": false,
+    "lines": 130,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "gradle/wrapper/gradle-wrapper.jar",
+    "bytes": 43583,
+    "sha256": "2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046",
+    "binary": true
+  },
+  {
+    "path": "gradle/wrapper/gradle-wrapper.properties",
+    "bytes": 253,
+    "sha256": "d7010368a34c1c06df2bae1a85d8b24c39b2499c74ac892fc7e66d005dbd7b8a",
+    "binary": false,
+    "lines": 7,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "gradle.properties",
+    "bytes": 161,
+    "sha256": "a48e5737c300ee757e7ae9daf2d66756be98ee887491ce6890ffa46504e20de1",
+    "binary": false,
+    "lines": 5,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "gradlew",
+    "bytes": 8762,
+    "sha256": "a3648413b47ef77af21d5ebc36c687c7d103aaef3e17f33de7d4f080a6f300a3",
+    "binary": false,
+    "lines": 252,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "gradlew.bat",
+    "bytes": 2966,
+    "sha256": "57931b17dd228e5c24dac90e815d0bf82477e831a4618dfab4136f5446b42a9f",
+    "binary": false,
+    "lines": 94,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "prototype/README.md",
+    "bytes": 431,
+    "sha256": "66887493a9c721ada22d5e8107085de94ab53a9b2fceafd34b553feebbb29d66",
+    "binary": false,
+    "lines": 7,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "prototype/domain/Models.kt",
+    "bytes": 759,
+    "sha256": "10eb3d81b8ae3fe367b6b5a79ca017fdfc20ccb253b88443217465a2282ad806",
+    "binary": false,
+    "lines": 29,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "prototype/privacy/PrivacyFilter.kt",
+    "bytes": 1471,
+    "sha256": "c49cd328a9977d40546ab6b1fbf454a10af4f8489fa4730442f4bdc2a480d82d",
+    "binary": false,
+    "lines": 33,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "settings.gradle.kts",
+    "bytes": 300,
+    "sha256": "595390cf25183aec37795881b8cadcc30daee730ffc56594b7c40e265ce6a0e4",
+    "binary": false,
+    "lines": 7,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "third_party/fieldwatch/LICENSE",
+    "bytes": 1074,
+    "sha256": "58ef16f0c87f0cbe252241fb2bf15eddc2aa88426ee45c500bfea0e0b2208acf",
+    "binary": false,
+    "lines": 21,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "third_party/fieldwatch/NOTICE",
+    "bytes": 1456,
+    "sha256": "921941da143ad0b3454546cfae6e672ddda87205adb008adbcbcaa929d5ab89a",
+    "binary": false,
+    "lines": 36,
+    "mac_literal_occurrences": 0
+  },
+  {
+    "path": "third_party/fieldwatch/SOURCE_MANIFEST.json",
+    "bytes": 12447,
+    "sha256": "67a01480878ebc9cf2225a5456ad697424308582645b67a2579805211218ec53",
+    "binary": false,
+    "lines": 260,
+    "mac_literal_occurrences": 0
+  }
+]
