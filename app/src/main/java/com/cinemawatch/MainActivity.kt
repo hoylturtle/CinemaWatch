@@ -127,7 +127,7 @@ private val Muted = Color(0xFF99AFBF)
     var license by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     var request by remember { mutableStateOf<SampleRequest?>(null) }
-    val busy = scan.running || scan.saving || scan.saveFailed || phoneFlowState.active || clearingData
+    val busy = scan.running || scan.saving || scan.saveFailed || phoneFlowState.active || clearingData || assetSaving
     val snackbar = remember { SnackbarHostState() }
     val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, issues, issueEvents, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups, issues, issueEvents) }
     LaunchedEffect(scan.running) { if (!scan.running) { register = null; signalSearch = "" } }

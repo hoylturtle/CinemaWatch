@@ -241,6 +241,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
     fun clearIdleState() {
         check(!state.value.running && !state.value.saving && pending == null)
         live.clear(); window.clear(); assetSamples.clear()
+        wifiTimes = emptyMap(); wifiCacheAt = Long.MIN_VALUE; wifiBatchTracker = WifiBatchTracker()
         bindings = emptyList(); assets = emptyList(); expectedAssetIds = emptySet()
         mutable.value = ScanUi()
     }
@@ -271,7 +272,7 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
         val samples = assetSamples.mapValues { it.value.toList() }
         val grouped = snap.groups.map { (key, count) -> SignalGroupCount(session.id, key.second, key.first, count) }
         // Clear all unregistered addresses/names/payloads before any persistence call.
-        live.clear(); window.clear(); assetSamples.clear(); bindings = bindings.toList()
+        live.clear(); window.clear(); assetSamples.clear(); wifiTimes = emptyMap(); bindings = bindings.toList()
         mutable.value = snap.copy(running = false, saving = true, live = emptyList(), remaining = 0)
         ContextCompat.getMainExecutor(context).execute {
             context.stopService(android.content.Intent(context, InspectionService::class.java))
