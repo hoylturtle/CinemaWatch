@@ -30,3 +30,5 @@ Room 与文件系统无法原子提交。附件清理失败时保留数据库记
 ## 首轮 CI
 
 [运行39688838422](https://github.com/hoylturtle/CinemaWatch/actions/runs/39688838422)：单元测试及真实旧版校验通过，release 应用包构建成功；release instrumentation 的 R8 因 Error Prone 编译期注解引用 `javax.lang.model.element.Modifier` 失败。仅在测试混淆规则中忽略这一 Android 不存在的编译器类型警告，保留 release 混淆及后续界面测试；仍需新一轮 CI 通过。
+
+检查首轮 R8 usage/mapping 还发现测试调用的 updater 注入 setter 和 Kotlin 默认参数 bridge 被优化删除。生产 release 和测试使用同一候选：保留应用公开调用面及跨模块测试使用的 SignatureClass，允许名称混淆，继续裁剪依赖与私有实现。不能只给 CI 构建特殊的“不混淆版本”再发布另一份包。
