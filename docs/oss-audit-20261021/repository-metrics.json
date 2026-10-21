@@ -1,0 +1,32 @@
+{
+  "as_of_utc": "2026-10-21",
+  "snapshot": "208da9b98e884c831f25ece0221515a84b9d9654",
+  "main_reachable_commits": 69,
+  "main_non_merge_commits": 55,
+  "all_advertised_ref_reachable_commits": 69,
+  "stars": 0,
+  "forks": 0,
+  "releases": 11,
+  "prereleases": 11,
+  "issues_excluding_prs": {
+    "total": 5,
+    "open": 5,
+    "closed": 0
+  },
+  "pull_requests": {
+    "total": 14,
+    "closed": 14
+  },
+  "github_contributor_accounts": 1,
+  "git_author_identities": 2,
+  "apk_download_counter_sum": 18,
+  "latest_apk_download_counter": 2,
+  "unit_tests": {
+    "app": 60,
+    "fieldwatch-core": 158
+  },
+  "android_test_methods": 9,
+  "historical_upstream_baseline_tests": 478,
+  "download_counter_note": "Counters were sampled before the audit APK download; automation and this audit can affect them. They are not unique users.",
+  "test_execution_note": "Downloaded and parsed existing main CI evidence; no fresh Android build, emulator run or RF hardware test during this audit."
+}

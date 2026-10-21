@@ -8,6 +8,7 @@ import re
 import subprocess
 
 config = json.loads(Path('.github/release-config.json').read_text())
+subprocess.run(['python3', '.github/scripts/check-release.py', 'candidate/app-release.apk'], check=True)
 key_dir = Path(os.environ['RUNNER_TEMP']) / 'cinemawatch-signing'
 key_dir.mkdir(mode=0o700, exist_ok=True)
 key = key_dir / 'release.p12'
@@ -20,7 +21,7 @@ apk = artifacts / ('CinemaWatch-' + config['versionName'] + '.apk')
 tools = Path(os.environ['ANDROID_HOME']) / 'build-tools/35.0.0'
 try:
     subprocess.run([str(tools/'apksigner'), 'sign', '--ks', str(key), '--ks-key-alias', 'cinemawatch',
-        '--ks-pass', 'file:' + str(password), '--out', str(apk), 'candidate/app-debug.apk'], check=True)
+        '--ks-pass', 'file:' + str(password), '--out', str(apk), 'candidate/app-release.apk'], check=True)
     verified = subprocess.check_output([str(tools/'apksigner'), 'verify', '--print-certs', str(apk)], text=True)
     certificate = re.search(r'certificate SHA-256 digest: ([0-9a-f]+)', verified).group(1)
     if certificate != config['signerSha256']:
@@ -28,6 +29,7 @@ try:
     badging = subprocess.check_output([str(tools/'aapt'), 'dump', 'badging', str(apk)], text=True)
     if "name='" + config['packageName'] + "'" not in badging.splitlines()[0] or "versionCode='" + str(config['versionCode']) + "'" not in badging.splitlines()[0]:
         raise RuntimeError('Candidate package/version differs from release configuration')
+    subprocess.run(['python3', '.github/scripts/check-release.py', str(apk)], check=True)
     manifest = dict(config, schemaVersion=1, size=apk.stat().st_size, sha256=hashlib.sha256(apk.read_bytes()).hexdigest(),
         apkUrl='https://github.com/hoylturtle/CinemaWatch/releases/download/v' + config['versionName'] + '-preview/' + apk.name)
     (artifacts/'update.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2)+'\n')

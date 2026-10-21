@@ -37,6 +37,6 @@ Release 同时发布 `update.json`，包含 schemaVersion、packageName、versio
 
 ## 验证边界
 
-CI 构建 versionCode=2 的旧版本测试安装包和 versionCode=3 新版，同一测试证书；写入影院、区域、资产、无线绑定、报告、语言／区域设置后执行 `adb install -r`，验证数据保留。它证明同签名覆盖机制，不代表能覆盖使用已丢失私钥的真实 0.1／0.2。
+历史 CI 曾使用仅修改版本号的旧版 fixture。本次整改改为下载已发布 0.9.0/code11，校验固定 SHA-256 与官方证书，然后把旧 APK、seed 测试和新 release 候选用同一临时 CI 证书签名；写入影院、区域、资产、绑定、报告及语言设置，再执行 `adb install -r`，在 API29/35 检查数据保留。它验证真实旧代码的数据兼容，不是生产私钥安装测试；生产证书连续性由发布脚本另行检查。新候选为 minified、不可调试的 release，匹配的 release instrumentation 验证界面与功能。通过前不得宣称整改验收成功。旧版 seed instrumentation 在升级前卸载，以便安装匹配新混淆映射的测试包。
 
 另验证手动更新界面的“已是最新／发现新版／网络失败／错误签名拒绝安装”，包名、版本、签名、URL 与清单检查。系统未知来源授权和真实 GitHub 下载仍需真机验证。

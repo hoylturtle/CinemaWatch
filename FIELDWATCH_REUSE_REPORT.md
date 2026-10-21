@@ -1,3 +1,5 @@
+> 历史阶段记录：保留当时的结果与限制，不代表当前功能。当前架构见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)，整改状态见 [整改记录](docs/REMEDIATION_20261021.md)。
+
 # Fieldwatch 复用审计报告 — Issue #1
 
 审计日期：2026-10-07（UTC）。目标分支：`cinema-watch-mvp`。

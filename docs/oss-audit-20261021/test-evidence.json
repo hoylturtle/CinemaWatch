@@ -1,0 +1,30 @@
+{
+  "unit_counts": {
+    "app": 60,
+    "fieldwatch-core": 158
+  },
+  "failing_xml": [],
+  "android_logs": {
+    "FirstRunTest.log": [
+      "OK (2 tests)"
+    ],
+    "UpgradeVerifyTest.log": [
+      "OK (1 test)"
+    ],
+    "MaintenanceFlowTest.log": [
+      "OK (1 test)"
+    ],
+    "UpgradeSeedTest.log": [
+      "OK (1 test)"
+    ],
+    "UpdatesUiTest.log": [
+      "OK (1 test)"
+    ],
+    "PhoneFlowTest.log": [
+      "OK (1 test)"
+    ],
+    "FloorPlanTest.log": [
+      "OK (2 tests)"
+    ]
+  }
+}

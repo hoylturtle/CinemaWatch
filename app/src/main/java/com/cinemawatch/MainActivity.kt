@@ -123,10 +123,11 @@ private val Muted = Color(0xFF99AFBF)
     var delete by remember { mutableStateOf<CinemaAsset?>(null) }
     var hunt by remember { mutableStateOf<CinemaAsset?>(null) }
     var reset by remember { mutableStateOf(false) }
+    var clearingData by remember { mutableStateOf(false) }
     var license by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<Int?>(null) }
     var request by remember { mutableStateOf<SampleRequest?>(null) }
-    val busy = scan.running || scan.saving || scan.saveFailed || phoneFlowState.active
+    val busy = scan.running || scan.saving || scan.saveFailed || phoneFlowState.active || clearingData
     val snackbar = remember { SnackbarHostState() }
     val exportCsv = remember(sessions, zones, cinemas, results, assets, groups, issues, issueEvents, context) { ReportExport.csv(sessions, zones, cinemas, results, assets, context, groups, issues, issueEvents) }
     LaunchedEffect(scan.running) { if (!scan.running) { register = null; signalSearch = "" } }
@@ -476,7 +477,7 @@ private val Muted = Color(0xFF99AFBF)
         }
     } }
     delete?.let { asset -> ConfirmDialog(R.string.delete_asset_title, R.string.delete_asset_note, { delete = null }) {
-        scope.launch { runCatching { dao.deleteAsset(asset.id) }.onSuccess { delete = null }.onFailure { error = R.string.error_save } }
+        scope.launch { runCatching { app.repository.deleteAsset(asset.id) }.onSuccess { delete = null }.onFailure { error = R.string.error_save } }
     } }
     hunt?.let { asset ->
         val radio = scan.live.find { it.assetId == asset.id }?.takeIf { System.currentTimeMillis() - it.lastAt <= 15_000 }
@@ -493,7 +494,15 @@ private val Muted = Color(0xFF99AFBF)
         }, confirmButton = { TextButton(onClick = { hunt = null }) { Text(stringResource(R.string.close)) } })
     }
     if (reset) ConfirmDialog(R.string.reset_title, R.string.reset_note, { reset = false }) {
-        scope.launch { runCatching { dao.clear(); app.phoneFlow.clearReports(); withContext(Dispatchers.IO) { val plans = File(context.filesDir, "plans"); if (plans.exists()) check(plans.deleteRecursively()) } }.onSuccess { reset = false; floorPlan = false; zoneId = "" }.onFailure { error = R.string.error_save } }
+        if (!clearingData) {
+            clearingData = true
+            scope.launch {
+                try {
+                    runCatching { app.updates.reset(); app.phoneFlow.clearReports(); app.repository.clearCinemaData(); app.scanner.clearIdleState() }
+                        .onSuccess { reset = false; floorPlan = false; zoneId = "" }.onFailure { error = R.string.error_save }
+                } finally { clearingData = false }
+            }
+        }
     }
     if (logic) AlertDialog(onDismissRequest = { logic = false }, title = { Text(stringResource(R.string.signal_logic)) }, text = {
         Column(Modifier.verticalScroll(rememberScrollState())) { Text(stringResource(R.string.signal_logic_summary)) }

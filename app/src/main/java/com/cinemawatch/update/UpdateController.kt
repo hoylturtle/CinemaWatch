@@ -36,5 +36,9 @@ class UpdateController(private val source: () -> UpdateSource) {
             catch (e: Exception) { mutable.value = UpdateState(UpdatePhase.ERROR, release, error = (e as? UpdateException)?.reason ?: UpdateError.NETWORK) }
         }
     }
+    suspend fun reset() {
+        job?.cancelAndJoin(); job = null
+        mutable.value = UpdateState()
+    }
     fun reject(error: UpdateError) { mutable.value = mutable.value.copy(phase = UpdatePhase.ERROR, file = null, error = error) }
 }

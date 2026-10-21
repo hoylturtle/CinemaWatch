@@ -1,0 +1,8 @@
+{
+  "tag": "v0.9.0-preview",
+  "versionCode": 11,
+  "versionName": "0.9.0",
+  "url": "https://github.com/hoylturtle/CinemaWatch/releases/download/v0.9.0-preview/CinemaWatch-0.9.0.apk",
+  "sha256": "bf0c9c8c1f23956585ce0ec83ea7b0db5556e4799d0764d9bc89f4a7b26121a0",
+  "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf"
+}

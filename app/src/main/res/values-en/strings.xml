@@ -89,7 +89,7 @@
     <string name="license_intro">Scanning core derived from Fieldwatch v1.1.21. Copyright © 2026 Off Grid Pete LLC. MIT license; lookup data is also subject to IEEE and Bluetooth SIG terms.</string>
     <string name="reset">Clear local data</string>
     <string name="reset_title">Clear all cinema data?</string>
-    <string name="reset_note">This deletes cinemas, zones, authorized bindings and records. This cannot be undone.</string>
+    <string name="reset_note">Deletes cinema records, areas, authorized bindings, floor plans, experiment reports, maintenance photos and related caches. This cannot be undone. Language settings are retained.</string>
     <string name="error_save">Save failed. Check local storage space and retry.</string>
     <string name="retry_save">Retry saving</string>
     <string name="close">Close</string>

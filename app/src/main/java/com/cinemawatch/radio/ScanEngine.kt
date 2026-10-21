@@ -238,6 +238,12 @@ class ScanEngine(private val context: Context, private val repository: CinemaRep
             groups = window.groupCounts(), live = live.values.sortedByDescending { it.rssi })
     }
 
+    fun clearIdleState() {
+        check(!state.value.running && !state.value.saving && pending == null)
+        live.clear(); window.clear(); assetSamples.clear()
+        bindings = emptyList(); assets = emptyList(); expectedAssetIds = emptySet()
+        mutable.value = ScanUi()
+    }
     fun stop() { if (state.value.running) scope.launch { finish() } }
 
     private suspend fun finish() {

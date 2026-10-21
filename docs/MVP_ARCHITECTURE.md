@@ -1,3 +1,5 @@
+> 历史阶段记录：保留当时的结果与限制，不代表当前功能。当前架构见 [ARCHITECTURE.md](ARCHITECTURE.md)，整改状态见 [整改记录](REMEDIATION_20261021.md)。
+
 # CinemaWatch MVP 架构与改动范围
 
 ## 基线

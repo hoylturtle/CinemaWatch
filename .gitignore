@@ -5,3 +5,16 @@ local.properties
 *.keystore
 .idea/
 artifacts/
+
+# Never commit signing backups, passwords or local exports.
+*.p12
+*.pfx
+.env
+.env.*
+password.txt
+keystore.base64.txt
+*signing-backup*.zip
+candidate/
+
+__pycache__/
+*.pyc
