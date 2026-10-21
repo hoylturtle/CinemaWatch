@@ -1,13 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p build/upgrade-check build/ui-screenshots
-trap 'adb pull /sdcard/cinemawatch-ui build/ui-screenshots >/dev/null 2>&1 || true' EXIT
+capture_evidence() {
+  adb logcat -b crash -d -v threadtime > build/upgrade-check/crash.log 2>&1 || true
+  adb logcat -d -v threadtime > build/upgrade-check/logcat.log 2>&1 || true
+  adb pull /sdcard/cinemawatch-ui build/ui-screenshots >/dev/null 2>&1 || true
+}
+trap capture_evidence EXIT
 run_test() {
   local test_class="$1"
   local log_path="build/upgrade-check/${test_class}.log"
-  adb shell am instrument -w -e class "com.cinemawatch.${test_class}" com.cinemawatch.test/androidx.test.runner.AndroidJUnitRunner > "$log_path"
+  adb logcat -c
+  timeout 180s adb shell am instrument -w -e class "com.cinemawatch.${test_class}" com.cinemawatch.test/androidx.test.runner.AndroidJUnitRunner > "$log_path"
   if ! grep -Eq 'OK \([1-9][0-9]* tests?\)' "$log_path"; then
     cat "$log_path"
+    adb logcat -b crash -d -v threadtime || true
     exit 1
   fi
 }
