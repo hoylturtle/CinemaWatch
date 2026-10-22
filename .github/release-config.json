@@ -1,8 +1,8 @@
 {
   "packageName": "com.cinemawatch",
-  "versionCode": 11,
-  "versionName": "0.9.0",
+  "versionCode": 12,
+  "versionName": "0.9.1",
   "minSdk": 29,
   "signerSha256": "12a3e20ece78354456c1cbb77c44cc6e606ae5d411620ca5a4fb57a1aa45a1bf",
-  "notes": "新增多手机局域网采集验证：固定节点、授权 BLE 标签白名单、RSSI 对比、区域流向、现场已知位置核验及本地报告。仅实验标签，不代表顾客人数或真实顾客动线。保留资产数据与固定签名覆盖升级。"
+  "notes": "开源成熟度整改：正式 release 构建与验证，完整清除影院数据、维修照片及相关缓存，删除资产时回收附件与标记。沿用固定签名，保留三语言与已有巡检功能。"
 }

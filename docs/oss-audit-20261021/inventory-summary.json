@@ -1,0 +1,31 @@
+{
+  "files": 163,
+  "kotlin_files": 102,
+  "binary_files": 2,
+  "main_commits": 69,
+  "all_ref_commits": 69,
+  "non_merge_main_commits": 55,
+  "historical_unique_blobs": 355,
+  "historical_binary_blobs": 2,
+  "mac_literal_files": {
+    "app/src/androidTest/java/com/cinemawatch/FirstRunTest.kt": 13,
+    "app/src/androidTest/java/com/cinemawatch/MaintenanceFlowTest.kt": 1,
+    "app/src/androidTest/java/com/cinemawatch/PhoneFlowTest.kt": 2,
+    "app/src/androidTest/java/com/cinemawatch/UpgradePersistenceTest.kt": 2,
+    "app/src/main/java/com/cinemawatch/radio/ScanEngine.kt": 3,
+    "app/src/test/java/com/cinemawatch/AssetAndImportTest.kt": 11,
+    "app/src/test/java/com/cinemawatch/FlowInboxTest.kt": 1,
+    "app/src/test/java/com/cinemawatch/FlowTrackerTest.kt": 1,
+    "app/src/test/java/com/cinemawatch/FlowTransportTest.kt": 3,
+    "app/src/test/java/com/cinemawatch/MaintenanceTest.kt": 1,
+    "app/src/test/java/com/cinemawatch/PersistenceTest.kt": 6,
+    "fieldwatch-core/src/main/java/app/fieldwatch/domain/DefaultCatalog.kt": 2,
+    "fieldwatch-core/src/test/java/app/fieldwatch/domain/AdvPayloadDecoderTest.kt": 2,
+    "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureCandidatesTest.kt": 26,
+    "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureExchangeTest.kt": 112,
+    "fieldwatch-core/src/test/java/app/fieldwatch/domain/SignatureFieldDecoderTest.kt": 10
+  },
+  "current_sensitive_categories": {},
+  "history_sensitive_categories": {},
+  "suspicious_paths": []
+}

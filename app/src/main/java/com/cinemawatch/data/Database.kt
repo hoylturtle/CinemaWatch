@@ -73,6 +73,8 @@ interface CinemaDao {
     @Insert suspend fun insertGroups(values: List<SignalGroupCount>)
     @Query("UPDATE assets SET name = :name WHERE id = :id") suspend fun renameAsset(id: String, name: String)
     @Query("UPDATE assets SET name = :name, location = :location, notes = :notes WHERE id = :id") suspend fun updateAssetDetails(id: String, name: String, location: String, notes: String)
+    @Query("SELECT DISTINCT e.photo FROM issue_events e INNER JOIN maintenance_issues m ON e.issueId = m.id WHERE m.assetId = :id AND e.photo != ''") suspend fun assetPhotos(id: String): List<String>
+    @Query("SELECT DISTINCT e.photo FROM issue_events e INNER JOIN maintenance_issues m ON e.issueId = m.id WHERE m.assetId != :id AND e.photo != ''") suspend fun otherAssetPhotos(id: String): List<String>
     @Query("DELETE FROM assets WHERE id = :id") suspend fun deleteAsset(id: String)
     @Query("SELECT * FROM asset_baselines") fun baselines(): Flow<List<AssetBaseline>>
     @Query("SELECT * FROM asset_baselines WHERE assetId = :id") suspend fun baseline(id: String): AssetBaseline?

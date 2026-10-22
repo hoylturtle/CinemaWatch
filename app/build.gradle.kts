@@ -11,11 +11,20 @@ android {
         applicationId = "com.cinemawatch"
         minSdk = 29
         targetSdk = 35
-        versionCode = providers.gradleProperty("cinemaVersionCode").orNull?.toInt() ?: 11
-        versionName = providers.gradleProperty("cinemaVersionName").orNull ?: "0.9.0"
+        versionCode = providers.gradleProperty("cinemaVersionCode").orNull?.toInt() ?: 12
+        versionName = providers.gradleProperty("cinemaVersionName").orNull ?: "0.9.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    testBuildType = providers.gradleProperty("cinemaTestBuildType").orElse("debug").get()
     signingConfigs {
+        create("verification") {
+            System.getenv("CW_TEST_KEYSTORE_FILE")?.let { path ->
+                storeFile = file(path)
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
         create("persistent") {
             System.getenv("CW_KEYSTORE_FILE")?.let { path ->
                 storeFile = file(path)
@@ -27,7 +36,12 @@ android {
     }
     buildTypes {
         release {
-            if (System.getenv("CW_KEYSTORE_FILE") != null) signingConfig = signingConfigs.getByName("persistent")
+            isDebuggable = false
+            if (providers.gradleProperty("cinemaVerificationSigning").orNull == "true") {
+                require(System.getenv("CW_TEST_KEYSTORE_FILE") != null) { "Verification signing requires a disposable CI key" }
+                signingConfig = signingConfigs.getByName("verification")
+            } else if (System.getenv("CW_KEYSTORE_FILE") != null) signingConfig = signingConfigs.getByName("persistent")
+            testProguardFiles("test-proguard-rules.pro")
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

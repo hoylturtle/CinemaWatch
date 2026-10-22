@@ -89,7 +89,7 @@
     <string name="license_intro">掃描核心衍生自 Fieldwatch v1.1.21。Copyright © 2026 Off Grid Pete LLC。MIT 授權；查表資料另受 IEEE 與 Bluetooth SIG 條款約束。</string>
     <string name="reset">清除本機資料</string>
     <string name="reset_title">清除所有影院資料？</string>
-    <string name="reset_note">將刪除影院、區域、授權綁定與紀錄，無法復原。</string>
+    <string name="reset_note">將刪除影院、區域、授權綁定、紀錄、平面圖、驗證報告、維修照片及相關快取，無法復原。語言設定保留。</string>
     <string name="error_save">儲存失敗；請檢查本機空間後重試。</string>
     <string name="retry_save">重試儲存</string>
     <string name="close">關閉</string>

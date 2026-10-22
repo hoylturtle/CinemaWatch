@@ -1,0 +1,27 @@
+{
+  "manifest": {
+    "versionCode": 11,
+    "versionName": "0.9.0",
+    "compileSdkVersion": 35,
+    "compileSdkVersionCodename": "15",
+    "package": "com.cinemawatch",
+    "platformBuildVersionCode": 35,
+    "platformBuildVersionName": 15
+  },
+  "uses-sdk": {
+    "minSdkVersion": 29,
+    "targetSdkVersion": 35
+  },
+  "application": {
+    "theme": 2131558671,
+    "label": 2131492899,
+    "icon": 2131165277,
+    "name": "com.cinemawatch.CinemaApp",
+    "debuggable": true,
+    "allowBackup": false,
+    "supportsRtl": true,
+    "extractNativeLibs": false,
+    "appComponentFactory": "androidx.core.app.CoreComponentFactory",
+    "localeConfig": 2131689473
+  }
+}

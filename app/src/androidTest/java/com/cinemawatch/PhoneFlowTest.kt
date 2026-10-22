@@ -35,11 +35,14 @@ class PhoneFlowTest {
         }
         val lobby=zones.first { it.name=="Lobby" }.id;val corridor=zones.first { it.name=="Corridor" }.id
         ScanPermissions.required().forEach { InstrumentationRegistry.getInstrumentation().uiAutomation.grantRuntimePermission(app.packageName,it) }
+        if (android.os.Build.VERSION.SDK_INT >= 33) InstrumentationRegistry.getInstrumentation().uiAutomation
+            .grantRuntimePermission(app.packageName, android.Manifest.permission.POST_NOTIFICATIONS)
         runBlocking { withContext(Dispatchers.Main) {
             app.phoneFlow.prepareHost("Phone pilot",zones.associate { it.id to it.name },listOf("Authorized beacon" to "AA:BB:CC:DD:EE:01"),"Lobby → Corridor","Coordinator",lobby,0)
             ContextCompat.startForegroundService(compose.activity,Intent(compose.activity,PhoneFlowService::class.java))
         } }
         compose.waitUntil(10000) { app.phoneFlow.state.value.active && app.phoneFlow.state.value.config!=null }
+        compose.waitUntil(10000) { app.getSystemService(NotificationManager::class.java).activeNotifications.any { it.id==201 } }
         assertTrue(app.getSystemService(NotificationManager::class.java).activeNotifications.any { it.id==201 })
         val sender=Executors.newSingleThreadScheduledExecutor()
         val collector=PhoneFlow(app)

@@ -16,7 +16,7 @@ object RadioAddress {
     }
 }
 
-class CinemaRepository(val database: CinemaDatabase) {
+class CinemaRepository(val database: CinemaDatabase, private val files: CinemaDataFiles? = null) {
     val dao = database.dao()
     suspend fun createCinema(name: String, zoneName: String) = database.withTransaction {
         require(name.isNotBlank() && zoneName.isNotBlank())
@@ -84,6 +84,16 @@ class CinemaRepository(val database: CinemaDatabase) {
     suspend fun updateAssetDetails(id: String, name: String, location: String, notes: String) {
         require(name.isNotBlank() && dao.asset(id) != null)
         dao.updateAssetDetails(id, name.trim().take(80), location.trim().take(160), notes.trim().take(1000))
+    }
+    /** File failures leave database references in place so deletion can be retried. */
+    suspend fun deleteAsset(id: String) = database.withTransaction {
+        val unsharedPhotos = dao.assetPhotos(id).toSet() - dao.otherAssetPhotos(id).toSet()
+        files?.removeAsset(id, unsharedPhotos)
+        dao.deleteAsset(id)
+    }
+    suspend fun clearCinemaData() = database.withTransaction {
+        files?.clear()
+        dao.clear()
     }
     suspend fun save(session: Inspection, results: List<AssetResult>, groups: List<SignalGroupCount> = emptyList()) = database.withTransaction {
         dao.insertSession(session); dao.insertResults(results); dao.insertGroups(groups)
