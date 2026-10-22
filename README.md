@@ -4,7 +4,7 @@
 
 Android 10+ 的本地影院设备巡检预览应用，基于固定版本 Fieldwatch v1.1.21。界面支持简体中文、繁体中文和英文，默认匹配系统，不支持的语言回退简体中文。
 
-当前版本：0.9.0-preview。项目处于早期验证阶段。**多手机功能用于授权BLE测试标签的区域变化实验，尚未证明真实顾客动线、人数估计或准确室内坐标。**
+当前版本：0.9.1-preview。项目处于早期验证阶段。**多手机功能用于授权BLE测试标签的区域变化实验，尚未证明真实顾客动线、人数估计或准确室内坐标。**
 
 ## 可以做什么
 
@@ -23,9 +23,9 @@ Android 10+ 的本地影院设备巡检预览应用，基于固定版本 Fieldwa
 
 ## 下载与安装
 
-[0.9.0 APK](https://github.com/hoylturtle/CinemaWatch/releases/download/v0.9.0-preview/CinemaWatch-0.9.0.apk) · [发布记录](https://github.com/hoylturtle/CinemaWatch/releases)
+[0.9.1 APK](https://github.com/hoylturtle/CinemaWatch/releases/download/v0.9.1-preview/CinemaWatch-0.9.1.apk) · [发布记录](https://github.com/hoylturtle/CinemaWatch/releases)
 
-0.3起使用固定签名，后续版本支持原位升级；0.1/0.2临时签名不保证可覆盖。不要安装Actions的临时测试候选包。当前公开预览APK仍是重签的debug变体，`debuggable=true`；本次整改改为构建真正的 release 变体，并在发布前检查不可调试标志；未经 CI 验证和维护者合并，不代表新版本已发布。
+0.3起使用固定签名，后续版本支持原位升级；0.1/0.2临时签名不保证可覆盖。不要安装Actions的临时测试候选包。0.9.1 已发布经过验证的 release 变体，`debuggable=false`，沿用固定证书和包名，可覆盖固定签名版本。
 
 ## 本地构建
 
@@ -50,7 +50,7 @@ Debug构建无需维护者私钥，使用Android默认debug签名；不要把这
 
 ## 验证与已知限制
 
-截至2026-10-21，最新main CI证据为app60项、复用核心158项单元测试和9项Android测试通过。该记录为整改前基线；本次 CI 新增 API29/35 release 验证，结果见对应 PR，未通过前不能计为成功；没有测试覆盖率百分比或真实影院定位精度承诺。[CI证据](https://github.com/hoylturtle/CinemaWatch/actions/runs/38004959930)。
+0.9.1 验收：应用65项、复用核心158项，共223项单元测试通过；API29和API35各11项安装/界面测试通过（每套含1项旧版seed、10项新版验证）。测试数不等于覆盖率或真实影院RF精度。[发布验证](https://github.com/hoylturtle/CinemaWatch/actions/runs/39698038748)。
 
 ## 来源与许可
 

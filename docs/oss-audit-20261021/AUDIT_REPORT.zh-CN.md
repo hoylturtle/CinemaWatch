@@ -88,7 +88,6 @@
 - README.zh-CN.draft.md、README.en.draft.md：事实边界明确的中英文草稿；未覆盖仓库README。
 - ARCHITECTURE.md、ROADMAP.md、CONTRIBUTING.md：明确标识的建议稿，未写入仓库。
 - MULTISIGNAL_FUSION_PROPOSAL.md、DUAL_DEVICE_MAPPING_RESEARCH.md：两项独立后续方案，全部属于建议。
-- OSS_APPLICATION_EVIDENCE.md、APPLICATION_COPY.en.md：申请证据与三段小于500字符文案。
 - 指标、源码清单、测试和APK manifest JSON：供复核。完整Git mirror、源代码和APK不放入建议文档压缩包，避免误当新版本。
 
 建议先确认P0整改范围，特别是项目许可、release构建与完整数据清除。此后可另开实施阶段；本阶段没有修改源码/许可证、提交、合并、创建Issue、发布版本或提交申请。等待维护者审核。
