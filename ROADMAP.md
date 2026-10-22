@@ -4,7 +4,7 @@ Updated 2026-10-21. Future milestones are proposals, not implemented capabilitie
 
 ## P0 — publication and contribution readiness
 
-1. **Clarify rights:** maintainers choose and document a project license for original work; retain upstream notices; check IEEE/Bluetooth SIG/Fast Pair terms and dependency licenses. Acceptance: public readers can identify the grant and exceptions without inference. No automatic relicensing.
+1. **Clarify rights:** Original code MIT approved on 2026-10-22; retain upstream notices and complete separate review of IEEE/Bluetooth SIG/Fast Pair terms and dependency licenses. Acceptance: public readers can identify the grant and exceptions without inference. No automatic relicensing.
 2. **Publish a verified release variant:** build/test release rather than re-sign debug; preserve the existing certificate. Acceptance: artifact manifest is not debuggable, package/version/certificate/digest agree and actual historical release upgrades preserve data.
 3. **Complete deletion:** inventory Room, plans, pilot reports, photos, camera/export/update caches and orphans. Acceptance: reset/delete/restart tests verify appropriate files are removed, without deleting unrelated shared files.
 4. **Reconcile documentation and issues:** replace present-tense roadmap claims with evidence-based current architecture; archive obsolete build blockers; review acceptance of the five open issues. Do not close them merely because similar code exists.

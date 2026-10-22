@@ -8,7 +8,7 @@ This is an inventory boundary, not a legal opinion or a completed license cleara
 |IEEE and Bluetooth SIG lookup data|Source URLs and separate terms described in upstream NOTICE|Not covered by Fieldwatch's original-code MIT grant; redistribution/usage terms need maintainer review|
 |Fast Pair model listings|Public partner/community provenance described in upstream NOTICE|No blanket MIT grant asserted; rights review pending|
 |AndroidX, Kotlin and related dependencies|Gradle declarations and resolved `releaseRuntimeClasspath` report in CI build evidence; upstream NOTICE lists Apache-2.0 components|Resolved dependency report is not an SBOM or a complete transitive-license audit; full notices/license inventory pending|
-|Original CinemaWatch work|Project-level license decision requested from maintainer|Pending; no inferred license grant|
+|Original CinemaWatch work|[Root MIT License](../LICENSE), explicitly approved by maintainer on 2026-10-22|MIT grant applies to original code; upstream notices and separate dataset terms remain|
 
 New public fixtures must be synthetic or explicitly authorized, with provenance recorded in the change. Existing upstream address/payload examples are preserved with upstream attribution; this does not prove every historic example was synthetically generated. Do not publish production device captures, signing backups, private cinema plans or customer identifiers.
 

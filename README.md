@@ -54,6 +54,6 @@ Debug构建无需维护者私钥，使用Android默认debug签名；不要把这
 
 ## 来源与许可
 
-Fieldwatch固定提交 `5379a2049c351c2483f7f106ca68d5d6d5f00e64`，保留其 [MIT](third_party/fieldwatch/LICENSE) 和 [NOTICE](third_party/fieldwatch/NOTICE)。IEEE/Bluetooth SIG查表及Fast Pair模型表不在该原创MIT授权范围，详见 [第三方来源与待核查项](docs/THIRD_PARTY.md)。**CinemaWatch原创部分尚缺项目级许可证声明，维护者需要明确；本文不新增许可或对第三方数据重新授权。**
+Fieldwatch固定提交 `5379a2049c351c2483f7f106ca68d5d6d5f00e64`，保留其 [MIT](third_party/fieldwatch/LICENSE) 和 [NOTICE](third_party/fieldwatch/NOTICE)。IEEE/Bluetooth SIG查表及Fast Pair模型表不在该原创MIT授权范围，详见 [第三方来源与待核查项](docs/THIRD_PARTY.md)。CinemaWatch 原创代码采用 [MIT License](LICENSE)。该授权不替代 Fieldwatch 原有归属声明，也不对第三方数据重新授权。
 
 本仓库的现有文档中有历史规划，应以版本对应实现和证据为准。当前架构见 [架构说明](docs/ARCHITECTURE.md)，后续工作见 [路线图](ROADMAP.md)，参与方式见 [贡献说明](CONTRIBUTING.md)。请只使用合成/明确授权数据提交公开报告。

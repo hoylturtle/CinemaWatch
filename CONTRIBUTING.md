@@ -1,6 +1,6 @@
 # Contributing
 
-The project-level license for original CinemaWatch work is awaiting a maintainer decision. These development instructions do not grant a license or imply that external contributions have accepted unresolved licensing terms. Existing third-party notices remain authoritative for their portions.
+Original CinemaWatch code is licensed under the root MIT LICENSE. Existing third-party notices remain authoritative for their portions; lookup datasets are not relicensed by that grant.
 
 ## Before a change
 
@@ -29,4 +29,4 @@ Describe the problem, final behavior, evidence and limitations. List commands ac
 
 Do not open a public issue containing a secret, personal identifier or exploit details against a real deployment. If private vulnerability reporting is enabled, use it; otherwise ask maintainers for a private reporting channel without including sensitive details. No currently enabled reporting mechanism, response SLA or security email is invented here.
 
-License terms, a dedicated security policy, support expectations and community conduct remain follow-up work; no SLA is promised.
+Third-party rights review, a dedicated security policy, support expectations and community conduct remain follow-up work; no SLA is promised.
