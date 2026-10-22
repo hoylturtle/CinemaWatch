@@ -4,7 +4,7 @@
 
 A local-first Android 10+ preview app for authorized cinema-device inspections, built on pinned Fieldwatch v1.1.21 code. The interface supports Simplified Chinese, Traditional Chinese, and English, with system matching and a Simplified Chinese fallback.
 
-Current preview: **0.9.0**. This is an early-stage project. Its multi-phone experiment evaluates region changes for explicitly authorized BLE test tags. It does not establish customer trajectories, attendance estimates, or accurate indoor coordinates.
+Current preview: **0.9.1**. This is an early-stage project. Its multi-phone experiment evaluates region changes for explicitly authorized BLE test tags. It does not establish customer trajectories, attendance estimates, or accurate indoor coordinates.
 
 ## Implemented workflows
 
@@ -22,9 +22,9 @@ Automatic surveying or floor-plan reconstruction; metric indoor localization; UW
 
 ## Install
 
-[Download 0.9.0 APK](https://github.com/hoylturtle/CinemaWatch/releases/download/v0.9.0-preview/CinemaWatch-0.9.0.apk) · [Releases](https://github.com/hoylturtle/CinemaWatch/releases)
+[Download 0.9.1 APK](https://github.com/hoylturtle/CinemaWatch/releases/download/v0.9.1-preview/CinemaWatch-0.9.1.apk) · [Releases](https://github.com/hoylturtle/CinemaWatch/releases)
 
-Versions from 0.3 use the persistent certificate. Older 0.1/0.2 temporary signatures may prevent replacement installation. Do not install transient Actions candidates. The current published preview is a re-signed debug variant and remains debuggable; this remediation builds a release variant and rejects debuggable artifacts before publication. A changed workflow does not mean a new release has already passed verification or shipped.
+Versions from 0.3 use the persistent certificate. Older 0.1/0.2 temporary signatures may prevent replacement installation. Do not install transient Actions candidates. Preview 0.9.1 is a verified, non-debuggable release variant and retains the persistent certificate and package name.
 
 ## Build
 
@@ -45,7 +45,7 @@ Use fixed phones in different named areas, the same non-isolated Wi-Fi LAN, and 
 
 Unregistered identifiers remain transient within bounded inspection state; authorized asset bindings may be stored locally. Notes, photos, floor plans and labels can still contain sensitive business information. Review exports before sharing. GitHub is contacted for user-requested updates, and authorized-tag data is exchanged on the LAN during the pilot. Reset stops update/experiment writes and removes the database, photos, plans, experiment reports and related caches while retaining language settings. Asset deletion reclaims unshared photos and its plan markers. Exports saved outside the app must be deleted by the user. This is application-level deletion, not forensic flash erasure.
 
-The latest main CI reports 60 app and 158 reused-core unit tests, plus 9 Android tests, passing on an API29 emulator. These are historical baseline counts, not coverage percentages or measured RF accuracy. The remediation adds API29/35 release checks; consult the PR for their actual results before claiming a pass. [Verification run](https://github.com/hoylturtle/CinemaWatch/actions/runs/38004959930).
+The 0.9.1 verification passed 65 app and 158 reused-core unit tests (223 total), plus 11 installation/interface tests on each API29/API35 emulator. Each matrix entry includes one old-code seed test and ten replacement tests. These counts are not coverage percentages or measured RF accuracy. [Release verification](https://github.com/hoylturtle/CinemaWatch/actions/runs/39698038748).
 
 ## Provenance and licensing
 

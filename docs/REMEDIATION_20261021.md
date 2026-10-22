@@ -44,3 +44,5 @@ Room 与文件系统无法原子提交。附件清理失败时保留数据库记
 功能提交 `5496dbfa9a79437e0b5398f129fdf0002f7a5aa9` 的 [运行39696178012](https://github.com/hoylturtle/CinemaWatch/actions/runs/39696178012) 已全部通过：app65/core158，共223项单元测试，0失败/错误/跳过；API29及API35各11项安装/界面测试通过（每套包含1项旧版seed及10项新版验证）。release包为com.cinemawatch、0.9.1/code12、debuggable=false。已下载核对XML、instrumentation日志及产物SHA，前文“待验收”是当时状态。
 
 PR20已合并main，合并提交 `42eb69e9e670da6d0952ab6cef5900cd6ce74586`。主分支发布流程另行构建、验证和固定密钥签名；是否完成发布以Release及其工作流为准，本文不提前宣称成功。用户明确批准CinemaWatch原创代码采用MIT，已补根LICENSE；Fieldwatch MIT/NOTICE及51项固定来源保持不变。第三方数据权利核查、SBOM、真机测试及研究路线图仍未完成。
+
+2026-10-22：主分支运行39698038748的构建、API29/API35验证及固定签名发布均成功，已发布[0.9.1-preview](https://github.com/hoylturtle/CinemaWatch/releases/tag/v0.9.1-preview)。下载正式APK核对包名com.cinemawatch、versionCode12、versionName0.9.1、大小15,661,763字节及SHA-256 `adeb33141c601fe8747bd5f204fe2b019bab1a41e5119fcf2b4be640d606ae21`，均与update.json一致。表单填写稿及申请专用材料按维护者要求移出项目，技术审计证据保留。

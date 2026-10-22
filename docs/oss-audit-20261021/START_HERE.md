@@ -6,7 +6,6 @@
 - ARCHITECTURE.md / ROADMAP.md / CONTRIBUTING.md：待维护者审核的文件草稿。
 - MULTISIGNAL_FUSION_PROPOSAL.md：信号融合、设备指纹与置信度方案。
 - DUAL_DEVICE_MAPPING_RESEARCH.md：双设备视觉/惯性/测距研究与退出条件。
-- OSS_APPLICATION_EVIDENCE.md / APPLICATION_COPY.en.md：申请证据和三段英文。
 - repository-metrics.json / test-evidence.json / apk-manifest-evidence.json：可复核指标。
 - source-inventory.json / inventory-summary.json：当前文件哈希清单与历史检查口径。
 
