@@ -49,6 +49,6 @@ The latest main CI reports 60 app and 158 reused-core unit tests, plus 9 Android
 
 ## Provenance and licensing
 
-Upstream: Fieldwatch v1.1.21, commit `5379a2049c351c2483f7f106ca68d5d6d5f00e64`. Preserve its [MIT notice](third_party/fieldwatch/LICENSE) and [third-party notice](third_party/fieldwatch/NOTICE). Assigned-number tables and Fast Pair data have separate rights/terms; see [provenance and pending reviews](docs/THIRD_PARTY.md). CinemaWatch currently lacks an explicit project-level license for its original portions. Maintainer clarification is required; this document does not grant a new license or relicense third-party data.
+Upstream: Fieldwatch v1.1.21, commit `5379a2049c351c2483f7f106ca68d5d6d5f00e64`. Preserve its [MIT notice](third_party/fieldwatch/LICENSE) and [third-party notice](third_party/fieldwatch/NOTICE). Assigned-number tables and Fast Pair data have separate rights/terms; see [provenance and pending reviews](docs/THIRD_PARTY.md). Original CinemaWatch code is licensed under the [MIT License](LICENSE). This grant does not replace Fieldwatch attribution or relicense third-party datasets.
 
 Use synthetic or explicitly authorized fixtures in public contributions. Historical documents are marked accordingly. See [architecture](docs/ARCHITECTURE.md), [roadmap](ROADMAP.md) and [contributing](CONTRIBUTING.md).
